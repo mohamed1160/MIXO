@@ -1,0 +1,108 @@
+@import url('https://fonts.googleapis.com/css2?family=Libertinus+Serif:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ── MIXO Brand Tokens (CSS Custom Properties) ── */
+@theme {
+  /* Colors */
+  --color-mixo-red:     #FF1F3D;
+  --color-mixo-dark:    #070B10;
+  --color-mixo-surface: #10161D;
+  --color-mixo-[#151C24]: #151C24;
+  --color-mixo-border:  #1E2630;
+
+  /* Fonts */
+  --font-sans:    'Poppins', sans-serif;
+  --font-serif:   'Libertinus Serif', serif;
+  --font-display: 'Libertinus Serif', serif;
+  --font-body:    'Poppins', sans-serif;
+  --font-ui:      'Poppins', sans-serif;
+}
+
+html  { scroll-behavior: smooth; }
+
+body  {
+  font-family: var(--font-ui);
+  background-color: #F8FAFC;
+  color: #0F172A;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+html.dark body {
+  background-color: #070B10;
+  color: #F5F7FA;
+}
+
+a       { text-decoration: none; color: inherit; }
+button  { cursor: pointer; font-family: inherit; }
+img     { display: block; max-width: 100%; }
+ul, ol  { list-style: none; }
+
+/* Custom scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ── MIXO Micro-Animations & Glow Utilities ── */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-7px); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 15px rgba(255, 31, 61, 0.25); }
+  50% { box-shadow: 0 0 28px rgba(255, 31, 61, 0.55); }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2.5s ease-in-out infinite;
+}
+
+.animate-shimmer-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.animate-shimmer-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.25),
+    transparent
+  );
+  transform: translateX(-100%);
+  animation: shimmer 3s infinite;
+}
+
+/* Smooth Card Lift & Red Glow on Hover */
+.mixo-card-hover {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.35s ease;
+}
+
+.mixo-card-hover:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 32px -8px rgba(255, 31, 61, 0.18);
+  border-color: rgba(255, 31, 61, 0.4);
+}
+

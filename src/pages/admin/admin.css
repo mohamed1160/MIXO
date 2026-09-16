@@ -1,0 +1,162 @@
+/* ─────────────────────────────────────────────────
+   MIXO 3D Admin — Design System & Branding Tokens
+   ─────────────────────────────────────────────────
+   Aligned with Mixo Red (#FF1F3D) E-Commerce Aesthetic
+   ───────────────────────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root,
+[data-admin-theme="light"] {
+  --site-navbar-height: 0px;
+
+  /* ─── Sidebar Brand Colors ─── */
+  --admin-sidebar-bg:      #0B0F14;
+  --admin-sidebar-text:    #FFFFFF;
+  --admin-sidebar-border:  #1E2630;
+  --admin-gold:            #FF1F3D; /* Mixo Primary Red Accent */
+  --admin-primary:         #FF1F3D;
+  --admin-sidebar-width:   260px;
+  --admin-sidebar-collapsed-width: 72px;
+
+  /* ─── Background / Surface ─── */
+  --admin-bg:              #F8FAFC;
+  --admin-bg-secondary:    #FFFFFF;
+
+  /* ─── Typography ─── */
+  --admin-text:            #0F172A;
+  --admin-text-secondary:  #475569;
+  --admin-font:            'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* ─── Borders & Radius ─── */
+  --admin-border:          #E2E8F0;
+  --admin-radius-xs:       8px;
+  --admin-radius-sm:       12px;
+  --admin-radius-md:       16px;
+  --admin-radius-lg:       24px;
+
+  /* ─── Semantic Palette ─── */
+  --admin-purple:          #8B5CF6;   --admin-purple-bg: #F5F3FF;
+  --admin-green:           #10B981;   --admin-green-bg:  #ECFDF5;
+  --admin-orange:          #F59E0B;   --admin-orange-bg: #FFFBEB;
+  --admin-blue:            #3B82F6;   --admin-blue-bg:   #EFF6FF;
+  --admin-red:             #FF1F3D;   --admin-red-bg:    #FEF2F2;
+  --admin-yellow:          #EAB308;   --admin-yellow-bg: #FEFCE8;
+
+  /* ─── Shadows ─── */
+  --admin-shadow-sm:       0 1px 3px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.03);
+  --admin-shadow-md:       0 4px 15px rgba(0,0,0,.06);
+  --admin-shadow-red:      0 8px 25px rgba(255, 31, 61, 0.25);
+}
+
+/* ─────────────────────────────────────────────────
+   Dark theme overrides — Matching Website Dark Mode
+   ───────────────────────────────────────────────── */
+[data-admin-theme="dark"] {
+  --admin-bg:              #070B10;
+  --admin-bg-secondary:    #0F151D;
+  --admin-text:            #F5F7FA;
+  --admin-text-secondary:  #7F8A96;
+  --admin-border:          #1E2630;
+
+  --admin-purple-bg: rgba(139,92,246,.15);
+  --admin-green-bg:  rgba(16,185,129,.15);
+  --admin-orange-bg: rgba(245,158,11,.15);
+  --admin-blue-bg:   rgba(59,130,246,.15);
+  --admin-red-bg:    rgba(255,31,61,.15);
+  --admin-yellow-bg: rgba(234,179,8,.15);
+
+  --admin-shadow-sm: 0 1px 3px rgba(0,0,0,.4);
+  --admin-shadow-md: 0 6px 20px rgba(0,0,0,.5);
+}
+
+/* ─────────────────────────────────────────────────
+   Light Mode Contrast Protection (Main Content Only)
+   ───────────────────────────────────────────────── */
+html[data-admin-theme="light"] .admin-content {
+  background-color: #F8FAFC !important;
+  color: #0F172A !important;
+}
+
+html[data-admin-theme="light"] .admin-content .bg-\[\#121923\],
+html[data-admin-theme="light"] .admin-content .bg-\[\#0F151D\],
+html[data-admin-theme="light"] .admin-content .bg-\[\#171F2A\] {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+  border-color: #E2E8F0 !important;
+}
+
+html[data-admin-theme="light"] .admin-content .bg-\[\#1A2332\],
+html[data-admin-theme="light"] .admin-content .bg-\[\#151C24\],
+html[data-admin-theme="light"] .admin-content .bg-\[\#1C2530\] {
+  background-color: #F1F5F9 !important;
+  color: #0F172A !important;
+  border-color: #CBD5E1 !important;
+}
+
+html[data-admin-theme="light"] .admin-content .text-white {
+  color: #0F172A !important;
+}
+
+html[data-admin-theme="light"] .admin-content .text-gray-300,
+html[data-admin-theme="light"] .admin-content .text-gray-400 {
+  color: #475569 !important;
+}
+
+html[data-admin-theme="light"] .admin-content .text-gray-500 {
+  color: #64748B !important;
+}
+
+html[data-admin-theme="light"] .admin-content input,
+html[data-admin-theme="light"] .admin-content select,
+html[data-admin-theme="light"] .admin-content textarea {
+  color: #0F172A !important;
+  background-color: #F8FAFC !important;
+  border-color: #CBD5E1 !important;
+}
+
+html[data-admin-theme="light"] .admin-content input::placeholder,
+html[data-admin-theme="light"] .admin-content textarea::placeholder {
+  color: #94A3B8 !important;
+}
+
+/* ─────────────────────────────────────────────────
+   Root Layout & Global Resets
+   ───────────────────────────────────────────────── */
+.admin-root {
+  font-family: var(--admin-font);
+  -webkit-font-smoothing: antialiased;
+  color: var(--admin-text);
+}
+
+.admin-main {
+  transition: margin-left 0.2s ease;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--admin-bg);
+}
+
+.admin-content {
+  flex: 1;
+  padding: 28px 32px;
+  background: var(--admin-bg);
+  color: var(--admin-text);
+}
+
+/* ─────────────────────────────────────────────────
+   Custom Scrollbars & Active Highlights
+   ───────────────────────────────────────────────── */
+.admin-content ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.admin-content ::-webkit-scrollbar-thumb {
+  background: rgba(255, 31, 61, 0.2);
+  border-radius: 9999px;
+}
+
+.admin-content ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 31, 61, 0.5);
+}
