@@ -65,24 +65,34 @@ export default function Messages() {
     e.preventDefault();
     if (!replyText.trim()) return;
 
-    // Push notification to user's notifications storage
+    // Push notification to user's notifications storage across all keys
     if (selectedMessage) {
-      const userIdentifier = selectedMessage.phone || selectedMessage.email || 'default';
-      const userKey = `MIXO_user_notifications_${userIdentifier}`;
-      try {
-        const storedNotifs = JSON.parse(localStorage.getItem(userKey) || '[]');
-        const newNotification = {
-          id: `QUOTE_REPLY_${Date.now()}`,
-          title: `رد من الإدارة: ${selectedMessage.subject || 'طلبك/استفسارك'}`,
-          message: replyText,
-          date: new Date().toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' }),
-          isRead: false
-        };
-        localStorage.setItem(userKey, JSON.stringify([newNotification, ...storedNotifs]));
-        window.dispatchEvent(new Event('storage'));
-      } catch (err) {
-        console.error('Failed to dispatch user notification:', err);
-      }
+      const keys = [
+        selectedMessage.phone ? `MIXO_user_notifications_${selectedMessage.phone}` : null,
+        selectedMessage.email ? `MIXO_user_notifications_${selectedMessage.email}` : null,
+        'MIXO_user_notifications_all',
+        'MIXO_user_notifications_default',
+      ].filter(Boolean);
+
+      const newNotification = {
+        id: `QUOTE_REPLY_${Date.now()}`,
+        title: `رد من الإدارة: ${selectedMessage.subject || 'طلبك/استفسارك'}`,
+        message: replyText,
+        date: new Date().toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' }),
+        isRead: false
+      };
+
+      keys.forEach((userKey) => {
+        try {
+          const storedNotifs = JSON.parse(localStorage.getItem(userKey) || '[]');
+          localStorage.setItem(userKey, JSON.stringify([newNotification, ...storedNotifs]));
+        } catch (err) {
+          console.error('Failed to dispatch user notification:', err);
+        }
+      });
+
+      // Dispatch event to update open windows/tabs dynamically
+      window.dispatchEvent(new Event('storage'));
     }
 
     toast.success('تم إرسال الرد للعميل وإضافته في إشعارات حسابه بنجاح! 🔔');

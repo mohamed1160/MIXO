@@ -7,47 +7,58 @@ export default function Notifications() {
   const { isRTL } = useLanguage();
   const { user, markAllNotificationsRead } = useAuthStore();
 
-  const getInitialNotifications = () => {
-    try {
-      const userKey = `MIXO_user_notifications_${user?.phone || user?.email || "default"}`;
-      const stored = localStorage.getItem(userKey);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          return parsed.map((item) => ({
-            ...item,
-            icon: item.id?.includes("QUOTE") ? Printer : item.id?.includes("PLA") ? Package : Sparkles,
-            color: item.id?.includes("QUOTE")
-              ? "bg-red-500/10 text-[#FF1F3D]"
-              : item.id?.includes("PLA")
-              ? "bg-emerald-500/10 text-emerald-600"
-              : "bg-blue-500/10 text-blue-600",
-          }));
-        }
-      }
-    } catch (e) {
-      console.error(e);
-    }
-    return [];
-  };
-
-  const [notifications, setNotifications] = useState(getInitialNotifications);
+  const [notifications, setNotifications] = useState([]);
   const [toastMessage, setToastMessage] = useState(null);
 
-  const triggerToast = (msg) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
-  };
-
-  const saveNotifications = (newNotifs) => {
-    setNotifications(newNotifs);
+  const loadNotifications = () => {
     try {
-      const userKey = `MIXO_user_notifications_${user?.phone || user?.email || "default"}`;
-      localStorage.setItem(userKey, JSON.stringify(newNotifs));
+      const keysToTry = [
+        user?.phone ? `MIXO_user_notifications_${user.phone}` : null,
+        user?.email ? `MIXO_user_notifications_${user.email}` : null,
+        user?.id ? `MIXO_user_notifications_${user.id}` : null,
+        'MIXO_user_notifications_all',
+        'MIXO_user_notifications_default',
+      ].filter(Boolean);
+
+      let allNotifs = [];
+      const seenIds = new Set();
+
+      keysToTry.forEach((key) => {
+        const stored = localStorage.getItem(key);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            parsed.forEach((item) => {
+              if (!seenIds.has(item.id)) {
+                seenIds.add(item.id);
+                allNotifs.push({
+                  ...item,
+                  icon: item.id?.includes("QUOTE") ? Printer : item.id?.includes("PLA") ? Package : Sparkles,
+                  color: item.id?.includes("QUOTE")
+                    ? "bg-red-500/10 text-[#FF1F3D]"
+                    : item.id?.includes("PLA")
+                    ? "bg-emerald-500/10 text-emerald-600"
+                    : "bg-blue-500/10 text-blue-600",
+                });
+              }
+            });
+          }
+        }
+      });
+
+      setNotifications(allNotifs);
     } catch (e) {
       console.error(e);
     }
   };
+
+  React.useEffect(() => {
+    loadNotifications();
+
+    const handleStorageChange = () => loadNotifications();
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, [user]);
 
   const handleMarkAllRead = () => {
     const updated = notifications.map((n) => ({ ...n, isRead: true }));
