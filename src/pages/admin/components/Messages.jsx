@@ -64,8 +64,29 @@ export default function Messages() {
   const handleSendReply = (e) => {
     e.preventDefault();
     if (!replyText.trim()) return;
-    toast.success('تم إرسال الرد للعميل وتحديث حالة الرسالة إلى مُجابة');
-    const updated = messages.map(m => m.id === selectedMessage.id ? { ...m, status: 'read' } : m);
+
+    // Push notification to user's notifications storage
+    if (selectedMessage) {
+      const userIdentifier = selectedMessage.phone || selectedMessage.email || 'default';
+      const userKey = `MIXO_user_notifications_${userIdentifier}`;
+      try {
+        const storedNotifs = JSON.parse(localStorage.getItem(userKey) || '[]');
+        const newNotification = {
+          id: `QUOTE_REPLY_${Date.now()}`,
+          title: `رد من الإدارة: ${selectedMessage.subject || 'طلبك/استفسارك'}`,
+          message: replyText,
+          date: new Date().toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' }),
+          isRead: false
+        };
+        localStorage.setItem(userKey, JSON.stringify([newNotification, ...storedNotifs]));
+        window.dispatchEvent(new Event('storage'));
+      } catch (err) {
+        console.error('Failed to dispatch user notification:', err);
+      }
+    }
+
+    toast.success('تم إرسال الرد للعميل وإضافته في إشعارات حسابه بنجاح! 🔔');
+    const updated = messages.map(m => m.id === selectedMessage.id ? { ...m, status: 'read', reply: replyText } : m);
     saveMessages(updated);
     setReplyText('');
     setSelectedMessage(null);
