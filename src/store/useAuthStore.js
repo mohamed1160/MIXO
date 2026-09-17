@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { authService } from '../api/auth';
+import { findSupabaseUser, saveSupabaseUser } from '../services/db.service';
 
 const USERS_STORAGE_KEY = 'MIXO_registered_users';
 const CURRENT_USER_KEY = 'MIXO_current_user';
@@ -65,7 +66,30 @@ export const useAuthStore = create((set, get) => ({
     const cleanIdentifier = identifier.trim();
     const cleanPassword = password.trim();
 
-    // 1. Try Strapi Backend
+    // 1. Try Supabase Database First
+    try {
+      const supaUser = await findSupabaseUser(cleanIdentifier);
+      if (supaUser) {
+        if (supaUser.password === cleanPassword) {
+          const { password: _, ...userData } = supaUser;
+          if (cleanIdentifier === 'admin@gmail.com' || supaUser.phone === '01000000000') {
+            userData.role = 'admin';
+          }
+          localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(userData));
+          set({ user: userData, isAuthenticated: true, isLoading: false, error: null });
+          return userData;
+        } else {
+          const errMsg = 'كلمة السر غير صحيحة، يرجى إعادة المحاولة ⚠️';
+          set({ isLoading: false, error: errMsg });
+          throw new Error(errMsg);
+        }
+      }
+    } catch (e) {
+      if (e.message?.includes('كلمة السر')) throw e;
+      console.log('Supabase user login fallback:', e.message);
+    }
+
+    // 2. Try Strapi Backend
     try {
       const strapiRes = await authService.login({ identifier: cleanIdentifier, password: cleanPassword });
       if (strapiRes?.user) {
@@ -90,7 +114,7 @@ export const useAuthStore = create((set, get) => ({
       console.log('Strapi auth login attempt fallback to local:', e.message);
     }
 
-    // 2. Fallback to Local Account
+    // 3. Fallback to Local Account
     const users = getStoredUsers();
     const cleanPhoneSearch = cleanIdentifier.replace(/[\s\-\+]/g, '');
 
@@ -129,47 +153,6 @@ export const useAuthStore = create((set, get) => ({
     const cleanEmail = formData.email?.trim().toLowerCase() || `${cleanPhone}@mixo3d.com`;
     const isSystemAdmin = cleanPhone === '01000000000' || cleanEmail === 'admin@gmail.com';
 
-    // 1. Try Strapi Backend
-    try {
-      const strapiRes = await authService.register(formData);
-      if (strapiRes?.user) {
-        const u = strapiRes.user;
-        const userData = {
-          id: u.id,
-          email: u.email || cleanEmail,
-          firstName: u.firstName || formData.firstName,
-          lastName: u.lastName || formData.lastName,
-          name: `${formData.firstName || ''} ${formData.lastName || ''}`.trim(),
-          phone: u.phone || cleanPhone,
-          role: isSystemAdmin ? 'admin' : 'user',
-          availablePoints: u.availablePoints || 0,
-          registeredAt: new Date().toISOString(),
-        };
-
-        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(userData));
-        set({ user: userData, isAuthenticated: true, isLoading: false, error: null });
-        return userData;
-      }
-    } catch (e) {
-      console.log('Strapi auth register attempt fallback to local:', e.message);
-    }
-
-    // 2. Fallback to Local Account
-    const users = getStoredUsers();
-    const cleanPhoneSearch = cleanPhone.replace(/[\s\-\+]/g, '');
-
-    const exists = users.some(
-      (u) =>
-        (u.phone && u.phone.replace(/[\s\-\+]/g, '') === cleanPhoneSearch) ||
-        (u.email && u.email.trim().toLowerCase() === cleanEmail)
-    );
-
-    if (exists) {
-      const errMsg = 'رقم الهاتف مسجل بالفعل، يمكنك تسجيل الدخول مباشرة ⚠️';
-      set({ isLoading: false, error: errMsg });
-      throw new Error(errMsg);
-    }
-
     const newUser = {
       id: `CUS-${Date.now().toString().slice(-4)}`,
       firstName: formData.firstName || '',
@@ -192,8 +175,27 @@ export const useAuthStore = create((set, get) => ({
       createdAt: new Date().toISOString(),
     };
 
-    const updatedUsers = [...users, newUser];
-    saveStoredUsers(updatedUsers);
+    // Save to Supabase DB First
+    try {
+      await saveSupabaseUser(newUser);
+    } catch (err) {
+      console.warn('Supabase register sync warning:', err);
+    }
+
+    // Save to Local Account Fallback
+    const users = getStoredUsers();
+    const cleanPhoneSearch = cleanPhone.replace(/[\s\-\+]/g, '');
+
+    const exists = users.some(
+      (u) =>
+        (u.phone && u.phone.replace(/[\s\-\+]/g, '') === cleanPhoneSearch) ||
+        (u.email && u.email.trim().toLowerCase() === cleanEmail)
+    );
+
+    if (!exists) {
+      const updatedUsers = [...users, newUser];
+      saveStoredUsers(updatedUsers);
+    }
 
     const { password: _, ...userSession } = newUser;
     localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(userSession));

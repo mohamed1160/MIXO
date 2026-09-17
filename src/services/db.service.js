@@ -313,3 +313,92 @@ export async function saveSupabaseSettings(settingsObj) {
   localStorage.setItem('MIXO_settings', JSON.stringify(settingsObj));
   window.dispatchEvent(new Event('storage'));
 }
+
+// ==========================================
+// 5. USERS SERVICE (Supabase Authentication & Profiles)
+// ==========================================
+export async function getSupabaseUsers() {
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*');
+
+    if (error) throw error;
+    if (data) {
+      const formatted = data.map(u => ({
+        id: u.id,
+        firstName: u.first_name,
+        lastName: u.last_name,
+        name: u.name,
+        email: u.email,
+        phone: u.phone,
+        password: u.password,
+        role: u.role,
+        availablePoints: u.available_points || 0,
+        registeredAt: u.created_at
+      }));
+      return formatted;
+    }
+  } catch (err) {
+    console.warn('Supabase users fetch fallback:', err);
+  }
+  return null;
+}
+
+export async function saveSupabaseUser(userObj) {
+  try {
+    const payload = {
+      id: userObj.id || `CUS-${Date.now().toString().slice(-4)}`,
+      first_name: userObj.firstName || '',
+      last_name: userObj.lastName || '',
+      name: userObj.name || `${userObj.firstName || ''} ${userObj.lastName || ''}`.trim(),
+      email: userObj.email,
+      phone: userObj.phone,
+      password: userObj.password,
+      role: userObj.role || 'user',
+      available_points: userObj.availablePoints || 0
+    };
+
+    const { data, error } = await supabase
+      .from('users')
+      .upsert([payload])
+      .select();
+
+    if (error) throw error;
+    return data ? data[0] : payload;
+  } catch (err) {
+    console.error('Failed to save user in Supabase:', err);
+    throw err;
+  }
+}
+
+export async function findSupabaseUser(identifier) {
+  try {
+    const clean = identifier.trim();
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .or(`phone.eq.${clean},email.eq.${clean}`)
+      .limit(1);
+
+    if (error) throw error;
+    if (data && data.length > 0) {
+      const u = data[0];
+      return {
+        id: u.id,
+        firstName: u.first_name,
+        lastName: u.last_name,
+        name: u.name,
+        email: u.email,
+        phone: u.phone,
+        password: u.password,
+        role: u.role,
+        availablePoints: u.available_points || 0,
+        registeredAt: u.created_at
+      };
+    }
+  } catch (err) {
+    console.warn('Supabase findUser fallback:', err);
+  }
+  return null;
+}

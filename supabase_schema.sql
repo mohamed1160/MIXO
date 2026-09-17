@@ -49,6 +49,20 @@ CREATE TABLE IF NOT EXISTS public.settings (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- 5. Users Table
+CREATE TABLE IF NOT EXISTS public.users (
+  id TEXT PRIMARY KEY,
+  first_name TEXT,
+  last_name TEXT,
+  name TEXT,
+  email TEXT UNIQUE,
+  phone TEXT UNIQUE,
+  password TEXT NOT NULL,
+  role TEXT DEFAULT 'user',
+  available_points INT DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
 -- Enable Realtime Live Tracking for Orders Table
 ALTER PUBLICATION supabase_realtime ADD TABLE public.orders;
 
@@ -57,6 +71,7 @@ ALTER TABLE public.products DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.orders DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.faqs DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.settings DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.users DISABLE ROW LEVEL SECURITY;
 
 -- 5. Create 3D File Upload Storage Bucket
 INSERT INTO storage.buckets (id, name, public) 
