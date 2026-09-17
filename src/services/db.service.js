@@ -374,28 +374,35 @@ export async function saveSupabaseUser(userObj) {
 
 export async function findSupabaseUser(identifier) {
   try {
-    const clean = identifier.trim();
+    const clean = identifier.trim().toLowerCase();
+    const cleanPhone = clean.replace(/[\s\-\+]/g, '');
+
     const { data, error } = await supabase
       .from('users')
-      .select('*')
-      .or(`phone.eq.${clean},email.eq.${clean}`)
-      .limit(1);
+      .select('*');
 
     if (error) throw error;
     if (data && data.length > 0) {
-      const u = data[0];
-      return {
-        id: u.id,
-        firstName: u.first_name,
-        lastName: u.last_name,
-        name: u.name,
-        email: u.email,
-        phone: u.phone,
-        password: u.password,
-        role: u.role,
-        availablePoints: u.available_points || 0,
-        registeredAt: u.created_at
-      };
+      const u = data.find(
+        (item) =>
+          (item.email && item.email.trim().toLowerCase() === clean) ||
+          (item.phone && item.phone.replace(/[\s\-\+]/g, '') === cleanPhone)
+      );
+
+      if (u) {
+        return {
+          id: u.id,
+          firstName: u.first_name,
+          lastName: u.last_name,
+          name: u.name,
+          email: u.email,
+          phone: u.phone,
+          password: u.password,
+          role: u.role,
+          availablePoints: u.available_points || 0,
+          registeredAt: u.created_at
+        };
+      }
     }
   } catch (err) {
     console.warn('Supabase findUser fallback:', err);
