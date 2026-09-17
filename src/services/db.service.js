@@ -672,3 +672,33 @@ export async function saveSupabaseNotification(userIdentifier, notificationObj) 
     console.error('Failed to save notification in Supabase:', err);
   }
 }
+
+// ==========================================
+// 10. STORAGE SERVICE (3D Files & Images Bucket)
+// ==========================================
+export async function upload3DFileToSupabase(file) {
+  try {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
+    const filePath = `custom-uploads/${fileName}`;
+
+    const { data, error } = await supabase.storage
+      .from('3d-files')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (error) throw error;
+
+    const { data: publicUrlData } = supabase.storage
+      .from('3d-files')
+      .getPublicUrl(filePath);
+
+    return publicUrlData?.publicUrl || null;
+  } catch (err) {
+    console.warn('Supabase storage upload fallback:', err);
+    return null;
+  }
+}
+

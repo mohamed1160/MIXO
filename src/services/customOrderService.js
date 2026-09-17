@@ -1,3 +1,5 @@
+import { upload3DFileToSupabase } from './db.service';
+
 export const customOrderService = {
   validateFiles(files) {
     const maxFiles = 5;
@@ -32,9 +34,20 @@ export const customOrderService = {
   },
 
   async uploadCustomImages(files) {
-    const imageUrls = Array.from(files).map((file) => URL.createObjectURL(file));
+    if (!files || files.length === 0) return [];
+    
+    const imageUrls = [];
+    for (const file of Array.from(files)) {
+      const supaUrl = await upload3DFileToSupabase(file);
+      if (supaUrl) {
+        imageUrls.push(supaUrl);
+      } else {
+        imageUrls.push(URL.createObjectURL(file));
+      }
+    }
     return imageUrls;
   },
+
 
   createCustomOrderItem(data) {
     const {
