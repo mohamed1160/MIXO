@@ -55,9 +55,9 @@ export const translations = {
       cta: "Customize Order",
     },
     filamentsBanner: {
-      eyebrow: "PREMIUM MATERIALS",
-      title: "High Grade Filaments",
-      description: "Durable PLA+, PETG, and Resin materials for maximum quality.",
+      eyebrow: "100% ECO PLA MATERIAL",
+      title: "High-Grade Eco PLA Filament",
+      description: "Durable, non-toxic, eco-friendly 100% PLA materials for smooth and detailed 3D prints.",
       cta: "Shop Filaments",
     },
     whyChooseUs: {
@@ -164,9 +164,9 @@ export const translations = {
       cta: "طلب تصميم خاص",
     },
     filamentsBanner: {
-      eyebrow: "خامات احترافية",
-      title: "أجود خامات الطباعة 3D",
-      description: "نستخدم خامات PLA+ و PETG و Resin المتينة لأفضل النتائج.",
+      eyebrow: "خامة PLA 100% صديقة للبيئة",
+      title: "أجود خامات الـ PLA الفاخرة",
+      description: "نستخدم خامة PLA ناعمة وغير سامة وصديقة للبيئة تمتاز بصلابة فائقة ودقة عالية في طباعة المجسمات 3D.",
       cta: "تسوق الخامات",
     },
     whyChooseUs: {

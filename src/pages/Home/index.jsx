@@ -72,13 +72,14 @@ export default function Home() {
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-6 space-y-8 sm:space-y-12">
         
         {/* ========================================== */}
-        {/* 1. HERO SECTION                            */}
+        {/* ========================================== */}
+        {/* 1. HERO SECTION (Sleek Frosted Glass Design) */}
         {/* ========================================== */}
         <motion.section 
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="relative rounded-2xl sm:rounded-3xl bg-[#0F151D] text-white p-4 sm:p-10 lg:p-12 overflow-hidden shadow-2xl border border-slate-800 dark:border-[#1E2630]"
+          className="relative rounded-2xl sm:rounded-3xl bg-gradient-to-br from-white/90 via-slate-50/80 to-red-50/30 dark:from-[#0F151D] dark:to-[#070B10] text-gray-900 dark:text-white p-4 sm:p-10 lg:p-12 overflow-hidden shadow-xl border border-gray-200/80 dark:border-[#1E2630] backdrop-blur-xl"
         >
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-8 items-center">
             
@@ -88,12 +89,12 @@ export default function Home() {
                 {t.hero.eyebrow}
               </span>
 
-              <h1 className="text-xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-snug text-white">
+              <h1 className="text-xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-snug text-gray-900 dark:text-white">
                 {t.hero.titleLine1} <br />
                 <span className="text-[#FF1F3D]">{t.hero.titleLine2}</span>
               </h1>
 
-              <p className="mt-1.5 sm:mt-4 text-xs sm:text-base text-gray-300 dark:text-[#AAB4C0] max-w-lg leading-relaxed">
+              <p className="mt-1.5 sm:mt-4 text-xs sm:text-base text-gray-600 dark:text-[#AAB4C0] max-w-lg leading-relaxed">
                 {t.hero.subtitle}
               </p>
 
@@ -106,24 +107,24 @@ export default function Home() {
                 </Link>
               </div>
 
-              {/* Feature badges at bottom (Desktop only to prevent mobile clutter) */}
-              <div className="hidden sm:grid mt-6 sm:mt-12 pt-4 sm:pt-6 border-t border-slate-800/80 dark:border-[#1E2630] grid-cols-3 gap-2 sm:gap-4 w-full text-[10px] sm:text-xs text-gray-300 dark:text-[#AAB4C0]">
+              {/* Feature badges at bottom */}
+              <div className="hidden sm:grid mt-6 sm:mt-12 pt-4 sm:pt-6 border-t border-gray-200/80 dark:border-[#1E2630] grid-cols-3 gap-2 sm:gap-4 w-full text-[10px] sm:text-xs text-gray-700 dark:text-[#AAB4C0]">
                 <div className="flex items-center gap-1.5 sm:gap-2.5">
-                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-slate-800/80 dark:bg-[#151C24] flex items-center justify-center text-[#FF1F3D] flex-shrink-0 animate-float">
+                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-red-500/10 flex items-center justify-center text-[#FF1F3D] flex-shrink-0 animate-float">
                     <Box className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </div>
                   <span className="font-medium line-clamp-1">{t.hero.features.quality}</span>
                 </div>
 
                 <div className="flex items-center gap-1.5 sm:gap-2.5">
-                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-slate-800/80 dark:bg-[#151C24] flex items-center justify-center text-[#FF1F3D] flex-shrink-0 animate-float" style={{ animationDelay: '0.6s' }}>
+                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-red-500/10 flex items-center justify-center text-[#FF1F3D] flex-shrink-0 animate-float" style={{ animationDelay: '0.6s' }}>
                     <Truck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </div>
                   <span className="font-medium line-clamp-1">{t.hero.features.fast}</span>
                 </div>
 
                 <div className="flex items-center gap-1.5 sm:gap-2.5">
-                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-slate-800/80 dark:bg-[#151C24] flex items-center justify-center text-[#FF1F3D] flex-shrink-0 animate-float" style={{ animationDelay: '1.2s' }}>
+                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-red-500/10 flex items-center justify-center text-[#FF1F3D] flex-shrink-0 animate-float" style={{ animationDelay: '1.2s' }}>
                     <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </div>
                   <span className="font-medium line-clamp-1">{t.hero.features.custom}</span>
@@ -131,15 +132,15 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Hero Right Visual (Hidden on mobile for ultra-clean space) */}
+            {/* Hero Right Visual */}
             <div className="hidden sm:flex lg:col-span-5 relative items-center justify-center">
-              <div className="relative w-full aspect-16/9 sm:aspect-square lg:aspect-4/3 rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl border border-slate-800/90 dark:border-[#1E2630] group">
+              <div className="relative w-full aspect-16/9 sm:aspect-square lg:aspect-4/3 rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl border border-gray-200/80 dark:border-[#1E2630] group">
                 <img
                   src={heroDragonImg}
                   alt="3D Printed Dragon Figurine"
                   className="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0F151D]/80 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-white/40 dark:from-[#0F151D]/80 via-transparent to-transparent" />
               </div>
             </div>
 
@@ -178,62 +179,24 @@ export default function Home() {
         </motion.section>
 
         {/* ========================================== */}
-        {/* 3. POPULAR PRODUCTS (2-column on mobile)   */}
-        {/* ========================================== */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.15 }}
-        >
-          <SectionHeader
-            title={t.popular.title}
-            subtitle={t.popular.subtitle}
-            linkText={t.popular.viewAll}
-            linkUrl="/shop"
-          />
-
-          {isLoading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-6">
-              {[1, 2, 3, 4, 5, 6].map((n) => (
-                <div
-                  key={n}
-                  className="h-64 sm:h-80 bg-gray-200 dark:bg-[#10161D] animate-pulse rounded-xl sm:rounded-2xl border border-transparent dark:border-[#1E2630]"
-                />
-              ))}
-            </div>
-          ) : products.length === 0 ? (
-            <div className="text-center py-12 text-gray-500 dark:text-[#7F8A96]">
-              No products found.
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-6">
-              {products.slice(0, 6).map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          )}
-        </motion.section>
-
-        {/* ========================================== */}
-        {/* 4. CUSTOM 3D PRINTING BANNER               */}
+        {/* 3. CUSTOM 3D PRINTING BANNER (White Glass Aesthetics) */}
         {/* ========================================== */}
         <motion.section 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="rounded-2xl sm:rounded-3xl bg-[#0F151D] text-white p-4 sm:p-10 overflow-hidden shadow-xl border border-slate-800 dark:border-[#1E2630] relative"
+          className="rounded-2xl sm:rounded-3xl bg-gradient-to-r from-white/90 via-slate-50/90 to-red-50/40 dark:from-[#0F151D] dark:to-[#16202E] text-gray-900 dark:text-white p-4 sm:p-10 overflow-hidden shadow-xl border border-gray-200/80 dark:border-[#1E2630] backdrop-blur-xl relative"
         >
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 items-center">
             <div className="md:col-span-7 space-y-2 sm:space-y-3 z-10">
               <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[#FF1F3D]">
                 {t.customBanner.eyebrow}
               </span>
-              <h2 className="text-lg sm:text-4xl font-bold tracking-tight">
+              <h2 className="text-lg sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-white">
                 {t.customBanner.title}
               </h2>
-              <p className="text-xs sm:text-sm text-gray-300 dark:text-[#AAB4C0] max-w-md leading-relaxed">
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-[#AAB4C0] max-w-md leading-relaxed">
                 {t.customBanner.description}
               </p>
               <div className="pt-1 sm:pt-2">
@@ -247,7 +210,7 @@ export default function Home() {
             </div>
 
             <div className="hidden sm:block md:col-span-5 relative">
-              <div className="aspect-16/9 md:aspect-4/3 rounded-xl sm:rounded-2xl overflow-hidden border border-slate-800 dark:border-[#1E2630] shadow-inner group">
+              <div className="aspect-16/9 md:aspect-4/3 rounded-xl sm:rounded-2xl overflow-hidden border border-gray-200/80 dark:border-[#1E2630] shadow-inner group">
                 <img
                   src={customVaseImg}
                   alt="Custom 3D Printing Vase"
