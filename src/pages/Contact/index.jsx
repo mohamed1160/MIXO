@@ -19,6 +19,7 @@ import {
 import { useLanguage } from "../../providers/LanguageContext";
 import mixoLogoImg from "../../assets/images/logo/mixo_red_logo.png";
 import { saveSupabaseMessage } from "../../services/db.service";
+import CustomDesignModal from "../../components/CustomDesignModal";
 
 export default function Contact() {
   const { isRTL } = useLanguage();
