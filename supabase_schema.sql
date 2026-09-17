@@ -63,17 +63,70 @@ CREATE TABLE IF NOT EXISTS public.users (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Enable Realtime Live Tracking for Orders Table
-ALTER PUBLICATION supabase_realtime ADD TABLE public.orders;
+-- 6. Contact & 3D Price Quote Messages Table
+CREATE TABLE IF NOT EXISTS public.contact_messages (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  phone TEXT NOT NULL,
+  email TEXT,
+  makerworld_url TEXT,
+  subject TEXT,
+  message TEXT NOT NULL,
+  type TEXT DEFAULT 'general',
+  status TEXT DEFAULT 'unread',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
 
--- Disable RLS for public demo access (or set open policies)
+-- 7. Reviews Table
+CREATE TABLE IF NOT EXISTS public.reviews (
+  id TEXT PRIMARY KEY,
+  product_id TEXT NOT NULL,
+  user_name TEXT NOT NULL,
+  rating NUMERIC DEFAULT 5,
+  comment TEXT NOT NULL,
+  status TEXT DEFAULT 'approved',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 8. Promo Coupons Table
+CREATE TABLE IF NOT EXISTS public.coupons (
+  code TEXT PRIMARY KEY,
+  discount_percent NUMERIC,
+  discount_amount NUMERIC,
+  min_spend NUMERIC DEFAULT 0,
+  is_active BOOLEAN DEFAULT true,
+  expires_at TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 9. Notifications Table
+CREATE TABLE IF NOT EXISTS public.notifications (
+  id TEXT PRIMARY KEY,
+  user_identifier TEXT NOT NULL,
+  title TEXT NOT NULL,
+  message TEXT NOT NULL,
+  type TEXT DEFAULT 'info',
+  is_read BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Enable Realtime Live Tracking for Orders & Messages
+ALTER PUBLICATION supabase_realtime ADD TABLE public.orders;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.contact_messages;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.notifications;
+
+-- Disable RLS for public demo access
 ALTER TABLE public.products DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.orders DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.faqs DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.settings DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.users DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.contact_messages DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.reviews DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.coupons DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.notifications DISABLE ROW LEVEL SECURITY;
 
--- 5. Create 3D File Upload Storage Bucket
+-- 10. Create 3D File Upload Storage Bucket
 INSERT INTO storage.buckets (id, name, public) 
 VALUES ('3d-files', '3d-files', true)
 ON CONFLICT (id) DO NOTHING;

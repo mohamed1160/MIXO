@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { useLanguage } from "../../providers/LanguageContext";
 import mixoLogoImg from "../../assets/images/logo/mixo_red_logo.png";
-import CustomDesignModal from "../../components/CustomDesignModal";
+import { saveSupabaseMessage } from "../../services/db.service";
 
 export default function Contact() {
   const { isRTL } = useLanguage();
@@ -37,7 +37,7 @@ export default function Contact() {
     message: "",
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name || !formData.phone || !formData.message) return;
 
@@ -52,12 +52,7 @@ export default function Contact() {
       createdAt: new Date().toISOString(),
     };
 
-    try {
-      const existing = JSON.parse(localStorage.getItem("MIXO_contact_messages") || "[]");
-      localStorage.setItem("MIXO_contact_messages", JSON.stringify([newMessage, ...existing]));
-    } catch (err) {
-      console.error("Error saving contact message:", err);
-    }
+    await saveSupabaseMessage(newMessage);
 
     setSubmittedSuccess(true);
     setFormData({

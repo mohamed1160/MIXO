@@ -1,4 +1,4 @@
-﻿import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   Tag,
   Plus,
@@ -22,6 +22,11 @@ import {
   Layers,
 } from 'lucide-react';
 import { getAdminData } from '../../../services/adminMockData';
+import {
+  getSupabaseCoupons,
+  saveSupabaseCoupon,
+  deleteSupabaseCoupon
+} from '../../../services/db.service';
 
 // Format helper for dates
 const formatDate = (dateStr) => {
@@ -38,6 +43,17 @@ const formatDate = (dateStr) => {
 export default function PromoCodes() {
   const { promoCodes: initialCodes } = getAdminData();
   const [codes, setCodes] = useState(initialCodes);
+
+  const loadCoupons = async () => {
+    const data = await getSupabaseCoupons();
+    if (data && data.length > 0) {
+      setCodes(data);
+    }
+  };
+
+  useEffect(() => {
+    loadCoupons();
+  }, []);
 
   // Filter & Search states
   const [searchQuery, setSearchQuery] = useState('');
@@ -133,9 +149,10 @@ export default function PromoCodes() {
   };
 
   // Delete Code
-  const handleDeleteCode = (id, codeName) => {
+  const handleDeleteCode = async (id, codeName) => {
     if (window.confirm(`Are you sure you want to delete promo code "${codeName}"?`)) {
-      setCodes((prev) => prev.filter((c) => c.id !== id));
+      await deleteSupabaseCoupon(codeName);
+      setCodes((prev) => prev.filter((c) => c.code !== codeName && c.id !== id));
       triggerToast(`Promo code "${codeName}" deleted. 🗑️`);
     }
   };
@@ -201,16 +218,26 @@ export default function PromoCodes() {
   };
 
   // Create / Edit Submit
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
     if (!formData.code) return;
 
     const formattedCode = formData.code.toUpperCase().trim();
+    const couponPayload = {
+      code: formattedCode,
+      discountPercent: formData.type === 'percentage' ? Number(formData.value) || 0 : null,
+      discountAmount: formData.type === 'fixed' ? Number(formData.value) || 0 : null,
+      minSpend: Number(formData.minPurchase) || 0,
+      isActive: true,
+      expiresAt: formData.endDate
+    };
+
+    await saveSupabaseCoupon(couponPayload);
 
     if (editingCode) {
       setCodes((prev) =>
         prev.map((c) =>
-          c.id === editingCode.id
+          c.id === editingCode.id || c.code === formattedCode
             ? {
                 ...c,
                 code: formattedCode,

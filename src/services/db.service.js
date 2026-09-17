@@ -409,3 +409,266 @@ export async function findSupabaseUser(identifier) {
   }
   return null;
 }
+
+// ==========================================
+// 6. CONTACT MESSAGES & 3D QUOTES SERVICE
+// ==========================================
+export async function getSupabaseMessages() {
+  try {
+    const { data, error } = await supabase
+      .from('contact_messages')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    if (data && data.length > 0) {
+      const formatted = data.map(m => ({
+        id: m.id,
+        name: m.name,
+        phone: m.phone,
+        email: m.email,
+        link: m.makerworld_url,
+        subject: m.subject,
+        message: m.message,
+        type: m.type || (m.makerworld_url ? 'custom_quote' : 'general'),
+        status: m.status || 'unread',
+        date: new Date(m.created_at).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' })
+      }));
+      localStorage.setItem('MIXO_contact_messages', JSON.stringify(formatted));
+      return formatted;
+    }
+  } catch (err) {
+    console.warn('Supabase messages fallback to LocalStorage:', err);
+  }
+
+  const saved = localStorage.getItem('MIXO_contact_messages');
+  return saved ? JSON.parse(saved) : [];
+}
+
+export async function saveSupabaseMessage(msgObj) {
+  try {
+    const payload = {
+      id: msgObj.id || `MSG-${Date.now().toString().slice(-6)}`,
+      name: msgObj.name,
+      phone: msgObj.phone,
+      email: msgObj.email || null,
+      makerworld_url: msgObj.makerworldUrl || msgObj.link || null,
+      subject: msgObj.subject || '3D Printing Inquiry',
+      message: msgObj.message,
+      type: msgObj.type || (msgObj.makerworldUrl || msgObj.link ? 'custom_quote' : 'general'),
+      status: 'unread'
+    };
+
+    const { error } = await supabase
+      .from('contact_messages')
+      .insert([payload]);
+
+    if (error) throw error;
+  } catch (err) {
+    console.error('Failed to save message in Supabase:', err);
+  }
+
+  const saved = localStorage.getItem('MIXO_contact_messages');
+  const list = saved ? JSON.parse(saved) : [];
+  const updated = [msgObj, ...list];
+  localStorage.setItem('MIXO_contact_messages', JSON.stringify(updated));
+  window.dispatchEvent(new Event('storage'));
+  return msgObj;
+}
+
+export async function updateSupabaseMessageStatus(msgId, newStatus) {
+  try {
+    const { error } = await supabase
+      .from('contact_messages')
+      .update({ status: newStatus })
+      .eq('id', msgId);
+
+    if (error) throw error;
+  } catch (err) {
+    console.error('Failed to update message status in Supabase:', err);
+  }
+}
+
+export async function deleteSupabaseMessage(msgId) {
+  try {
+    const { error } = await supabase
+      .from('contact_messages')
+      .delete()
+      .eq('id', msgId);
+
+    if (error) throw error;
+  } catch (err) {
+    console.error('Failed to delete message in Supabase:', err);
+  }
+}
+
+// ==========================================
+// 7. REVIEWS SERVICE
+// ==========================================
+export async function getSupabaseReviews(productId = null) {
+  try {
+    let query = supabase.from('reviews').select('*').order('created_at', { ascending: false });
+    if (productId) query = query.eq('product_id', String(productId));
+
+    const { data, error } = await query;
+    if (error) throw error;
+    if (data) {
+      return data.map(r => ({
+        id: r.id,
+        productId: r.product_id,
+        userName: r.user_name,
+        rating: Number(r.rating),
+        comment: r.comment,
+        status: r.status,
+        date: new Date(r.created_at).toLocaleDateString('ar-EG')
+      }));
+    }
+  } catch (err) {
+    console.warn('Supabase reviews fallback:', err);
+  }
+  return [];
+}
+
+export async function saveSupabaseReview(reviewObj) {
+  try {
+    const payload = {
+      id: reviewObj.id || `REV-${Date.now()}`,
+      product_id: String(reviewObj.productId),
+      user_name: reviewObj.userName || 'مشتري مؤكد',
+      rating: reviewObj.rating || 5,
+      comment: reviewObj.comment,
+      status: reviewObj.status || 'approved'
+    };
+
+    const { error } = await supabase
+      .from('reviews')
+      .insert([payload]);
+
+    if (error) throw error;
+    return payload;
+  } catch (err) {
+    console.error('Failed to save review in Supabase:', err);
+    throw err;
+  }
+}
+
+// ==========================================
+// 8. PROMO COUPONS SERVICE
+// ==========================================
+export async function getSupabaseCoupons() {
+  try {
+    const { data, error } = await supabase
+      .from('coupons')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    if (data && data.length > 0) {
+      const formatted = data.map(c => ({
+        code: c.code,
+        discountPercent: c.discount_percent ? Number(c.discount_percent) : null,
+        discountAmount: c.discount_amount ? Number(c.discount_amount) : null,
+        minSpend: c.min_spend ? Number(c.min_spend) : 0,
+        isActive: c.is_active,
+        expiresAt: c.expires_at
+      }));
+      localStorage.setItem('MIXO_promo_coupons', JSON.stringify(formatted));
+      return formatted;
+    }
+  } catch (err) {
+    console.warn('Supabase coupons fallback:', err);
+  }
+
+  const saved = localStorage.getItem('MIXO_promo_coupons');
+  return saved ? JSON.parse(saved) : [];
+}
+
+export async function saveSupabaseCoupon(couponObj) {
+  try {
+    const payload = {
+      code: couponObj.code.trim().toUpperCase(),
+      discount_percent: couponObj.discountPercent || null,
+      discount_amount: couponObj.discountAmount || null,
+      min_spend: couponObj.minSpend || 0,
+      is_active: couponObj.isActive !== undefined ? couponObj.isActive : true,
+      expires_at: couponObj.expiresAt || null
+    };
+
+    const { error } = await supabase
+      .from('coupons')
+      .upsert([payload]);
+
+    if (error) throw error;
+  } catch (err) {
+    console.error('Failed to save coupon in Supabase:', err);
+  }
+
+  const saved = localStorage.getItem('MIXO_promo_coupons');
+  const list = saved ? JSON.parse(saved) : [];
+  const updated = [couponObj, ...list.filter(c => c.code !== couponObj.code)];
+  localStorage.setItem('MIXO_promo_coupons', JSON.stringify(updated));
+  window.dispatchEvent(new Event('storage'));
+}
+
+export async function deleteSupabaseCoupon(code) {
+  try {
+    const { error } = await supabase
+      .from('coupons')
+      .delete()
+      .eq('code', code);
+
+    if (error) throw error;
+  } catch (err) {
+    console.error('Failed to delete coupon in Supabase:', err);
+  }
+}
+
+// ==========================================
+// 9. NOTIFICATIONS SERVICE
+// ==========================================
+export async function getSupabaseNotifications(userIdentifier) {
+  try {
+    const clean = String(userIdentifier).trim();
+    const { data, error } = await supabase
+      .from('notifications')
+      .select('*')
+      .or(`user_identifier.eq.${clean},user_identifier.eq.all`)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    if (data) {
+      return data.map(n => ({
+        id: n.id,
+        title: n.title,
+        message: n.message,
+        type: n.type,
+        isRead: n.is_read,
+        date: new Date(n.created_at).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' })
+      }));
+    }
+  } catch (err) {
+    console.warn('Supabase notifications fallback:', err);
+  }
+  return [];
+}
+
+export async function saveSupabaseNotification(userIdentifier, notificationObj) {
+  try {
+    const payload = {
+      id: notificationObj.id || `NOTIF-${Date.now()}`,
+      user_identifier: String(userIdentifier).trim(),
+      title: notificationObj.title,
+      message: notificationObj.message,
+      type: notificationObj.type || 'info',
+      is_read: false
+    };
+
+    const { error } = await supabase
+      .from('notifications')
+      .insert([payload]);
+
+    if (error) throw error;
+  } catch (err) {
+    console.error('Failed to save notification in Supabase:', err);
+  }
+}

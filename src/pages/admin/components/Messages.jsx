@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { MessageSquare, Search, Trash2, Eye, ExternalLink, Printer, Send, X, CheckCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import {
+  getSupabaseMessages,
+  updateSupabaseMessageStatus,
+  deleteSupabaseMessage,
+  saveSupabaseNotification
+} from '../../../services/db.service';
 
 const INITIAL_MESSAGES = [
   {
@@ -14,17 +20,6 @@ const INITIAL_MESSAGES = [
     type: 'custom_quote',
     status: 'unread',
     date: '2026-09-15 14:30'
-  },
-  {
-    id: 'msg-2',
-    name: 'مي مصطفى',
-    email: 'mai@example.com',
-    phone: '01198765432',
-    subject: 'استفسار عن توافر فيلامينت PETG شفاف',
-    message: 'هل متوفر فيلامينت PETG شفاف 1.75mm في المخزن حالياً؟ ومتى تتوفر الألوان الخشبية؟',
-    type: 'general',
-    status: 'read',
-    date: '2026-09-14 11:15'
   }
 ];
 
@@ -35,19 +30,16 @@ export default function Messages() {
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [replyText, setReplyText] = useState('');
 
+  const loadData = async () => {
+    const data = await getSupabaseMessages();
+    setMessages(data && data.length > 0 ? data : INITIAL_MESSAGES);
+  };
+
   useEffect(() => {
-    const loaded = localStorage.getItem('MIXO_contact_messages');
-    if (loaded) {
-      try {
-        setMessages(JSON.parse(loaded));
-      } catch (e) {
-        setMessages(INITIAL_MESSAGES);
-        localStorage.setItem('MIXO_contact_messages', JSON.stringify(INITIAL_MESSAGES));
-      }
-    } else {
-      setMessages(INITIAL_MESSAGES);
-      localStorage.setItem('MIXO_contact_messages', JSON.stringify(INITIAL_MESSAGES));
-    }
+    loadData();
+    const handleStorage = () => loadData();
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
   }, []);
 
   const saveMessages = (updated) => {
@@ -56,25 +48,18 @@ export default function Messages() {
     window.dispatchEvent(new Event('storage'));
   };
 
-  const handleMarkAsRead = (msgId) => {
+  const handleMarkAsRead = async (msgId) => {
+    await updateSupabaseMessageStatus(msgId, 'read');
     const updated = messages.map(m => m.id === msgId ? { ...m, status: 'read' } : m);
     saveMessages(updated);
   };
 
-  const handleSendReply = (e) => {
+  const handleSendReply = async (e) => {
     e.preventDefault();
     if (!replyText.trim()) return;
 
-    // Push notification to user's notifications storage across all keys
     if (selectedMessage) {
-      const keys = [
-        selectedMessage.phone ? `MIXO_user_notifications_${selectedMessage.phone}` : null,
-        selectedMessage.email ? `MIXO_user_notifications_${selectedMessage.email}` : null,
-        'MIXO_user_notifications_all',
-        'MIXO_user_notifications_default',
-      ].filter(Boolean);
-
-      const newNotification = {
+      const newNotif = {
         id: `QUOTE_REPLY_${Date.now()}`,
         title: `رد من الإدارة: ${selectedMessage.subject || 'طلبك/استفسارك'}`,
         message: replyText,
@@ -82,19 +67,29 @@ export default function Messages() {
         isRead: false
       };
 
+      if (selectedMessage.phone) await saveSupabaseNotification(selectedMessage.phone, newNotif);
+      if (selectedMessage.email) await saveSupabaseNotification(selectedMessage.email, newNotif);
+      await saveSupabaseNotification('all', newNotif);
+
+      const keys = [
+        selectedMessage.phone ? `MIXO_user_notifications_${selectedMessage.phone}` : null,
+        selectedMessage.email ? `MIXO_user_notifications_${selectedMessage.email}` : null,
+        'MIXO_user_notifications_all',
+        'MIXO_user_notifications_default',
+      ].filter(Boolean);
+
       keys.forEach((userKey) => {
         try {
           const storedNotifs = JSON.parse(localStorage.getItem(userKey) || '[]');
-          localStorage.setItem(userKey, JSON.stringify([newNotification, ...storedNotifs]));
+          localStorage.setItem(userKey, JSON.stringify([newNotif, ...storedNotifs]));
         } catch (err) {
-          console.error('Failed to dispatch user notification:', err);
+          console.error(err);
         }
       });
-
-      // Dispatch event to update open windows/tabs dynamically
       window.dispatchEvent(new Event('storage'));
     }
 
+    await updateSupabaseMessageStatus(selectedMessage.id, 'read');
     toast.success('تم إرسال الرد للعميل وإضافته في إشعارات حسابه بنجاح! 🔔');
     const updated = messages.map(m => m.id === selectedMessage.id ? { ...m, status: 'read', reply: replyText } : m);
     saveMessages(updated);
@@ -102,8 +97,9 @@ export default function Messages() {
     setSelectedMessage(null);
   };
 
-  const handleDeleteMessage = (msgId) => {
+  const handleDeleteMessage = async (msgId) => {
     if (window.confirm('هل أنت متاكد من حذف هذه الرسالة؟')) {
+      await deleteSupabaseMessage(msgId);
       const updated = messages.filter(m => m.id !== msgId);
       saveMessages(updated);
       toast.success('تم حذف الرسالة بنجاح');
