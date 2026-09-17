@@ -228,6 +228,16 @@ export const useAuthStore = create((set, get) => ({
     users[userIndex].password = newPassword.trim();
     saveStoredUsers(users);
 
+    // Sync to Supabase DB
+    try {
+      await saveSupabaseUser({
+        ...targetUser,
+        password: newPassword.trim(),
+      });
+    } catch (e) {
+      console.warn("Supabase password update sync warning:", e);
+    }
+
     return true;
   },
 
@@ -241,7 +251,7 @@ export const useAuthStore = create((set, get) => ({
     set({ user: null, isAuthenticated: false, isLoading: false, error: null });
   },
 
-  updateUser: (updatedFields) => {
+  updateUser: async (updatedFields) => {
     const currentUser = get().user;
     if (!currentUser) return;
 
@@ -250,6 +260,9 @@ export const useAuthStore = create((set, get) => ({
     try {
       localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newUserData));
       authService.updateProfile(updatedFields).catch(() => {});
+
+      // Sync updated user data to Supabase DB
+      await saveSupabaseUser(newUserData).catch((err) => console.warn("Supabase updateUser sync warning:", err));
     } catch (e) {
       console.error(e);
     }
