@@ -258,14 +258,14 @@ export default function Settings() {
 
             <div>
               <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
-                رابط فيسبوك (Facebook URL)
+                رابط واتساب للتواصل المباشر (WhatsApp Link)
               </label>
               <input
                 type="url"
                 dir="ltr"
-                value={settings.facebookUrl || ''}
-                onChange={(e) => setSettings({ ...settings, facebookUrl: e.target.value })}
-                placeholder="https://facebook.com/your-page"
+                value={settings.whatsappUrl || (settings.supportPhone ? `https://wa.me/2${settings.supportPhone.replace(/[^\d]/g, '')}` : 'https://wa.me/201012345678')}
+                onChange={(e) => setSettings({ ...settings, whatsappUrl: e.target.value })}
+                placeholder="https://wa.me/201012345678"
                 className="w-full bg-gray-50 dark:bg-[#1A2332] border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-2 text-xs text-gray-900 dark:text-white focus:outline-none focus:border-[#FF1F3D]"
               />
             </div>
