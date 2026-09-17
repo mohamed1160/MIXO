@@ -154,14 +154,19 @@ export async function getSupabaseProducts() {
         rating: p.rating || 4.8,
         reviewCount: p.review_count || 120,
         isBestSeller: p.is_bestseller || false,
-        description: p.description
+        description: p.description,
+        material: p.material || 'PLA Plus',
+        inStock: p.in_stock !== false
       }));
+      localStorage.setItem('MIXO_products', JSON.stringify(formatted));
       return formatted;
     }
   } catch (err) {
     console.warn('Supabase products fallback:', err);
   }
-  return null;
+
+  const saved = localStorage.getItem('MIXO_products');
+  return saved ? JSON.parse(saved) : null;
 }
 
 export async function saveSupabaseProduct(product) {
@@ -178,7 +183,9 @@ export async function saveSupabaseProduct(product) {
       rating: product.rating || 4.8,
       review_count: product.reviewCount || 120,
       is_bestseller: product.isBestSeller || false,
-      description: product.description || ''
+      description: product.description || '',
+      material: product.material || 'PLA Plus',
+      in_stock: product.inStock !== false
     };
 
     const { error } = await supabase
@@ -186,11 +193,16 @@ export async function saveSupabaseProduct(product) {
       .upsert([payload]);
 
     if (error) throw error;
-    return payload;
   } catch (err) {
     console.error('Failed to save product in Supabase:', err);
-    throw err;
   }
+
+  const saved = localStorage.getItem('MIXO_products');
+  const existingList = saved ? JSON.parse(saved) : [];
+  const updated = [product, ...existingList.filter(p => String(p.id) !== String(product.id))];
+  localStorage.setItem('MIXO_products', JSON.stringify(updated));
+  window.dispatchEvent(new Event('storage'));
+  return product;
 }
 
 export async function deleteSupabaseProduct(productId) {
@@ -203,6 +215,14 @@ export async function deleteSupabaseProduct(productId) {
     if (error) throw error;
   } catch (err) {
     console.error('Failed to delete product in Supabase:', err);
+  }
+
+  const saved = localStorage.getItem('MIXO_products');
+  if (saved) {
+    const existingList = JSON.parse(saved);
+    const updated = existingList.filter(p => String(p.id) !== String(productId));
+    localStorage.setItem('MIXO_products', JSON.stringify(updated));
+    window.dispatchEvent(new Event('storage'));
   }
 }
 

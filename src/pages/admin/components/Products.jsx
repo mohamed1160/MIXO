@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getSupabaseProducts, saveSupabaseProduct, deleteSupabaseProduct } from '../../../services/db.service';
+import { getSupabaseProducts, saveSupabaseProduct, deleteSupabaseProduct, upload3DFileToSupabase } from '../../../services/db.service';
 import {
   Search,
   Plus,
@@ -14,7 +14,8 @@ import {
   X,
   Image as ImageIcon,
   Sparkles,
-  Printer
+  Printer,
+  UploadCloud
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import heroDragonImg from '../../../assets/images/3dprint/hero_dragon.jpg';
@@ -155,6 +156,33 @@ export default function Products() {
     setIsModalOpen(true);
   };
 
+  const handleProductImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("برجاء اختيار صورة صحيحة (JPG, PNG, WEBP)");
+      return;
+    }
+
+    try {
+      const supaUrl = await upload3DFileToSupabase(file);
+      if (supaUrl) {
+        setFormData((prev) => ({ ...prev, image: supaUrl }));
+        toast.success("تم رفع صورة المنتج بنجاح إلى Supabase! 📷");
+      } else {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setFormData((prev) => ({ ...prev, image: reader.result }));
+          toast.success("تم اختيار الصورة بنجاح! 📷");
+        };
+        reader.readAsDataURL(file);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name || !formData.price) {
@@ -184,10 +212,14 @@ export default function Products() {
     }
   };
 
-  const toggleStock = (productId) => {
-    const updated = products.map(p => p.id === productId ? { ...p, inStock: !p.inStock } : p);
-    saveProducts(updated);
-    toast.success('تم تحديث حالة التوفر في المخزن');
+  const toggleStock = async (productId) => {
+    const target = products.find(p => p.id === productId);
+    if (target) {
+      const updated = { ...target, inStock: !target.inStock };
+      await saveSupabaseProduct(updated);
+      loadProducts();
+      toast.success('تم تحديث حالة التوفر بالمخزن');
+    }
   };
 
   const filteredProducts = products.filter(p => {
@@ -415,14 +447,64 @@ export default function Products() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">رابط صورة المنتج (URL)</label>
-                <input
-                  type="text"
-                  placeholder="https://images.unsplash.com/..."
-                  value={formData.image}
-                  onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                  className="w-full bg-gray-50 dark:bg-[#1A2332] border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-2 text-xs text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-[#FF1F3D]"
-                />
+                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
+                  صورة المنتج (رفع صورة من جهازك) *
+                </label>
+                
+                <div className="flex flex-col gap-2">
+                  <label className="border-2 border-dashed border-[#FF1F3D]/40 hover:border-[#FF1F3D] bg-gray-50 dark:bg-[#1A2332] rounded-2xl p-4 flex flex-col items-center justify-center cursor-pointer transition-all text-center group">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleProductImageUpload}
+                      className="hidden"
+                    />
+                    <UploadCloud className="w-8 h-8 text-[#FF1F3D] mb-1 group-hover:scale-110 transition-transform" />
+                    <span className="text-xs font-bold text-gray-900 dark:text-white">
+                      اضغط هنا لرفع صورة من جهازك 📷
+                    </span>
+                    <span className="text-[10px] text-gray-400 mt-0.5">
+                      (PNG, JPG, WEBP - رفع مباشر لـ Supabase)
+                    </span>
+                  </label>
+
+                  {formData.image && (
+                    <div className="flex items-center gap-3 bg-gray-100 dark:bg-[#151C24] p-2.5 rounded-xl border border-gray-200 dark:border-gray-800">
+                      <img
+                        src={formData.image}
+                        alt="Preview"
+                        className="w-12 h-12 rounded-lg object-cover border border-gray-300 dark:border-gray-700"
+                      />
+                      <div className="flex-1 truncate">
+                        <span className="text-xs font-bold text-gray-800 dark:text-gray-200 block truncate">
+                          {formData.image.startsWith("data:") ? "صورة مرفوعة من الجهاز" : formData.image}
+                        </span>
+                        <span className="text-[10px] text-emerald-500 font-bold">جاهزة للعرض في المتجر ✓</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, image: "" })}
+                        className="p-1.5 text-gray-400 hover:text-red-500 rounded-lg transition-colors"
+                        title="حذف الصورة"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+
+                  <div className="pt-1">
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">
+                      أو ادخل رابط صورة مباشر (URL):
+                    </span>
+                    <input
+                      type="url"
+                      placeholder="https://images.unsplash.com/..."
+                      value={formData.image}
+                      onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                      className="w-full bg-gray-50 dark:bg-[#1A2332] border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-1.5 text-xs text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-[#FF1F3D]"
+                    />
+                  </div>
+                </div>
               </div>
 
               <div>

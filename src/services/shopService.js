@@ -3,39 +3,47 @@ import { MOCK_PRODUCTS } from "./products";
 import { applyFilters } from "../utils/filter";
 import { applySort } from "../utils/sort";
 import { applyPagination } from "../utils/pagination";
+import { getSupabaseProducts } from './db.service';
 
 export const shopService = {
   getProducts: async ({ filters, sort, page = 1, limit = 12 }) => {
     let allProducts = MOCK_PRODUCTS;
 
     try {
-      const response = await api.get('/products?populate=*');
-      if (response.data?.data && Array.isArray(response.data.data) && response.data.data.length > 0) {
-        allProducts = response.data.data.map(item => ({
-          id: item.id || item.documentId,
-          title: item.title || item.attributes?.title,
-          slug: item.slug || item.attributes?.slug,
-          price: item.price || item.attributes?.price,
-          oldPrice: item.oldPrice || item.attributes?.oldPrice,
-          description: item.description || item.attributes?.description,
-          details: item.details || item.attributes?.details,
-          category: item.category?.name || item.attributes?.category?.data?.attributes?.name || item.category || 'General',
-          stock: item.stock ?? item.attributes?.stock ?? 10,
-          ratings: item.ratings || item.attributes?.ratings || 5,
-          numReviews: item.numReviews || item.attributes?.numReviews || 0,
-          colors: item.colors || item.attributes?.colors || [],
-          sizes: item.sizes || item.attributes?.sizes || [],
-          images: item.images?.length ? item.images : (item.attributes?.images || MOCK_PRODUCTS[0].images),
-          isNewArrival: item.isNewArrival ?? item.attributes?.isNewArrival ?? false,
-          isBestSeller: item.isBestSeller ?? item.attributes?.isBestSeller ?? false,
-        }));
+      const supaProducts = await getSupabaseProducts();
+      if (supaProducts && supaProducts.length > 0) {
+        const supaIds = new Set(supaProducts.map(p => String(p.id)));
+        const defaultRemain = MOCK_PRODUCTS.filter(p => !supaIds.has(String(p.id)));
+        allProducts = [...supaProducts, ...defaultRemain];
       }
     } catch (e) {
-      console.log('Strapi products fallback to mock:', e.message);
+      console.warn('Supabase getProducts fallback in shopService:', e);
     }
 
+    const normalizedProducts = allProducts.map((item) => ({
+      id: item.id,
+      title: item.title || item.name,
+      name: item.name || item.title,
+      price: Number(item.price) || 0,
+      oldPrice: item.oldPrice || item.originalPrice || null,
+      originalPrice: item.originalPrice || item.oldPrice || null,
+      description: item.description || '',
+      category: item.category || '3D Print',
+      stock: item.inStock !== false ? 10 : 0,
+      inStock: item.inStock !== false,
+      ratings: item.rating || item.ratings || 5,
+      numReviews: item.reviewCount || item.numReviews || 0,
+      colors: item.colors || [],
+      sizes: item.sizes || [],
+      image: item.image || item.images?.[0] || '',
+      images: item.images?.length ? item.images : [item.image || ''],
+      material: item.material || 'PLA Plus',
+      isNewArrival: item.isNewArrival ?? false,
+      isBestSeller: item.isBestSeller ?? false,
+    }));
+
     // 1. Filter
-    const filtered = applyFilters(allProducts, filters);
+    const filtered = applyFilters(normalizedProducts, filters);
     // 2. Sort
     const sorted = applySort(filtered, sort);
     // 3. Paginate
