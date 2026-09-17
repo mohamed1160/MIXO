@@ -18,9 +18,16 @@ import {
   ShieldCheck,
   Eye,
   Plus,
+  TrendingUp,
 } from "lucide-react";
 import { useLanguage } from "../../../providers/LanguageContext";
 import heroDragonImg from "../../../assets/images/3dprint/hero_dragon.jpg";
+import {
+  getSupabaseOrders,
+  getSupabaseUsers,
+  getSupabaseMessages,
+  subscribeToRealtimeOrders,
+} from "../../../services/db.service";
 
 export default function Overview() {
   const { isRTL } = useLanguage();
@@ -30,36 +37,103 @@ export default function Overview() {
   const [users, setUsers] = useState([]);
   const [messages, setMessages] = useState([]);
 
-  useEffect(() => {
+  const loadData = async () => {
     try {
-      const storedOrders = JSON.parse(localStorage.getItem("MIXO_customer_orders") || "[]");
-      const storedUsers = JSON.parse(localStorage.getItem("MIXO_registered_users") || "[]");
-      const storedMsgs = JSON.parse(localStorage.getItem("MIXO_contact_messages") || "[]");
+      const supaOrders = await getSupabaseOrders();
+      const supaUsers = await getSupabaseUsers();
+      const supaMsgs = await getSupabaseMessages();
 
-      setOrders(storedOrders);
-      setUsers(storedUsers);
-      setMessages(storedMsgs);
+      if (supaOrders && supaOrders.length > 0) {
+        setOrders(supaOrders);
+      } else {
+        const storedOrders = JSON.parse(localStorage.getItem("MIXO_customer_orders") || "[]");
+        setOrders(storedOrders);
+      }
+
+      if (supaUsers && supaUsers.length > 0) {
+        setUsers(supaUsers);
+      } else {
+        const storedUsers = JSON.parse(localStorage.getItem("MIXO_registered_users") || "[]");
+        setUsers(storedUsers);
+      }
+
+      if (supaMsgs && supaMsgs.length > 0) {
+        setMessages(supaMsgs);
+      } else {
+        const storedMsgs = JSON.parse(localStorage.getItem("MIXO_contact_messages") || "[]");
+        setMessages(storedMsgs);
+      }
     } catch (e) {
-      console.error(e);
+      console.error("Error loading overview data:", e);
     }
+  };
+
+  useEffect(() => {
+    loadData();
+
+    const unsubscribe = subscribeToRealtimeOrders(() => {
+      loadData();
+    });
+
+    window.addEventListener("storage", loadData);
+    return () => {
+      unsubscribe();
+      window.removeEventListener("storage", loadData);
+    };
   }, []);
 
   // Compute Live Metrics
-  const totalSales = orders.reduce((sum, o) => sum + (o.total || 0), 0);
+  const totalSales = orders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
   const totalOrdersCount = orders.length;
-  const pendingQuotesCount = orders.filter((o) => o.paymentStatus === "Pending Quote" || (o.total === 0)).length;
+  const pendingQuotesCount = orders.filter((o) => o.paymentStatus === "Pending Quote" || (!o.total || o.total === 0)).length;
   const totalUsersCount = users.length;
 
-  // Chart Mock / Calculated Data
-  const chartData = [
-    { day: "Mon", sales: Math.round(totalSales * 0.1) || 120 },
-    { day: "Tue", sales: Math.round(totalSales * 0.15) || 250 },
-    { day: "Wed", sales: Math.round(totalSales * 0.2) || 180 },
-    { day: "Thu", sales: Math.round(totalSales * 0.25) || 320 },
-    { day: "Fri", sales: Math.round(totalSales * 0.18) || 290 },
-    { day: "Sat", sales: Math.round(totalSales * 0.3) || 450 },
-    { day: "Sun", sales: Math.round(totalSales * 0.35) || 520 },
-  ];
+  // Compute Real Chart Data from Actual Orders Grouped by Day
+  const getRealChartData = () => {
+    const daysOrder = isRTL
+      ? ["السبت", "الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"]
+      : ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"];
+
+    const dayIndexMap = {
+      6: 0, // Sat
+      0: 1, // Sun
+      1: 2, // Mon
+      2: 3, // Tue
+      3: 4, // Wed
+      4: 5, // Thu
+      5: 6, // Fri
+    };
+
+    const daysMap = daysOrder.map((dayName) => ({
+      day: dayName,
+      sales: 0,
+      ordersCount: 0,
+    }));
+
+    orders.forEach((ord) => {
+      let ordDate;
+      if (ord.createdAt) {
+        ordDate = new Date(ord.createdAt);
+      } else if (ord.date) {
+        ordDate = new Date(ord.date);
+      } else {
+        ordDate = new Date();
+      }
+
+      if (!isNaN(ordDate.getTime())) {
+        const rawDay = ordDate.getDay(); // 0 = Sun, 1 = Mon ... 6 = Sat
+        const idx = dayIndexMap[rawDay];
+        if (idx !== undefined && daysMap[idx]) {
+          daysMap[idx].sales += Number(ord.total) || 0;
+          daysMap[idx].ordersCount += 1;
+        }
+      }
+    });
+
+    return daysMap;
+  };
+
+  const chartData = getRealChartData();
 
   return (
     <div className="flex flex-col gap-8 font-sans text-gray-900 dark:text-[#F5F7FA]">
@@ -111,8 +185,9 @@ export default function Overview() {
           </div>
           <div>
             <p className="text-2xl font-extrabold text-gray-900 dark:text-white">${totalSales.toFixed(2)}</p>
-            <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 mt-1 inline-block">
-              +100% Live Sync
+            <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 mt-1 inline-block flex items-center gap-1">
+              <TrendingUp size={13} />
+              <span>Realtime Supabase Sync</span>
             </span>
           </div>
         </div>
@@ -181,14 +256,14 @@ export default function Overview() {
           <div className="flex items-center justify-between border-b border-gray-100 dark:border-[#1E2630] pb-3">
             <div>
               <h3 className="text-sm font-extrabold text-gray-900 dark:text-white uppercase tracking-wider">
-                {isRTL ? "أداء المبيعات والطلبات" : "Sales Performance Analytics"}
+                {isRTL ? "الرسم البياني للمبيعات الحقيقية حسب الأيام" : "Real Sales & Orders Analytics"}
               </h3>
               <p className="text-xs text-gray-400 mt-0.5">
-                {isRTL ? "تحليل مباشر للمبيعات اليومية" : "Live daily revenue breakdown"}
+                {isRTL ? "مجموع المبيعات الفعلية المحسوبة من الطلبيات الحية" : "Actual daily sales computed directly from real orders"}
               </p>
             </div>
             <span className="text-xs font-bold text-[#FF1F3D] bg-red-500/10 px-3 py-1 rounded-full border border-[#FF1F3D]/20">
-              Live Data
+              Live Real Data
             </span>
           </div>
 
@@ -204,9 +279,24 @@ export default function Overview() {
                     borderColor: "#1E2630",
                     borderRadius: "12px",
                     color: "#F5F7FA",
+                    fontSize: "12px",
                   }}
+                  formatter={(value, name) => [
+                    name === "sales" ? `$${Number(value).toFixed(2)}` : `${value}`,
+                    name === "sales"
+                      ? isRTL ? "إجمالي المبيعات" : "Total Sales"
+                      : isRTL ? "عدد الطلبات" : "Orders Count",
+                  ]}
                 />
-                <Line type="monotone" dataKey="sales" stroke="#FF1F3D" strokeWidth={3} dot={{ r: 4, fill: "#FF1F3D" }} />
+                <Line
+                  type="monotone"
+                  dataKey="sales"
+                  name="sales"
+                  stroke="#FF1F3D"
+                  strokeWidth={3}
+                  dot={{ r: 5, fill: "#FF1F3D" }}
+                  activeDot={{ r: 7 }}
+                />
               </LineChart>
             </ResponsiveContainer>
           </div>
