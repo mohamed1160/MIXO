@@ -7,32 +7,38 @@ import mixoLogoImg from "../assets/images/logo/mixo_red_logo.png";
 export default function Footer() {
   const [email, setEmail] = useState("");
   const { t, isRTL } = useLanguage();
-  const [socialLinks, setSocialLinks] = useState({
+  const [storeSettings, setStoreSettings] = useState({
     instagramUrl: "https://instagram.com",
     facebookUrl: "https://facebook.com",
     tiktokUrl: "https://tiktok.com",
+    supportPhone: "01012345678",
+    supportEmail: "support@mixo3d.com",
+    storeName: "Mixo 3D Printing & Design",
   });
 
   useEffect(() => {
-    const loadSocialLinks = () => {
+    const loadSettings = () => {
       try {
-        const saved = localStorage.getItem("MIXO_store_settings");
+        const saved = localStorage.getItem("MIXO_settings") || localStorage.getItem("MIXO_store_settings");
         if (saved) {
           const parsed = JSON.parse(saved);
-          setSocialLinks({
+          setStoreSettings({
             instagramUrl: parsed.instagramUrl || "https://instagram.com",
             facebookUrl: parsed.facebookUrl || "https://facebook.com",
             tiktokUrl: parsed.tiktokUrl || "https://tiktok.com",
+            supportPhone: parsed.supportPhone || "01012345678",
+            supportEmail: parsed.supportEmail || "support@mixo3d.com",
+            storeName: parsed.storeName || "Mixo 3D Printing & Design",
           });
         }
       } catch (e) {
-        console.error("Error loading social links:", e);
+        console.error("Error loading store settings in footer:", e);
       }
     };
 
-    loadSocialLinks();
-    window.addEventListener("storage", loadSocialLinks);
-    return () => window.removeEventListener("storage", loadSocialLinks);
+    loadSettings();
+    window.addEventListener("storage", loadSettings);
+    return () => window.removeEventListener("storage", loadSettings);
   }, []);
 
   const handleSubscribe = (e) => {
@@ -64,7 +70,7 @@ export default function Footer() {
 
             <div className="flex items-center gap-3 mt-2">
               <a
-                href={socialLinks.instagramUrl}
+                href={storeSettings.instagramUrl}
                 target="_blank"
                 rel="noreferrer"
                 className="w-9 h-9 rounded-full bg-white dark:bg-[#151C24] hover:bg-gray-100 dark:hover:bg-[#1E2630] border border-gray-200 dark:border-[#26313D] flex items-center justify-center text-gray-700 dark:text-[#AAB4C0] hover:text-black dark:hover:text-white transition-colors shadow-sm"
@@ -75,7 +81,7 @@ export default function Footer() {
                 </svg>
               </a>
               <a
-                href={socialLinks.facebookUrl}
+                href={storeSettings.facebookUrl}
                 target="_blank"
                 rel="noreferrer"
                 className="w-9 h-9 rounded-full bg-white dark:bg-[#151C24] hover:bg-gray-100 dark:hover:bg-[#1E2630] border border-gray-200 dark:border-[#26313D] flex items-center justify-center text-gray-700 dark:text-[#AAB4C0] hover:text-black dark:hover:text-white transition-colors shadow-sm"
@@ -86,7 +92,7 @@ export default function Footer() {
                 </svg>
               </a>
               <a
-                href={socialLinks.tiktokUrl}
+                href={storeSettings.tiktokUrl}
                 target="_blank"
                 rel="noreferrer"
                 className="w-9 h-9 rounded-full bg-white dark:bg-[#151C24] hover:bg-gray-100 dark:hover:bg-[#1E2630] border border-gray-200 dark:border-[#26313D] flex items-center justify-center text-gray-700 dark:text-[#AAB4C0] hover:text-black dark:hover:text-white transition-colors shadow-sm"

@@ -56,6 +56,7 @@ import TermsConditionsPage from '../pages/TermsConditions/TermsConditionsPage'
 import CareersPage   from '../pages/Careers/CareersPage'
 
 import WhatsAppButton from '../components/common/WhatsAppButton'
+import AnnouncementBar from '../components/AnnouncementBar'
 
 export default function AppRouter() {
   const location = useLocation();
@@ -63,6 +64,7 @@ export default function AppRouter() {
 
   return (
     <>
+      {!isAdminRoute && <AnnouncementBar />}
       {!isAdminRoute && <Navbar />}
 
       {/* Top Animated Gold Route Loading Indicator Bar */}

@@ -18,14 +18,27 @@ export default function PaymentMethods({ register, errors, watch, setValue, cart
 
   const { total } = calculateTotals(cart || []);
 
-  const adminSettings = (() => {
+  const [adminSettings, setAdminSettings] = useState(() => {
     try {
-      const s = localStorage.getItem('MIXO_store_settings') || localStorage.getItem('MIXO_admin_settings');
+      const s = localStorage.getItem('MIXO_settings') || localStorage.getItem('MIXO_store_settings') || localStorage.getItem('MIXO_admin_settings');
       return s ? JSON.parse(s) : null;
     } catch {
       return null;
     }
-  })();
+  });
+
+  React.useEffect(() => {
+    const load = () => {
+      try {
+        const s = localStorage.getItem('MIXO_settings') || localStorage.getItem('MIXO_store_settings');
+        if (s) setAdminSettings(JSON.parse(s));
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    window.addEventListener('storage', load);
+    return () => window.removeEventListener('storage', load);
+  }, []);
 
   const walletNumber = adminSettings?.vodafoneCashNumber || adminSettings?.paymentSettings?.vodafoneCash?.phoneNumber || "01012345678";
   const instapayIPA = adminSettings?.instapayAccount || adminSettings?.paymentSettings?.instapay?.handle || "01198765432 / mixo@instapay";

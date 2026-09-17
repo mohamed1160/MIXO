@@ -8,24 +8,30 @@ export default function WhatsAppButton() {
   const [showTooltip, setShowTooltip] = useState(true);
 
   useEffect(() => {
-    // Load WhatsApp phone number from Admin settings if available
-    try {
-      const savedSettings = localStorage.getItem('MIXO_settings');
-      if (savedSettings) {
-        const parsed = JSON.parse(savedSettings);
-        if (parsed.whatsapp || parsed.phone) {
-          const raw = parsed.whatsapp || parsed.phone;
-          const cleanPhone = raw.replace(/[^\d]/g, '');
-          if (cleanPhone) setWhatsappNumber(cleanPhone.startsWith('2') ? cleanPhone : `2${cleanPhone}`);
+    const loadPhone = () => {
+      try {
+        const savedSettings = localStorage.getItem('MIXO_settings');
+        if (savedSettings) {
+          const parsed = JSON.parse(savedSettings);
+          const raw = parsed.supportPhone || parsed.whatsapp || parsed.phone || parsed.vodafoneCashNumber;
+          if (raw) {
+            const cleanPhone = String(raw).replace(/[^\d]/g, '');
+            if (cleanPhone) setWhatsappNumber(cleanPhone.startsWith('2') ? cleanPhone : `2${cleanPhone}`);
+          }
         }
+      } catch (e) {
+        console.error('Error loading whatsapp setting:', e);
       }
-    } catch (e) {
-      console.error('Error loading whatsapp setting:', e);
-    }
+    };
 
-    // Auto-hide tooltip badge after 8 seconds
+    loadPhone();
+    window.addEventListener('storage', loadPhone);
+
     const timer = setTimeout(() => setShowTooltip(false), 8000);
-    return () => clearTimeout(timer);
+    return () => {
+      window.removeEventListener('storage', loadPhone);
+      clearTimeout(timer);
+    };
   }, []);
 
   const defaultMsg = isRTL 
