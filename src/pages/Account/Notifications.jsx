@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Bell, Check, Trash2, Sparkles, Printer, Package } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Bell, Check, Trash2, Sparkles, Printer, Package, CheckCheck, X } from "lucide-react";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useLanguage } from "../../providers/LanguageContext";
 
@@ -52,7 +52,7 @@ export default function Notifications() {
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     loadNotifications();
 
     const handleStorageChange = () => loadNotifications();
@@ -60,17 +60,62 @@ export default function Notifications() {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, [user]);
 
+  const triggerToast = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  const saveNotifications = (updatedList) => {
+    try {
+      const keysToUpdate = [
+        user?.phone ? `MIXO_user_notifications_${user.phone}` : null,
+        user?.email ? `MIXO_user_notifications_${user.email}` : null,
+        user?.id ? `MIXO_user_notifications_${user.id}` : null,
+        'MIXO_user_notifications_all',
+        'MIXO_user_notifications_default',
+      ].filter(Boolean);
+
+      keysToUpdate.forEach((key) => {
+        localStorage.setItem(key, JSON.stringify(updatedList));
+      });
+
+      if (keysToUpdate.length === 0) {
+        localStorage.setItem('MIXO_user_notifications_default', JSON.stringify(updatedList));
+      }
+
+      setNotifications(updatedList);
+      window.dispatchEvent(new Event("storage"));
+    } catch (e) {
+      console.error("Failed to save notifications:", e);
+    }
+  };
+
   const handleMarkAllRead = () => {
     const updated = notifications.map((n) => ({ ...n, isRead: true }));
     saveNotifications(updated);
-    markAllNotificationsRead();
+    if (typeof markAllNotificationsRead === 'function') {
+      markAllNotificationsRead();
+    }
     triggerToast(isRTL ? "تم تحديث جميع الإشعارات كمقروءة 👁️" : "All notifications marked as read 👁️");
   };
 
   const handleClearAll = () => {
     saveNotifications([]);
-    markAllNotificationsRead();
+    if (typeof markAllNotificationsRead === 'function') {
+      markAllNotificationsRead();
+    }
     triggerToast(isRTL ? "تم مسح جميع الإشعارات 🗑️" : "Notifications cleared 🗑️");
+  };
+
+  const handleMarkSingleRead = (id) => {
+    const updated = notifications.map((n) => (n.id === id ? { ...n, isRead: true } : n));
+    saveNotifications(updated);
+  };
+
+  const handleDeleteSingle = (id) => {
+    const updated = notifications.filter((n) => n.id !== id);
+    saveNotifications(updated);
+    triggerToast(isRTL ? "تم حذف الإشعار 🗑️" : "Notification removed 🗑️");
   };
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
@@ -107,14 +152,16 @@ export default function Notifications() {
 
         {notifications.length > 0 && (
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={handleMarkAllRead}
-              className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-[#FF1F3D] bg-red-500/10 border border-[#FF1F3D]/20 rounded-xl hover:bg-[#FF1F3D] hover:text-white transition-all cursor-pointer"
-            >
-              <Check size={14} />
-              <span>{isRTL ? "تحديد الكل كمقروء" : "Mark All Read"}</span>
-            </button>
+            {unreadCount > 0 && (
+              <button
+                type="button"
+                onClick={handleMarkAllRead}
+                className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-[#FF1F3D] bg-red-500/10 border border-[#FF1F3D]/20 rounded-xl hover:bg-[#FF1F3D] hover:text-white transition-all cursor-pointer"
+              >
+                <CheckCheck size={14} />
+                <span>{isRTL ? "تحديد الكل كمقروء" : "Mark All Read"}</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={handleClearAll}
@@ -145,9 +192,10 @@ export default function Notifications() {
             return (
               <div
                 key={n.id}
+                onClick={() => !n.isRead && handleMarkSingleRead(n.id)}
                 className={`p-4 rounded-2xl border transition-all flex items-start justify-between gap-4 ${
                   !n.isRead
-                    ? "bg-white dark:bg-[#0F151D] border-[#FF1F3D]/30 shadow-xs"
+                    ? "bg-white dark:bg-[#0F151D] border-[#FF1F3D]/30 shadow-xs cursor-pointer"
                     : "bg-gray-50/60 dark:bg-[#151C24]/50 border-gray-100 dark:border-[#1E2630]"
                 }`}
               >
@@ -166,6 +214,25 @@ export default function Notifications() {
                     <span className="text-[10px] text-gray-400 font-semibold block mt-1.5">{n.date}</span>
                   </div>
                 </div>
+
+                <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
+                  {!n.isRead && (
+                    <button
+                      onClick={() => handleMarkSingleRead(n.id)}
+                      className="p-1.5 text-gray-400 hover:text-emerald-500 rounded-lg transition-colors"
+                      title={isRTL ? "تحديد كمقروء" : "Mark as read"}
+                    >
+                      <Check size={14} />
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleDeleteSingle(n.id)}
+                    className="p-1.5 text-gray-400 hover:text-red-500 rounded-lg transition-colors"
+                    title={isRTL ? "حذف الإشعار" : "Delete notification"}
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
               </div>
             );
           })
@@ -175,3 +242,4 @@ export default function Notifications() {
     </div>
   );
 }
+
