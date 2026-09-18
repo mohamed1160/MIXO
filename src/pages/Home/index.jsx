@@ -103,7 +103,7 @@ export default function Home() {
 
               <div className="mt-3 sm:mt-8">
                 <Link to="/shop">
-                  <button className="animate-shimmer-btn bg-[#FF1F3D] hover:bg-[#E01833] text-white font-bold px-4 py-2 sm:px-6 sm:py-3.5 rounded-full text-xs sm:text-base transition-all duration-200 shadow-lg shadow-red-600/25 hover:scale-105 active:scale-95 flex items-center gap-2">
+                  <button className="bg-white hover:bg-black text-black hover:text-white font-extrabold px-4 py-2 sm:px-6 sm:py-3.5 rounded-full text-xs sm:text-base transition-all duration-300 shadow-lg hover:scale-105 active:scale-95 flex items-center gap-2">
                     <span>{t.hero.cta}</span>
                     {isRTL ? <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
                   </button>
@@ -207,7 +207,7 @@ export default function Home() {
               </p>
               <div className="pt-1 sm:pt-2">
                 <Link to="/custom-order">
-                  <button className="animate-shimmer-btn bg-[#FF1F3D] hover:bg-[#E01833] text-white font-semibold px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm transition-all duration-200 shadow-md shadow-red-600/20 active:scale-95 flex items-center gap-2">
+                  <button className="bg-white hover:bg-black text-black hover:text-white font-extrabold px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm transition-all duration-300 shadow-md hover:scale-105 active:scale-95 flex items-center gap-2">
                     <span>{t.customBanner.cta}</span>
                     {isRTL ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
                   </button>
