@@ -158,6 +158,20 @@ export async function getSupabaseProducts() {
         material: p.material || 'PLA Plus',
         inStock: p.in_stock !== false
       }));
+
+      // Merge local storage products that might not be in Supabase yet
+      const saved = localStorage.getItem('MIXO_products');
+      if (saved) {
+        try {
+          const localProducts = JSON.parse(saved);
+          const supaIds = new Set(formatted.map(p => String(p.id)));
+          const localOnly = localProducts.filter(lp => !supaIds.has(String(lp.id)));
+          const merged = [...formatted, ...localOnly];
+          localStorage.setItem('MIXO_products', JSON.stringify(merged));
+          return merged;
+        } catch (e) {}
+      }
+
       localStorage.setItem('MIXO_products', JSON.stringify(formatted));
       return formatted;
     }
@@ -166,7 +180,7 @@ export async function getSupabaseProducts() {
   }
 
   const saved = localStorage.getItem('MIXO_products');
-  return saved ? JSON.parse(saved) : null;
+  return saved ? JSON.parse(saved) : [];
 }
 
 export async function saveSupabaseProduct(product) {
@@ -175,7 +189,7 @@ export async function saveSupabaseProduct(product) {
       id: String(product.id || Date.now()),
       name: product.name || product.title,
       title: product.title || product.name,
-      category: product.category || '3D Print',
+      category: product.category || 'Figures & Collectibles',
       price: product.price,
       original_price: product.originalPrice || null,
       image: product.image,

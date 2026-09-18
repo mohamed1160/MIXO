@@ -1,5 +1,5 @@
 import api from '../api/axios';
-import { MOCK_PRODUCTS } from "./products";
+import { MOCK_PRODUCTS, mapCategoryToId } from "./products";
 import { applyFilters } from "../utils/filter";
 import { applySort } from "../utils/sort";
 import { applyPagination } from "../utils/pagination";
@@ -37,7 +37,8 @@ export const shopService = {
       oldPrice: item.oldPrice || item.originalPrice || null,
       originalPrice: item.originalPrice || item.oldPrice || null,
       description: item.description || '',
-      category: item.category || '3D Print',
+      category: item.category || 'Figures & Collectibles',
+      categoryId: item.categoryId || mapCategoryToId(item.category),
       stock: item.inStock !== false ? 10 : 0,
       inStock: item.inStock !== false,
       ratings: item.rating || item.ratings || 5,

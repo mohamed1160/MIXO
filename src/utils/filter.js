@@ -1,3 +1,5 @@
+import { mapCategoryToId } from "../services/products";
+
 export const applyFilters = (products, filters) => {
   if (!products || !Array.isArray(products)) return [];
   if (!filters) return products;
@@ -7,7 +9,7 @@ export const applyFilters = (products, filters) => {
 
     const title = (product.title || product.name || "").toLowerCase();
     const categoryName = (product.category || "").toLowerCase();
-    const categoryId = (product.categoryId || "").toLowerCase();
+    const categoryId = (product.categoryId || mapCategoryToId(product.category)).toLowerCase();
     const description = (product.description || "").toLowerCase();
     const collection = (product.collection || "").toLowerCase();
 
@@ -33,10 +35,13 @@ export const applyFilters = (products, filters) => {
         : [];
 
     if (selectedCategories.length > 0) {
+      const prodCatId = categoryId || mapCategoryToId(product.category);
       const matchesCategory = selectedCategories.some((cat) => {
         const selectedCat = cat.toLowerCase();
+        const mappedSelectedCat = mapCategoryToId(cat);
         return (
-          categoryId === selectedCat ||
+          prodCatId === selectedCat ||
+          prodCatId === mappedSelectedCat ||
           categoryName === selectedCat ||
           categoryName.includes(selectedCat) ||
           (selectedCat === "masks" && (product.isMask || categoryName.includes("mask")))

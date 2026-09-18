@@ -16,6 +16,27 @@ export const CATEGORIES = [
 
 export const MOCK_3D_PRODUCTS = [];
 
+export function mapCategoryToId(catName = "") {
+  if (!catName) return "figures";
+  const str = String(catName).toLowerCase().trim();
+
+  if (str.includes("figure") || str.includes("مجسمات") || str.includes("مقتنيات")) return "figures";
+  if (str.includes("mask") || str.includes("ماسكات") || str.includes("أقنعة")) return "masks";
+  if (str.includes("decor") || str.includes("ديكور")) return "decor";
+  if (str.includes("stand") || str.includes("phone") || str.includes("حوامل") || str.includes("هواتف")) return "stands";
+  if (str.includes("tool") || str.includes("functional") || str.includes("أدوات") || str.includes("مستلزمات")) return "tools";
+  if (str.includes("vase") || str.includes("art") || str.includes("فازات") || str.includes("تحف")) return "vases";
+  if (str.includes("game") || str.includes("gaming") || str.includes("cosplay") || str.includes("ألعاب") || str.includes("إكسسوارات")) return "gaming";
+  if (str.includes("keychain") || str.includes("tag") || str.includes("ميداليات")) return "keychains";
+  if (str.includes("filament") || str.includes("فيلـامينت") || str.includes("فيلامينت")) return "filaments";
+  if (str.includes("3d") || str.includes("model")) return "figures";
+
+  const found = CATEGORIES.find((c) => c.id === str);
+  if (found) return found.id;
+
+  return "figures";
+}
+
 export function getCategoryCounts(products = MOCK_3D_PRODUCTS) {
   const counts = {};
   CATEGORIES.forEach((cat) => {
@@ -23,19 +44,12 @@ export function getCategoryCounts(products = MOCK_3D_PRODUCTS) {
   });
 
   products.forEach((prod) => {
-    const catId = (prod.categoryId || "").toLowerCase();
-    const catName = (prod.category || "").toLowerCase();
-
-    CATEGORIES.forEach((cat) => {
-      const targetId = cat.id.toLowerCase();
-      if (
-        catId === targetId ||
-        catName.includes(targetId) ||
-        (targetId === "masks" && (prod.isMask || catName.includes("mask")))
-      ) {
-        counts[cat.id] = (counts[cat.id] || 0) + 1;
-      }
-    });
+    const mappedId = prod.categoryId || mapCategoryToId(prod.category);
+    if (counts[mappedId] !== undefined) {
+      counts[mappedId] += 1;
+    } else {
+      counts["figures"] = (counts["figures"] || 0) + 1;
+    }
   });
 
   return counts;
@@ -77,7 +91,7 @@ export async function getProducts(options = {}) {
     reviewCount: p.reviewCount || p.salesCount || 12,
     reviewsCount: p.reviewsCount || p.salesCount || 12,
     category: p.category || 'Figures & Collectibles',
-    categoryId: (p.category || 'figures').toLowerCase().replace(/[\s&]+/g, ''),
+    categoryId: p.categoryId || mapCategoryToId(p.category),
     description: p.description || '',
     material: p.material || 'PLA Plus',
     isPopular: true,
