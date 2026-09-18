@@ -51,7 +51,7 @@ export const translations = {
     customBanner: {
       eyebrow: "CUSTOM PRINTING",
       title: "Custom 3D Printing",
-      description: "Send us your CAD file or idea and we will print it with precision.",
+      description: "Send us your 3D / STL file or idea and we will print it with precision.",
       cta: "Customize Order",
     },
     filamentsBanner: {
@@ -160,7 +160,7 @@ export const translations = {
     customBanner: {
       eyebrow: "طباعة مخصصة",
       title: "نفذ فكرتك 3D معنا",
-      description: "أرسل لنا ملفك أو فكرتك وسنقوم بطباعتها لك بدقة.",
+      description: "أرسل لنا ملف الـ 3D / STL أو فكرتك وسنقوم بطباعتها لك بدقة.",
       cta: "طلب تصميم خاص",
     },
     filamentsBanner: {

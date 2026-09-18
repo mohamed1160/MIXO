@@ -7,17 +7,26 @@ import { getSupabaseProducts } from './db.service';
 
 export const shopService = {
   getProducts: async ({ filters, sort, page = 1, limit = 12 }) => {
-    let allProducts = MOCK_PRODUCTS;
+    let allProducts = [];
 
     try {
       const supaProducts = await getSupabaseProducts();
       if (supaProducts && supaProducts.length > 0) {
-        const supaIds = new Set(supaProducts.map(p => String(p.id)));
-        const defaultRemain = MOCK_PRODUCTS.filter(p => !supaIds.has(String(p.id)));
-        allProducts = [...supaProducts, ...defaultRemain];
+        allProducts = supaProducts;
+      } else {
+        const saved = localStorage.getItem('MIXO_products');
+        if (saved) {
+          allProducts = JSON.parse(saved);
+        }
       }
     } catch (e) {
       console.warn('Supabase getProducts fallback in shopService:', e);
+      const saved = localStorage.getItem('MIXO_products');
+      if (saved) {
+        try {
+          allProducts = JSON.parse(saved);
+        } catch (err) {}
+      }
     }
 
     const normalizedProducts = allProducts.map((item) => ({

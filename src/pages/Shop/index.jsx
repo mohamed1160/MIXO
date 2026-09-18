@@ -87,8 +87,14 @@ export default function Shop() {
 
     fetchData();
 
+    const handleStorageChange = () => {
+      fetchData();
+    };
+    window.addEventListener('storage', handleStorageChange);
+
     return () => {
       isMounted = false;
+      window.removeEventListener('storage', handleStorageChange);
     };
   }, [filters, sort, page]);
 

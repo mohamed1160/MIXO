@@ -1,6 +1,7 @@
 import heroDragonImg from "../assets/images/3dprint/hero_dragon.jpg";
 import customVaseImg from "../assets/images/3dprint/custom_vase.jpg";
 import filamentImg from "../assets/images/3dprint/filament_spools.jpg";
+import { getSupabaseProducts } from './db.service';
 
 export const CATEGORIES = [
   { id: "figures", nameKey: "figures", icon: "🐉", defaultName: "Figures & Collectibles", arName: "مجسمات ومقتنيات" },
@@ -43,44 +44,49 @@ export function getCategoryCounts(products = MOCK_3D_PRODUCTS) {
 export async function getProducts(options = {}) {
   const { sort = "popular", limit = 6, category = null } = options;
   
-  let allProducts = [...MOCK_3D_PRODUCTS];
+  let rawProducts = [];
   try {
-    const customProds = localStorage.getItem('MIXO_products');
-    if (customProds) {
-      const parsed = JSON.parse(customProds);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        // Map stored products to format expected by shop
-        const mappedCustom = parsed.map(p => ({
-          id: p.id || `prod-${Math.random()}`,
-          title: p.name || p.title,
-          name: p.name || p.title,
-          image: p.image || p.images?.[0] || 'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=600&auto=format&fit=crop&q=80',
-          images: [p.image || p.images?.[0] || 'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=600&auto=format&fit=crop&q=80'],
-          price: p.price || 0,
-          originalPrice: p.originalPrice,
-          rating: p.rating || 4.9,
-          reviewCount: p.salesCount || p.reviewCount || 12,
-          reviewsCount: p.salesCount || p.reviewsCount || 12,
-          category: p.category || 'Figures & Collectibles',
-          categoryId: (p.category || 'figures').toLowerCase().replace(/\s+/g, ''),
-          description: p.description || '',
-          material: p.material || 'PLA Plus',
-          isPopular: true,
-          isBestSeller: true,
-          stock: p.inStock !== false ? 10 : 0,
-          inStock: p.inStock !== false
-        }));
-        
-        // Put custom products at top
-        const customIds = new Set(mappedCustom.map(c => c.id));
-        allProducts = [...mappedCustom, ...allProducts.filter(p => !customIds.has(p.id))];
+    const supaProds = await getSupabaseProducts();
+    if (supaProds && supaProds.length > 0) {
+      rawProducts = supaProds;
+    } else {
+      const customProds = localStorage.getItem('MIXO_products');
+      if (customProds) {
+        rawProducts = JSON.parse(customProds);
       }
     }
   } catch (e) {
-    console.error('Error reading MIXO_products in getProducts:', e);
+    console.error('Error reading products in getProducts:', e);
+    const customProds = localStorage.getItem('MIXO_products');
+    if (customProds) {
+      try {
+        rawProducts = JSON.parse(customProds);
+      } catch (err) {}
+    }
   }
 
-  let result = [...allProducts];
+  const mappedProducts = (rawProducts || []).map(p => ({
+    id: p.id || `prod-${Math.random()}`,
+    title: p.name || p.title,
+    name: p.name || p.title,
+    image: p.image || p.images?.[0] || 'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=600&auto=format&fit=crop&q=80',
+    images: p.images?.length ? p.images : [p.image || 'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=600&auto=format&fit=crop&q=80'],
+    price: Number(p.price) || 0,
+    originalPrice: p.originalPrice ? Number(p.originalPrice) : null,
+    rating: p.rating || 4.9,
+    reviewCount: p.reviewCount || p.salesCount || 12,
+    reviewsCount: p.reviewsCount || p.salesCount || 12,
+    category: p.category || 'Figures & Collectibles',
+    categoryId: (p.category || 'figures').toLowerCase().replace(/[\s&]+/g, ''),
+    description: p.description || '',
+    material: p.material || 'PLA Plus',
+    isPopular: true,
+    isBestSeller: true,
+    stock: p.inStock !== false ? 10 : 0,
+    inStock: p.inStock !== false
+  }));
+
+  let result = [...mappedProducts];
 
   if (category && category !== "All") {
     const targetCat = category.toLowerCase();

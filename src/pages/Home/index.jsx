@@ -33,19 +33,24 @@ export default function Home() {
   const [activeFaq, setActiveFaq] = useState(null);
   const [activeSlide, setActiveSlide] = useState(0);
 
-  useEffect(() => {
-    async function loadData() {
-      setIsLoading(true);
-      try {
-        const data = await getProducts({ sort: "popular", limit: 6 });
-        setProducts(data);
-      } catch (err) {
-        console.error("Failed to load popular products:", err);
-      } finally {
-        setIsLoading(false);
-      }
+  const loadData = async () => {
+    setIsLoading(true);
+    try {
+      const data = await getProducts({ sort: "popular", limit: 6 });
+      setProducts(data);
+    } catch (err) {
+      console.error("Failed to load popular products:", err);
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  useEffect(() => {
     loadData();
+
+    const handleStorageChange = () => loadData();
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const toggleFaq = (index) => {
