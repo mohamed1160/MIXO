@@ -227,8 +227,8 @@ export default function AdminSecurity() {
               disabled={isChangingPass}
               className="w-full py-3 bg-[#FF1F3D] hover:bg-[#D91832] disabled:opacity-50 text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#FF1F3D]/20 cursor-pointer mt-2"
             >
-              <Lock className="w-4 h-4" />
-              {isChangingPass ? 'جاري تحديث كلمة السر...' : 'حفظ كلمة السر الجديدة'}
+              <Lock className="w-4 h-4 text-white shrink-0" />
+              <span className="text-white font-bold">{isChangingPass ? 'جاري تحديث كلمة السر...' : 'حفظ كلمة السر الجديدة'}</span>
             </button>
           </form>
         </div>
@@ -302,10 +302,10 @@ export default function AdminSecurity() {
               <button
                 type="submit"
                 disabled={isUpdatingInfo}
-                className="w-full py-3 bg-gray-900 hover:bg-black dark:bg-[#1F2937] dark:hover:bg-[#374151] disabled:opacity-50 text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 transition-all cursor-pointer mt-2"
+                className="w-full py-3 bg-[#0B0F14] hover:bg-black dark:bg-[#1A2332] dark:hover:bg-[#26313D] disabled:opacity-50 text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 transition-all cursor-pointer mt-2 border border-gray-800"
               >
-                <Save className="w-4 h-4" />
-                {isUpdatingInfo ? 'جاري التحديث...' : 'تحديث البيانات الأساسية'}
+                <Save className="w-4 h-4 text-white shrink-0" />
+                <span className="text-white font-bold">{isUpdatingInfo ? 'جاري التحديث...' : 'تحديث البيانات الأساسية'}</span>
               </button>
             </form>
           </div>
