@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getSupabaseProducts, saveSupabaseProduct, deleteSupabaseProduct, upload3DFileToSupabase } from '../../../services/db.service';
+import { MOCK_PRODUCTS } from '../../../services/products';
 import {
   Search,
   Plus,
@@ -18,81 +19,6 @@ import {
   UploadCloud
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import heroDragonImg from '../../../assets/images/3dprint/hero_dragon.jpg';
-import customVaseImg from '../../../assets/images/3dprint/custom_vase.jpg';
-import filamentImg from '../../../assets/images/3dprint/filament_spools.jpg';
-import oniMaskImg from '../../../assets/images/3dprint/oni_mask.jpg';
-
-const INITIAL_PRODUCTS = [
-  {
-    id: 'prod-1',
-    name: 'تمثال التنين الخرافي 3D Articulated Dragon',
-    nameAr: 'تمثال التنين الخرافي 3D',
-    nameEn: 'Articulated 3D Dragon Figurine',
-    price: 450,
-    originalPrice: 550,
-    category: '3D Models',
-    categoryAr: 'مجسمات ومقتنيات',
-    categoryEn: 'Figures & Collectibles',
-    material: 'PLA Silk Dual Color',
-    image: heroDragonImg,
-    images: [heroDragonImg],
-    description: 'تمثال تنين مفصلي مطبوع بتقنية 3D دقيقة باستخدام فيلامينت مائي متغير الألوان.',
-    inStock: true,
-    salesCount: 34
-  },
-  {
-    id: 'prod-2',
-    name: 'فازة هندسية مدرجة Spiral Silk Vase',
-    nameAr: 'فازة حريرية هندسية 3D',
-    nameEn: 'Twisted Spiral Silk Vase 3D',
-    price: 280,
-    originalPrice: 350,
-    category: 'Home Decor',
-    categoryAr: 'ديكور منزل',
-    categoryEn: 'Home Decor',
-    material: 'Matte PLA',
-    image: customVaseImg,
-    images: [customVaseImg],
-    description: 'تحفة ديكور هندسية فائقة الجمال للديكور المودرن.',
-    inStock: true,
-    salesCount: 19
-  },
-  {
-    id: 'prod-3',
-    name: 'بكرة فيلامينت PLA High Toughness 1KG',
-    nameAr: 'بكرة فيلامينت PLA قوية 1KG',
-    nameEn: 'PLA High Toughness Filament 1KG',
-    price: 170,
-    originalPrice: 200,
-    category: 'Filaments',
-    categoryAr: 'خامات وفلامنت',
-    categoryEn: 'Filaments',
-    material: 'PLA Plus (1.75mm)',
-    image: filamentImg,
-    images: [filamentImg],
-    description: 'خامة فيلامينت عالية الجودة ومقاومة الصدمات للطابعات ثلاثية الأبعاد.',
-    inStock: true,
-    salesCount: 88
-  },
-  {
-    id: 'prod-4',
-    name: 'قناع أوني الساموراي السايبورغ Cyberpunk Oni Mask',
-    nameAr: 'قناع أوني الساموراي السايبورغ 3D',
-    nameEn: 'Cyberpunk Samurai Oni Mask 3D',
-    price: 650,
-    originalPrice: 780,
-    category: 'Masks & Wearables',
-    categoryAr: 'أقنعة وإكسسوارات',
-    categoryEn: 'Masks & Wearables',
-    material: 'PETG Carbon Fiber',
-    image: oniMaskImg,
-    images: [oniMaskImg],
-    description: 'قناع سايبورغ أوني بدقة طباعة عالية جداً للارتداء أو العرض على القاعدة.',
-    inStock: true,
-    salesCount: 42
-  }
-];
 
 export default function Products() {
   const [products, setProducts] = useState([]);
@@ -106,7 +32,7 @@ export default function Products() {
     name: '',
     price: '',
     originalPrice: '',
-    category: '3D Models',
+    category: 'Figures & Collectibles',
     material: 'PLA Plus',
     image: '',
     description: '',
@@ -114,16 +40,35 @@ export default function Products() {
   });
 
   const loadProducts = async () => {
-    const data = await getSupabaseProducts();
-    if (data && data.length > 0) {
-      setProducts(data);
-    } else {
-      setProducts(INITIAL_PRODUCTS);
+    try {
+      const supaData = await getSupabaseProducts();
+      if (supaData && supaData.length > 0) {
+        const supaIds = new Set(supaData.map((p) => String(p.id)));
+        const defaultRemain = MOCK_PRODUCTS.filter((p) => !supaIds.has(String(p.id)));
+        setProducts([...supaData, ...defaultRemain]);
+      } else {
+        const saved = localStorage.getItem('MIXO_products');
+        if (saved) {
+          const localList = JSON.parse(saved);
+          const localIds = new Set(localList.map((p) => String(p.id)));
+          const defaultRemain = MOCK_PRODUCTS.filter((p) => !localIds.has(String(p.id)));
+          setProducts([...localList, ...defaultRemain]);
+        } else {
+          setProducts(MOCK_PRODUCTS);
+        }
+      }
+    } catch (e) {
+      console.error(e);
+      setProducts(MOCK_PRODUCTS);
     }
   };
 
   useEffect(() => {
     loadProducts();
+
+    const handleStorageChange = () => loadProducts();
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const handleOpenAddModal = () => {
@@ -230,7 +175,18 @@ export default function Products() {
     return p.category === categoryFilter;
   });
 
-  const categories = ['All', '3D Models', 'Filaments', 'Home Decor', 'Accessories'];
+  const categories = [
+    'All',
+    'Figures & Collectibles',
+    'Masks & Wearables',
+    'Home Decor',
+    'Phone Stands',
+    'Tools & Functional',
+    'Vases & Art',
+    'Gaming & Cosplay',
+    'Filaments',
+    '3D Models',
+  ];
 
   return (
     <div className="p-4 md:p-6 space-y-6 text-gray-900 dark:text-white min-h-screen dir-rtl" style={{ fontFamily: 'Tajawal, sans-serif' }}>
@@ -427,10 +383,9 @@ export default function Products() {
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                     className="w-full bg-gray-50 dark:bg-[#1A2332] border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 text-xs text-gray-900 dark:text-white focus:outline-none focus:border-[#FF1F3D]"
                   >
-                    <option value="3D Models">3D Models</option>
-                    <option value="Filaments">Filaments</option>
-                    <option value="Home Decor">Home Decor</option>
-                    <option value="Accessories">Accessories</option>
+                    {categories.filter(c => c !== 'All').map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
                   </select>
                 </div>
 
