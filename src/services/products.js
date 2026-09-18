@@ -12,6 +12,8 @@ export const CATEGORIES = [
   { id: "vases", nameKey: "vases", icon: "🏺", defaultName: "Vases & Art", arName: "فازات وتحف فنية" },
   { id: "gaming", nameKey: "gaming", icon: "🎮", defaultName: "Gaming & Cosplay", arName: "ألعاب وإكسسوارات" },
   { id: "keychains", nameKey: "keychains", icon: "🔑", defaultName: "Keychains & Tags", arName: "ميداليات وإكسسوارات" },
+  { id: "filaments", nameKey: "filaments", icon: "🧶", defaultName: "Filaments", arName: "خامات وفيلـامينت" },
+  { id: "3d-models", nameKey: "3dModels", icon: "🧊", defaultName: "3D Models", arName: "موديلات 3D" },
 ];
 
 export const MOCK_3D_PRODUCTS = [];
@@ -29,7 +31,7 @@ export function mapCategoryToId(catName = "") {
   if (str.includes("game") || str.includes("gaming") || str.includes("cosplay") || str.includes("ألعاب") || str.includes("إكسسوارات")) return "gaming";
   if (str.includes("keychain") || str.includes("tag") || str.includes("ميداليات")) return "keychains";
   if (str.includes("filament") || str.includes("فيلـامينت") || str.includes("فيلامينت")) return "filaments";
-  if (str.includes("3d") || str.includes("model")) return "figures";
+  if (str.includes("3d") || str.includes("model") || str.includes("موديل")) return "3d-models";
 
   const found = CATEGORIES.find((c) => c.id === str);
   if (found) return found.id;

@@ -50,7 +50,11 @@ export default function Home() {
 
     const handleStorageChange = () => loadData();
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener('mixo_products_updated', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('mixo_products_updated', handleStorageChange);
+    };
   }, []);
 
   const toggleFaq = (index) => {

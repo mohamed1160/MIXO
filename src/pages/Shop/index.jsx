@@ -91,10 +91,12 @@ export default function Shop() {
       fetchData();
     };
     window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('mixo_products_updated', handleStorageChange);
 
     return () => {
       isMounted = false;
       window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('mixo_products_updated', handleStorageChange);
     };
   }, [filters, sort, page]);
 

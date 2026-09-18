@@ -216,6 +216,7 @@ export async function saveSupabaseProduct(product) {
   const updated = [product, ...existingList.filter(p => String(p.id) !== String(product.id))];
   localStorage.setItem('MIXO_products', JSON.stringify(updated));
   window.dispatchEvent(new Event('storage'));
+  window.dispatchEvent(new CustomEvent('mixo_products_updated'));
   return product;
 }
 
@@ -237,6 +238,7 @@ export async function deleteSupabaseProduct(productId) {
     const updated = existingList.filter(p => String(p.id) !== String(productId));
     localStorage.setItem('MIXO_products', JSON.stringify(updated));
     window.dispatchEvent(new Event('storage'));
+    window.dispatchEvent(new CustomEvent('mixo_products_updated'));
   }
 }
 

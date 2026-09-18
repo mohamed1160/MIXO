@@ -6,7 +6,7 @@ const defaultFilters = {
   category: "All",
   categories: [],
   minPrice: 0,
-  maxPrice: 1000,
+  maxPrice: 50000,
   inStock: false,
   outOfStock: false,
   sizes: [],

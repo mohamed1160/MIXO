@@ -101,6 +101,33 @@ export default function Products() {
     setIsModalOpen(true);
   };
 
+  const compressImage = (file, maxWidth = 800, quality = 0.7) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = () => resolve(e.target.result);
+        img.src = e.target.result;
+      };
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleProductImageUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -116,12 +143,11 @@ export default function Products() {
         setFormData((prev) => ({ ...prev, image: supaUrl }));
         toast.success("تم رفع صورة المنتج بنجاح إلى Supabase! 📷");
       } else {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setFormData((prev) => ({ ...prev, image: reader.result }));
+        const compressed = await compressImage(file);
+        if (compressed) {
+          setFormData((prev) => ({ ...prev, image: compressed }));
           toast.success("تم اختيار الصورة بنجاح! 📷");
-        };
-        reader.readAsDataURL(file);
+        }
       }
     } catch (err) {
       console.error(err);
@@ -135,15 +161,25 @@ export default function Products() {
       return;
     }
 
+    const defaultImg = 'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=600&auto=format&fit=crop&q=80';
     const prodObj = {
       id: editingProduct ? editingProduct.id : `prod-${Date.now()}`,
-      ...formData,
+      name: formData.name,
+      title: formData.name,
       price: parseFloat(formData.price),
-      originalPrice: formData.originalPrice ? parseFloat(formData.originalPrice) : null
+      originalPrice: formData.originalPrice ? parseFloat(formData.originalPrice) : null,
+      category: formData.category || 'Figures & Collectibles',
+      material: formData.material || 'PLA Plus',
+      image: formData.image || defaultImg,
+      images: [formData.image || defaultImg],
+      description: formData.description || '',
+      inStock: formData.inStock !== false,
+      stock: formData.inStock !== false ? 10 : 0
     };
 
     await saveSupabaseProduct(prodObj);
-    toast.success(editingProduct ? 'تم تعديل المنتج بنجاح بـ Supabase 🎉' : 'تم إضافة المنتج الجديد بنجاح 🎉');
+    window.dispatchEvent(new CustomEvent('mixo_products_updated'));
+    toast.success(editingProduct ? 'تم تعديل المنتج بنجاح 🎉' : 'تم إضافة المنتج الجديد بنجاح 🎉');
 
     setIsModalOpen(false);
     loadProducts();

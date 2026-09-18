@@ -100,8 +100,7 @@ export default function RecommendedProducts() {
     } catch (e) {
       console.error("Error loading products from dashboard localStorage:", e);
     }
-    // Fallback to default products
-    localStorage.setItem("MIXO_products", JSON.stringify(DEFAULT_3D_PRODUCTS));
+    // Fallback to default products without overwriting LocalStorage
     setProducts(DEFAULT_3D_PRODUCTS);
   };
 
