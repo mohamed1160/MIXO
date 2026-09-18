@@ -94,8 +94,10 @@ html[data-admin-theme="light"] .admin-content .bg-\[\#1C2530\] {
   border-color: #CBD5E1 !important;
 }
 
-html[data-admin-theme="light"] .admin-content .text-white {
-  color: #0F172A !important;
+html[data-admin-theme="light"] .admin-content button .text-white,
+html[data-admin-theme="light"] .admin-content button.text-white,
+html[data-admin-theme="light"] .admin-content .text-white-force {
+  color: #FFFFFF !important;
 }
 
 html[data-admin-theme="light"] .admin-content .text-gray-300,

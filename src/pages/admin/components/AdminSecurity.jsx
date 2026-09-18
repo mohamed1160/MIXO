@@ -225,10 +225,11 @@ export default function AdminSecurity() {
             <button
               type="submit"
               disabled={isChangingPass}
-              className="w-full py-3 bg-[#FF1F3D] hover:bg-[#D91832] disabled:opacity-50 text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#FF1F3D]/20 cursor-pointer mt-2"
+              className="w-full py-3 bg-[#FF1F3D] hover:bg-[#D91832] disabled:opacity-50 !text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#FF1F3D]/20 cursor-pointer mt-2"
+              style={{ color: '#ffffff' }}
             >
-              <Lock className="w-4 h-4 text-white shrink-0" />
-              <span className="text-white font-bold">{isChangingPass ? 'جاري تحديث كلمة السر...' : 'حفظ كلمة السر الجديدة'}</span>
+              <Lock className="w-4 h-4 shrink-0" style={{ color: '#ffffff' }} />
+              <span className="font-bold" style={{ color: '#ffffff' }}>{isChangingPass ? 'جاري تحديث كلمة السر...' : 'حفظ كلمة السر الجديدة'}</span>
             </button>
           </form>
         </div>
@@ -302,10 +303,11 @@ export default function AdminSecurity() {
               <button
                 type="submit"
                 disabled={isUpdatingInfo}
-                className="w-full py-3 bg-[#0B0F14] hover:bg-black dark:bg-[#1A2332] dark:hover:bg-[#26313D] disabled:opacity-50 text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 transition-all cursor-pointer mt-2 border border-gray-800"
+                className="w-full py-3 bg-[#0B0F14] hover:bg-black dark:bg-[#1A2332] dark:hover:bg-[#26313D] disabled:opacity-50 !text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 transition-all cursor-pointer mt-2 border border-gray-800"
+                style={{ color: '#ffffff' }}
               >
-                <Save className="w-4 h-4 text-white shrink-0" />
-                <span className="text-white font-bold">{isUpdatingInfo ? 'جاري التحديث...' : 'تحديث البيانات الأساسية'}</span>
+                <Save className="w-4 h-4 shrink-0" style={{ color: '#ffffff' }} />
+                <span className="font-bold" style={{ color: '#ffffff' }}>{isUpdatingInfo ? 'جاري التحديث...' : 'تحديث البيانات الأساسية'}</span>
               </button>
             </form>
           </div>
