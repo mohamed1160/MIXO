@@ -41,7 +41,7 @@ export const shopService = {
       categoryId: item.categoryId || mapCategoryToId(item.category),
       stock: item.inStock !== false ? 10 : 0,
       inStock: item.inStock !== false,
-      ratings: item.rating || item.ratings || 5,
+      ratings: item.rating || item.ratings || 0,
       numReviews: item.reviewCount || item.numReviews || 0,
       colors: item.colors || [],
       sizes: item.sizes || [],

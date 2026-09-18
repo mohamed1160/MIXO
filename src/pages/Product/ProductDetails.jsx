@@ -103,15 +103,12 @@ export default function ProductDetails() {
 
   if (!product) return null;
 
-  const currentScaleObj = SCALE_OPTIONS.find((s) => s.label === selectedScale) || SCALE_OPTIONS[1];
-  const finalPrice = Math.round((product.price || 29.99) * currentScaleObj.multiplier * 100) / 100;
+  const finalPrice = Number(product.price) || 0;
 
   const handleAddToCart = () => {
     addToCart({
       ...product,
       price: finalPrice,
-      selectedColor,
-      selectedScale,
       quantity,
     });
     toast.success(
@@ -219,9 +216,11 @@ export default function ProductDetails() {
               <div className="flex flex-wrap items-center gap-4 text-xs">
                 <div className="flex items-center gap-1 text-amber-400">
                   <Star size={16} className="fill-current" />
-                  <span className="font-bold text-gray-900 dark:text-white">{product.rating || 4.9}</span>
+                  <span className="font-bold text-gray-900 dark:text-white">
+                    {((product.reviewCount || product.reviewsCount || 0) + (userReviewCountAdd || 0)) > 0 ? (product.rating || 5.0) : 0}
+                  </span>
                   <span className="text-gray-500 dark:text-[#7F8A96]">
-                    ({(product.reviewCount || product.reviewsCount || 128) + (userReviewCountAdd || 0)} {isRTL ? 'تقييم' : 'reviews'})
+                    ({(product.reviewCount || product.reviewsCount || 0) + (userReviewCountAdd || 0)} {isRTL ? 'تقييم' : 'reviews'})
                   </span>
                 </div>
 
@@ -261,53 +260,7 @@ export default function ProductDetails() {
                   : 'High-precision 3D printed model created using state-of-the-art additive manufacturing with eco-friendly reinforced PLA+ filaments.')}
             </p>
 
-            {/* Color Swatches */}
-            <div className="space-y-2">
-              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300">
-                {isRTL ? 'اختر لون المجسم:' : 'Select Print Color:'} <span className="text-[#FF1F3D]">{selectedColor}</span>
-              </label>
-              <div className="flex items-center gap-3">
-                {COLOR_OPTIONS.map((c) => (
-                  <button
-                    key={c.name}
-                    onClick={() => setSelectedColor(c.name)}
-                    className={`w-8 h-8 rounded-full border-2 transition-all relative flex items-center justify-center ${
-                      selectedColor === c.name
-                        ? 'border-[#FF1F3D] scale-110 shadow-md shadow-red-600/30'
-                        : 'border-transparent hover:scale-105'
-                    }`}
-                    style={{ backgroundColor: c.colorCode }}
-                    title={c.name}
-                  >
-                    {selectedColor === c.name && (
-                      <span className="w-2 h-2 rounded-full bg-white shadow-xs" />
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
 
-            {/* Scale Options */}
-            <div className="space-y-2">
-              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300">
-                {isRTL ? 'حجم المجسم (Scale):' : 'Select Size Scale:'}
-              </label>
-              <div className="grid grid-cols-3 gap-2">
-                {SCALE_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.label}
-                    onClick={() => setSelectedScale(opt.label)}
-                    className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all ${
-                      selectedScale === opt.label
-                        ? 'bg-[#FF1F3D] text-white border-[#FF1F3D] shadow-md shadow-red-600/20'
-                        : 'bg-white dark:bg-[#0F151D] text-gray-700 dark:text-[#AAB4C0] border-gray-200 dark:border-[#1E2630] hover:border-gray-400'
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            </div>
 
             {/* Quantity Selector & Action Buttons */}
             <div className="space-y-4 pt-2">

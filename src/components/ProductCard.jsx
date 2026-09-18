@@ -22,7 +22,7 @@ export default function ProductCard({ product }) {
   const title = product.title || product.name;
   const image = product.image || (product.images && product.images[0]);
   const price = product.price;
-  const rating = product.rating || 4.8;
+  const rating = product.rating || null;
   const reviewCount = product.reviewCount || product.reviewsCount || 0;
   const category = product.category || "3D Print";
   const isMask = product.isMask || category.toLowerCase().includes("mask");
@@ -92,15 +92,17 @@ export default function ProductCard({ product }) {
           </h3>
 
           {/* Rating & Reviews */}
-          <div className="flex items-center gap-1 mt-1 text-[10px] sm:text-xs text-gray-500 dark:text-[#7F8A96]">
-            <div className="flex items-center text-amber-400">
-              <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-current" />
+          {(reviewCount > 0 || rating > 0) && (
+            <div className="flex items-center gap-1 mt-1 text-[10px] sm:text-xs text-gray-500 dark:text-[#7F8A96]">
+              <div className="flex items-center text-amber-400">
+                <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-current" />
+              </div>
+              <span className="font-semibold text-gray-800 dark:text-[#F5F7FA]">
+                {rating || 5.0}
+              </span>
+              <span>({reviewCount})</span>
             </div>
-            <span className="font-semibold text-gray-800 dark:text-[#F5F7FA]">
-              {rating}
-            </span>
-            <span>({reviewCount})</span>
-          </div>
+          )}
 
           {/* Price & Add to Cart Container */}
           <div className="mt-2 sm:mt-3 pt-1 sm:pt-2 flex flex-col gap-2">

@@ -34,10 +34,8 @@ export default function ProductCard({ product }) {
     setQuickViewOpen(true);
   };
 
-  // Deterministic rating & sold numbers per product
-  const idNum = product.id ? product.id.toString().split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) : 0;
-  const rating = product.rating || (4.5 + (idNum % 5) / 10).toFixed(1);
-  const sold = product.sold || product.reviewCount || (idNum % 150) + 20;
+  const rating = product.rating || null;
+  const sold = product.sold || product.reviewCount || product.salesCount || 0;
   
   const discountPercent = product.oldPrice 
     ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100) 
@@ -134,18 +132,20 @@ export default function ProductCard({ product }) {
           </h3>
 
           {/* Rating & Sold count */}
-          <div className="flex items-center gap-1.5 mb-3 text-xs">
-            <div className="flex text-amber-400 text-xs">
-              ★
+          {(sold > 0 || rating > 0) && (
+            <div className="flex items-center gap-1.5 mb-3 text-xs">
+              <div className="flex text-amber-400 text-xs">
+                ★
+              </div>
+              <span className="text-gray-700 dark:text-gray-300 font-bold">
+                {rating || 5.0}
+              </span>
+              <span className="text-gray-300 dark:text-gray-700">•</span>
+              <span className="text-gray-500 dark:text-gray-400 font-medium text-[11px]">
+                {sold} {isRTL ? "مُباع" : "Sold"}
+              </span>
             </div>
-            <span className="text-gray-700 dark:text-gray-300 font-bold">
-              {rating}
-            </span>
-            <span className="text-gray-300 dark:text-gray-700">•</span>
-            <span className="text-gray-500 dark:text-gray-400 font-medium text-[11px]">
-              {sold} {isRTL ? "مُباع" : "Sold"}
-            </span>
-          </div>
+          )}
 
           {/* Price & Actions */}
           <div className="mt-auto pt-2 border-t border-gray-100 dark:border-gray-800/60">
