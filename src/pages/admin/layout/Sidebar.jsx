@@ -13,6 +13,7 @@ import {
   Printer,
   Sparkles,
   HelpCircle,
+  ShieldCheck,
 } from "lucide-react";
 import { useAdminStore } from "../../../store/useAdminStore";
 import { useAuthStore } from "../../../store/useAuthStore";
@@ -25,6 +26,7 @@ const NAV_ITEMS = [
   { to: "/admin/customers", label: "Registered Customers", labelAr: "العملاء المسجلين", icon: Users },
   { to: "/admin/messages", label: "Messages & Requests", labelAr: "الرسائل والطلبات المخصصة", icon: MessageSquare },
   { to: "/admin/faqs", label: "Q&A / FAQs", labelAr: "الأسئلة الشائعة", icon: HelpCircle },
+  { to: "/admin/security", label: "Security & Passwords", labelAr: "أمان الحساب وكلمة السر", icon: ShieldCheck },
   { to: "/admin/settings", label: "Store Settings", labelAr: "إعدادات المتجر", icon: Settings },
 ];
 

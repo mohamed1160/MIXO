@@ -43,6 +43,7 @@ import Reports       from '../pages/admin/components/Reports'
 import AdminReviews  from '../pages/admin/components/Reviews'
 import Notifications from '../pages/admin/components/Notifications'
 import Settings      from '../pages/admin/components/Settings'
+import AdminSecurity  from '../pages/admin/components/AdminSecurity'
 import Messages      from '../pages/admin/components/Messages'
 import AdminFAQs     from '../pages/admin/components/FAQs'
 import FAQsPage      from '../pages/FAQs/FAQsPage'
@@ -148,6 +149,7 @@ export default function AppRouter() {
             <Route path="notifications" element={<Notifications />} />
             <Route path="messages"      element={<Messages />} />
             <Route path="faqs"          element={<AdminFAQs />} />
+            <Route path="security"      element={<AdminSecurity />} />
             <Route path="settings"      element={<Settings />} />
           </Route>
         </Routes>
