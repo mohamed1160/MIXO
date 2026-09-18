@@ -8,20 +8,7 @@ import {
   saveSupabaseNotification
 } from '../../../services/db.service';
 
-const INITIAL_MESSAGES = [
-  {
-    id: 'msg-1',
-    name: 'أحمد محمود',
-    email: 'ahmed@example.com',
-    phone: '01012345678',
-    subject: 'طلب تسعير طباعة مجسم مفصلي خاص 3D',
-    message: 'مرحباً، أريد طباعة هذا الموديل بحجم 25 سم باستخدام خامة PLA Silk باللون الذهبي الأسود. كم تكلفتها وميعاد التسليم؟',
-    link: 'https://makerworld.com/en/models/12345',
-    type: 'custom_quote',
-    status: 'unread',
-    date: '2026-09-15 14:30'
-  }
-];
+const INITIAL_MESSAGES = [];
 
 export default function Messages() {
   const [messages, setMessages] = useState([]);
@@ -32,7 +19,7 @@ export default function Messages() {
 
   const loadData = async () => {
     const data = await getSupabaseMessages();
-    setMessages(data && data.length > 0 ? data : INITIAL_MESSAGES);
+    setMessages(data || []);
   };
 
   useEffect(() => {

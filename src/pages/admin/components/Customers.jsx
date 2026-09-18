@@ -10,38 +10,8 @@ const INITIAL_CUSTOMERS = [
     phone: '01000000000',
     role: 'admin',
     joinedDate: '2026-08-15',
-    ordersCount: 14,
-    totalSpent: 6450
-  },
-  {
-    id: 'usr-2',
-    name: 'سارة علي',
-    email: 'sara.ali@example.com',
-    phone: '01123456789',
-    role: 'customer',
-    joinedDate: '2026-09-02',
-    ordersCount: 3,
-    totalSpent: 1250
-  },
-  {
-    id: 'usr-3',
-    name: 'عمر خالد',
-    email: 'omar.khalid@example.com',
-    phone: '01298765432',
-    role: 'customer',
-    joinedDate: '2026-09-08',
-    ordersCount: 5,
-    totalSpent: 2800
-  },
-  {
-    id: 'usr-4',
-    name: 'ياسمين ممدوح',
-    email: 'yasmin.m@example.com',
-    phone: '01511223344',
-    role: 'customer',
-    joinedDate: '2026-09-12',
-    ordersCount: 2,
-    totalSpent: 900
+    ordersCount: 0,
+    totalSpent: 0
   }
 ];
 

@@ -1,4 +1,4 @@
-﻿import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   Search,
   Filter,
@@ -20,130 +20,9 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { getAdminData } from '../../../services/adminMockData';
+import { getSupabaseProducts } from '../../../services/db.service';
 
-// Fallback rich inventory dataset if products array doesn't have reserved/detailed fields
-const INITIAL_INVENTORY = [
-  {
-    id: 'PRD-1001',
-    name: 'MIXO Pharaoh T-Shirt',
-    sku: 'AUR-TS-001',
-    category: 'T-Shirts',
-    price: 450,
-    stock: 45,
-    reserved: 8,
-    status: 'Active',
-    lastUpdated: 'May 31, 2024, 10:30 AM',
-    image: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=100&auto=format&fit=crop&q=80',
-  },
-  {
-    id: 'PRD-1002',
-    name: 'MIXO Ankh Polo',
-    sku: 'AUR-PL-002',
-    category: 'Polos',
-    price: 650,
-    stock: 12,
-    reserved: 3,
-    status: 'Active',
-    lastUpdated: 'May 31, 2024, 09:15 AM',
-    image: 'https://images.unsplash.com/photo-1581655353564-df123a1eb820?w=100&auto=format&fit=crop&q=80',
-  },
-  {
-    id: 'PRD-1003',
-    name: 'MIXO Scarab Hoodie',
-    sku: 'AUR-HD-003',
-    category: 'Hoodies',
-    price: 950,
-    stock: 0,
-    reserved: 0,
-    status: 'Active',
-    lastUpdated: 'May 30, 2024, 08:45 PM',
-    image: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=100&auto=format&fit=crop&q=80',
-  },
-  {
-    id: 'PRD-1004',
-    name: 'MIXO Horus Cap',
-    sku: 'AUR-CP-004',
-    category: 'Accessories',
-    price: 250,
-    stock: 37,
-    reserved: 5,
-    status: 'Active',
-    lastUpdated: 'May 30, 2024, 07:20 PM',
-    image: 'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=100&auto=format&fit=crop&q=80',
-  },
-  {
-    id: 'PRD-1005',
-    name: 'MIXO Premium Jacket',
-    sku: 'AUR-JK-005',
-    category: 'Jackets',
-    price: 1800,
-    stock: 6,
-    reserved: 2,
-    status: 'Active',
-    lastUpdated: 'May 30, 2024, 04:10 PM',
-    image: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=100&auto=format&fit=crop&q=80',
-  },
-  {
-    id: 'PRD-1006',
-    name: 'MIXO Bastet Sweatshirt',
-    sku: 'AUR-SW-006',
-    category: 'Sweatshirts',
-    price: 750,
-    stock: 28,
-    reserved: 4,
-    status: 'Active',
-    lastUpdated: 'May 29, 2024, 02:30 PM',
-    image: 'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=100&auto=format&fit=crop&q=80',
-  },
-  {
-    id: 'PRD-1007',
-    name: 'MIXO Sneaker Pro',
-    sku: 'AUR-SN-007',
-    category: 'Footwear',
-    price: 1400,
-    stock: 2,
-    reserved: 1,
-    status: 'Active',
-    lastUpdated: 'May 29, 2024, 01:05 PM',
-    image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=100&auto=format&fit=crop&q=80',
-  },
-  {
-    id: 'PRD-1008',
-    name: 'MIXO Tote Bag',
-    sku: 'AUR-BG-008',
-    category: 'Bags',
-    price: 350,
-    stock: 19,
-    reserved: 0,
-    status: 'Active',
-    lastUpdated: 'May 29, 2024, 11:50 AM',
-    image: 'https://images.unsplash.com/photo-1544816155-12df9643f363?w=100&auto=format&fit=crop&q=80',
-  },
-  {
-    id: 'PRD-1009',
-    name: 'MIXO Minimalist Polo',
-    sku: 'AUR-PL-009',
-    category: 'Polos',
-    price: 600,
-    stock: 15,
-    reserved: 2,
-    status: 'Active',
-    lastUpdated: 'May 28, 2024, 03:20 PM',
-    image: 'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=100&auto=format&fit=crop&q=80',
-  },
-  {
-    id: 'PRD-1010',
-    name: 'MIXO Urban Joggers',
-    sku: 'AUR-JG-010',
-    category: 'Pants',
-    price: 700,
-    stock: 4,
-    reserved: 1,
-    status: 'Active',
-    lastUpdated: 'May 27, 2024, 10:15 AM',
-    image: 'https://images.unsplash.com/photo-1552902865-b72c031ac5ea?w=100&auto=format&fit=crop&q=80',
-  },
-];
+const INITIAL_INVENTORY = [];
 
 export default function Inventory() {
   const [products, setProducts] = useState([]);
@@ -168,27 +47,32 @@ export default function Inventory() {
 
   // Initialize data
   useEffect(() => {
-    const adminData = getAdminData();
-    if (adminData.products && adminData.products.length > 0) {
-      const merged = adminData.products.map((p, idx) => {
-        const fallback = INITIAL_INVENTORY[idx % INITIAL_INVENTORY.length];
-        return {
-          id: p.id || fallback.id,
-          name: p.name || fallback.name,
-          sku: p.sku || fallback.sku,
-          category: p.category || fallback.category,
-          price: p.price || p.finalPrice || fallback.price,
-          stock: typeof p.stock === 'number' ? p.stock : fallback.stock,
-          reserved: fallback.reserved || Math.floor((p.stock || 10) * 0.15),
-          status: p.visible !== false ? 'Active' : 'Inactive',
-          lastUpdated: fallback.lastUpdated,
-          image: p.image || p.images?.[0] || fallback.image,
-        };
-      });
-      setProducts(merged);
-    } else {
-      setProducts(INITIAL_INVENTORY);
+    async function loadData() {
+      try {
+        const supaData = await getSupabaseProducts();
+        if (supaData && supaData.length > 0) {
+          const formatted = supaData.map((p, idx) => ({
+            id: p.id || `PRD-${idx + 1000}`,
+            name: p.name || p.title,
+            sku: `MX-${p.id ? String(p.id).slice(-4) : idx + 100}`,
+            category: p.category || '3D Print',
+            price: Number(p.price) || 0,
+            stock: p.inStock ? 10 : 0,
+            reserved: 0,
+            status: p.inStock !== false ? 'Active' : 'Inactive',
+            lastUpdated: 'اليوم',
+            image: p.image || p.images?.[0] || '',
+          }));
+          setProducts(formatted);
+        } else {
+          setProducts([]);
+        }
+      } catch (err) {
+        console.error(err);
+        setProducts([]);
+      }
     }
+    loadData();
   }, []);
 
   const triggerToast = (msg) => {

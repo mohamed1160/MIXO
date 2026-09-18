@@ -1,4 +1,4 @@
-﻿/* ═══════════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════
    MIXO Admin — Real-Time Live Statistics & Charts Service
    Calculates all dashboard metrics & charts dynamically from actual website data
    stored in localStorage (Registered Users, Live Orders, Messages, Points).
@@ -35,9 +35,15 @@ export const governorates = [
 ];
 
 export const categories = [
-  { id: 'CAT-001', name: 'Ancient', slug: 'ancient', icon: '🏺', status: 'Active', order: 1 },
-  { id: 'CAT-002', name: 'Polo', slug: 'polo', icon: '👕', status: 'Active', order: 2 },
-  { id: 'CAT-003', name: 'Modern', slug: 'modern', icon: '🧥', status: 'Active', order: 3 },
+  { id: 'CAT-001', name: 'Figures & Collectibles', slug: 'figures', icon: '🐉', status: 'Active', order: 1 },
+  { id: 'CAT-002', name: 'Masks & Wearables', slug: 'masks', icon: '🎭', status: 'Active', order: 2 },
+  { id: 'CAT-003', name: 'Home Decor', slug: 'decor', icon: '🪴', status: 'Active', order: 3 },
+  { id: 'CAT-004', name: 'Phone Stands', slug: 'stands', icon: '📱', status: 'Active', order: 4 },
+  { id: 'CAT-005', name: 'Tools & Functional', slug: 'tools', icon: '⚙️', status: 'Active', order: 5 },
+  { id: 'CAT-006', name: 'Vases & Art', slug: 'vases', icon: '🏺', status: 'Active', order: 6 },
+  { id: 'CAT-007', name: 'Gaming & Cosplay', slug: 'gaming', icon: '🎮', status: 'Active', order: 7 },
+  { id: 'CAT-008', name: 'Filaments', slug: 'filaments', icon: '🧶', status: 'Active', order: 8 },
+  { id: 'CAT-009', name: '3D Models', slug: '3d-models', icon: '🧊', status: 'Active', order: 9 },
 ];
 
 export const defaultSettings = {

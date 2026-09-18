@@ -35,52 +35,7 @@ const STATUS_CONFIG = {
   'Cancelled': { label: 'ملغي', bg: 'rgba(239, 68, 68, 0.15)', color: '#F87171', icon: XCircle },
 };
 
-// Fallback demo orders if localStorage is empty
-const INITIAL_DEMO_ORDERS = [
-  {
-    id: 'ORD-9482',
-    type: '3d_custom',
-    customer: { name: 'أحمد محمود', phone: '01012345678', address: 'القاهرة - المعادي - شارع 9' },
-    date: '2026-09-16 19:30',
-    total: 350,
-    status: 'Pending Quote',
-    paymentMethod: 'Vodafone Cash',
-    customData: {
-      url: 'https://makerworld.com/en/models/123456',
-      mask: '150 x 120 x 80 mm',
-      filament: 'PLA Plus (Black)',
-      notes: 'برجاء طباعة الجزء الداخلي بدقة 0.16mm ونسبة ملء 20%'
-    },
-    items: [
-      { id: 'custom-1', name: 'مجسم 3D مخصص (MakerWorld)', price: 350, quantity: 1 }
-    ]
-  },
-  {
-    id: 'ORD-9481',
-    type: 'standard',
-    customer: { name: 'سارة علي', phone: '01198765432', address: 'الجيزة - الدقي - ميدان المساحة' },
-    date: '2026-09-16 15:10',
-    total: 620,
-    status: 'Processing',
-    paymentMethod: 'InstaPay',
-    items: [
-      { id: 'p1', name: 'تمثال التنين الخرافي 3D', price: 450, quantity: 1 },
-      { id: 'p2', name: 'بكرة فيلامينت PLA Silk Gold 1kg', price: 170, quantity: 1 }
-    ]
-  },
-  {
-    id: 'ORD-9480',
-    type: 'standard',
-    customer: { name: 'عمر خالد', phone: '01234567890', address: 'الإسكندرية - سموحة' },
-    date: '2026-09-15 11:20',
-    total: 280,
-    status: 'Delivered',
-    paymentMethod: 'Cash on Delivery',
-    items: [
-      { id: 'p3', name: 'فازة هندسية مدرجة 3D', price: 280, quantity: 1 }
-    ]
-  }
-];
+const INITIAL_DEMO_ORDERS = [];
 
 export default function Orders() {
   const [orders, setOrders] = useState([]);
