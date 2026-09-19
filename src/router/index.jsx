@@ -110,7 +110,7 @@ export default function AppRouter() {
             {/* ── Commerce Pages ── */}
             <Route path="/cart"               element={<PageTransition><Cart /></PageTransition>} />
             <Route path="/custom-order"       element={<PageTransition><CustomOrderPage /></PageTransition>} />
-            <Route path="/checkout"           element={<ProtectedRoute><PageTransition><Checkout /></PageTransition></ProtectedRoute>} />
+            <Route path="/checkout"           element={<PageTransition><Checkout /></PageTransition>} />
             
             {/* Wishlist route */}
             <Route path="/wishlist"           element={<ProtectedRoute><PageTransition><Wishlist /></PageTransition></ProtectedRoute>} />

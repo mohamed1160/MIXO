@@ -6,7 +6,6 @@ import { useLanguage } from '../../providers/LanguageContext';
 
 import instapayIcon from '../../assets/icons/instapay-icon.png';
 import vodafoneIcon from '../../assets/icons/vodafoneCash-icon.png';
-import codIcon from '../../assets/icons/cashOnDelivery-icon.png';
 
 export default function PaymentMethods({ register, errors, watch, setValue, cart }) {
   const { isRTL } = useLanguage();
@@ -85,12 +84,6 @@ export default function PaymentMethods({ register, errors, watch, setValue, cart
       label: isRTL ? "فودافون كاش (Vodafone Cash)" : "Vodafone Cash",
       subtitle: isRTL ? "تحويل كاش مباشر للمحفظة" : "Direct wallet transfer",
       iconImg: vodafoneIcon,
-    },
-    {
-      id: "cod",
-      label: isRTL ? "الدفع عند الاستلام (COD)" : "Cash on Delivery",
-      subtitle: isRTL ? "الدفع نقداً لمندوب الشحن عند التسليم" : "Pay cash upon delivery",
-      iconImg: codIcon,
     },
   ];
 
@@ -284,22 +277,6 @@ export default function PaymentMethods({ register, errors, watch, setValue, cart
         </div>
       )}
 
-      {/* Cash on Delivery Notice */}
-      {selectedMethod === "cod" && (
-        <div className="bg-gray-50 dark:bg-[#1A2332] border border-gray-200 dark:border-gray-800 rounded-2xl p-4 flex items-start gap-3">
-          <Banknote className="text-amber-500 dark:text-yellow-400 mt-0.5 shrink-0" size={20} />
-          <div className="text-xs">
-            <p className="font-bold text-gray-900 dark:text-white mb-0.5">
-              {isRTL ? "الدفع نقداً عند استلام الشحنة (Cash on Delivery)" : "Cash on Delivery (COD)"}
-            </p>
-            <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-              {isRTL 
-                ? "سوف تقوم بدفع المبلغ كاش لمندوب التوصيل عند تسليمك الطرد ودون الحاجة لإيصال تحويل مسبق."
-                : "You will pay in cash directly to the courier upon delivery of your package."}
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -170,11 +170,7 @@ export default function OrderSummary({ subtotal }) {
       {/* Checkout Button */}
       <button
         onClick={() => {
-          if (isAuthenticated) {
-            navigate('/checkout');
-          } else {
-            navigate('/login', { state: { from: { pathname: '/checkout' } } });
-          }
+          navigate('/checkout');
         }}
         className="group w-full h-12 rounded-xl bg-[#FF1F3D] hover:bg-[#D91832] text-white flex items-center justify-center gap-2 font-extrabold text-xs tracking-wider uppercase transition-all duration-300 shadow-lg shadow-[#FF1F3D]/25 hover:scale-[1.01] active:scale-95"
       >

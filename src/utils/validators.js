@@ -14,7 +14,7 @@ export const checkoutSchema = z.object({
     postalCode: z.string().optional(),
     saveInfo: z.boolean().optional(),
   }),
-  paymentMethod: z.enum(["instapay", "vodafone", "cod"], {
+  paymentMethod: z.enum(["instapay", "vodafone"], {
     errorMap: () => ({ message: "رجاء اختيار طريقة الدفع / Please select a payment method" }),
   }),
   transferReceipt: z.string().optional(),
