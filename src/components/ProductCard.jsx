@@ -21,7 +21,10 @@ export default function ProductCard({ product }) {
   const id = product.id;
   const title = product.title || product.name;
   const image = product.image || (product.images && product.images[0]);
-  const price = product.price;
+  const price = Number(product.price) || 0;
+  const originalPrice = (product.originalPrice || product.oldPrice) ? Number(product.originalPrice || product.oldPrice) : null;
+  const hasDiscount = originalPrice && originalPrice > price;
+  const discountPercent = hasDiscount ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
   const rating = product.rating || null;
   const reviewCount = product.reviewCount || product.reviewsCount || 0;
   const category = product.category || "3D Print";
@@ -67,6 +70,13 @@ export default function ProductCard({ product }) {
             loading="lazy"
           />
 
+          {/* Discount Badge */}
+          {hasDiscount && (
+            <div className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-[#FF1F3D] text-white text-[10px] sm:text-xs font-extrabold px-2 py-0.5 rounded-md shadow-md z-10">
+              -{discountPercent}%
+            </div>
+          )}
+
           {/* Floating Heart Button */}
           <button
             onClick={handleWishlistClick}
@@ -87,7 +97,7 @@ export default function ProductCard({ product }) {
             {category}
           </span>
 
-          <h3 className="font-bold text-xs sm:text-base text-gray-900 dark:text-[#F5F7FA] line-clamp-1 group-hover:text-black dark:group-hover:text-white transition-colors">
+          <h3 className="font-bold text-xs sm:text-base text-gray-900 dark:text-[#F5F7FA] line-clamp-1 group-hover:text-[#FF1F3D] transition-colors">
             {title}
           </h3>
 
@@ -106,8 +116,15 @@ export default function ProductCard({ product }) {
 
           {/* Price & Add to Cart Container */}
           <div className="mt-2 sm:mt-3 pt-1 sm:pt-2 flex flex-col gap-2">
-            <div className="font-bold text-xs sm:text-lg text-gray-900 dark:text-white tracking-tight">
-              ${Number(price).toFixed(2)}
+            <div className="flex items-baseline gap-1.5 flex-wrap">
+              <span className="font-extrabold text-sm sm:text-lg text-[#FF1F3D] tracking-tight">
+                {price.toLocaleString('en-US')} {isRTL ? "ج.م" : "EGP"}
+              </span>
+              {hasDiscount && (
+                <span className="text-[10px] sm:text-xs text-gray-400 dark:text-[#7F8A96] line-through font-semibold">
+                  {originalPrice.toLocaleString('en-US')} {isRTL ? "ج.م" : "EGP"}
+                </span>
+              )}
             </div>
 
             <button

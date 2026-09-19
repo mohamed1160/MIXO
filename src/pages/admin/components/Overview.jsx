@@ -184,7 +184,7 @@ export default function Overview() {
             </div>
           </div>
           <div>
-            <p className="text-2xl font-extrabold text-gray-900 dark:text-white">${totalSales.toFixed(2)}</p>
+            <p className="text-2xl font-extrabold text-gray-900 dark:text-white">{totalSales.toFixed(2)} ج.م</p>
             <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 mt-1 inline-block flex items-center gap-1">
               <TrendingUp size={13} />
               <span>Realtime Supabase Sync</span>
@@ -381,7 +381,7 @@ export default function Overview() {
                       {ord.createdAt ? new Date(ord.createdAt).toLocaleDateString() : ord.date || "Recent"}
                     </td>
                     <td className="py-3.5 px-4 font-extrabold text-[#FF1F3D]">
-                      {ord.total > 0 ? `$${Number(ord.total).toFixed(2)}` : (isRTL ? "قيد التسعير" : "Quote Pending")}
+                      {ord.total > 0 ? `${Number(ord.total).toFixed(2)} ج.م` : (isRTL ? "قيد التسعير" : "Quote Pending")}
                     </td>
                     <td className="py-3.5 px-4">
                       <span className="inline-block px-3 py-1 rounded-full text-[10px] font-bold border bg-red-500/10 text-[#FF1F3D] border-[#FF1F3D]/20">

@@ -37,7 +37,17 @@ export default function ProductDetails() {
 
   const [product, setProduct] = useState(null);
   const [selectedImage, setSelectedImage] = useState('');
-  const [selectedColor, setSelectedColor] = useState('Silk Red');
+  const [selectedColors, setSelectedColors] = useState([]);
+  const [colorError, setColorError] = useState(false);
+
+  const toggleColor = (colorName) => {
+    setColorError(false);
+    setSelectedColors((prev) =>
+      prev.includes(colorName)
+        ? prev.filter((c) => c !== colorName)
+        : [...prev, colorName]
+    );
+  };
   const [selectedScale, setSelectedScale] = useState('100% (Standard)');
   const [quantity, setQuantity] = useState(1);
   const [relatedProducts, setRelatedProducts] = useState([]);
@@ -90,11 +100,16 @@ export default function ProductDetails() {
   };
 
   const COLOR_OPTIONS = [
-    { name: 'Silk Red', colorCode: '#FF1F3D' },
-    { name: 'Matte Black', colorCode: '#0F151D' },
-    { name: 'Pure White', colorCode: '#F8FAFC' },
-    { name: 'Cyber Gold', colorCode: '#F59E0B' },
-    { name: 'Emerald Green', colorCode: '#10B981' },
+    { name: isRTL ? 'بيج' : 'Beige', colorCode: '#E5D3B3' },
+    { name: isRTL ? 'أبيض' : 'White', colorCode: '#FFFFFF' },
+    { name: isRTL ? 'أسود' : 'Black', colorCode: '#000000' },
+    { name: isRTL ? 'أحمر' : 'Red', colorCode: '#FF1F3D' },
+    { name: isRTL ? 'أصفر' : 'Yellow', colorCode: '#EAB308' },
+    { name: isRTL ? 'أخضر' : 'Green', colorCode: '#22C55E' },
+    { name: isRTL ? 'رمادي' : 'Grey', colorCode: '#6B7280' },
+    { name: isRTL ? 'أزرق' : 'Blue', colorCode: '#3B82F6' },
+    { name: isRTL ? 'بينك' : 'Pink', colorCode: '#EC4899' },
+    { name: isRTL ? 'بني' : 'Brown', colorCode: '#8B4513' },
   ];
 
   const SCALE_OPTIONS = [
@@ -161,7 +176,25 @@ export default function ProductDetails() {
 
   if (!product) return null;
 
+  const checkColorSelected = () => {
+    if (!selectedColors || selectedColors.length === 0) {
+      setColorError(true);
+      toast.error(
+        isRTL
+          ? '⚠️ يرجى اختيار لون واحد على الأقل للمجسم!'
+          : '⚠️ Please select at least one color!'
+      );
+      return false;
+    }
+    return true;
+  };
+
+  const activeColorValue = selectedColors.join(' + ');
+
   const handleAddToCart = () => {
+    if (!checkColorSelected()) return;
+    setColorError(false);
+
     if (isMask) {
       setPendingBuyNow(false);
       setIsMaskModalOpen(true);
@@ -169,17 +202,21 @@ export default function ProductDetails() {
     }
     addToCart({
       ...product,
+      color: activeColorValue,
       price: finalPrice,
       quantity,
     });
     toast.success(
       isRTL
-        ? `تمت إضافة (${product.title || product.name}) إلى السلة 🚀`
-        : `Added ${product.title || product.name} to cart 🚀`
+        ? `تمت إضافة (${product.title || product.name}) بلون (${activeColorValue}) إلى السلة 🚀`
+        : `Added ${product.title || product.name} (${activeColorValue}) to cart 🚀`
     );
   };
 
   const handleBuyNow = () => {
+    if (!checkColorSelected()) return;
+    setColorError(false);
+
     if (isMask) {
       setPendingBuyNow(true);
       setIsMaskModalOpen(true);
@@ -332,7 +369,67 @@ export default function ProductDetails() {
                   : 'High-precision 3D printed model created using state-of-the-art additive manufacturing with eco-friendly reinforced PLA+ filaments.')}
             </p>
 
+            {/* Mandatory Color Selection Section */}
+            <div className={`p-4 rounded-2xl border transition-all space-y-3 ${
+              colorError
+                ? 'bg-red-500/10 border-red-500 ring-2 ring-red-500/30 animate-pulse'
+                : 'bg-white dark:bg-[#0F151D] border-gray-200 dark:border-[#1E2630]'
+            }`}>
+              <div className="flex items-center justify-between gap-2">
+                <label className="text-xs font-extrabold text-gray-900 dark:text-white flex items-center gap-1.5">
+                  <span>{isRTL ? "تحديد ألوان الـ 3D المطلوبة:" : "Select 3D Color(s):"}</span>
+                  <span className="text-[#FF1F3D] font-bold text-[11px]">* ({isRTL ? "يمكن تحديد أكثر من لون" : "Multi-select supported"})</span>
+                </label>
+                {activeColorValue ? (
+                  <span className="text-xs font-bold text-[#FF1F3D] bg-red-500/10 px-2.5 py-0.5 rounded-full border border-[#FF1F3D]/30 max-w-[220px] truncate">
+                    {activeColorValue}
+                  </span>
+                ) : (
+                  <span className="text-[11px] font-bold text-amber-500 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/30">
+                    {isRTL ? "اختر لوناً أو أكثر" : "Select one or more colors"}
+                  </span>
+                )}
+              </div>
 
+              <div className="flex flex-wrap gap-2">
+                {COLOR_OPTIONS.map((c) => {
+                  const isSelected = selectedColors.includes(c.name);
+                  return (
+                    <button
+                      key={c.name}
+                      type="button"
+                      onClick={() => toggleColor(c.name)}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+                        isSelected
+                          ? "bg-[#FF1F3D] text-white border-[#FF1F3D] shadow-md shadow-red-500/20 scale-105 ring-2 ring-red-500/40"
+                          : "bg-gray-50 dark:bg-[#151C24] text-gray-700 dark:text-[#AAB4C0] border-gray-200 dark:border-[#26313D] hover:border-gray-400"
+                      }`}
+                    >
+                      <span
+                        className={`w-3.5 h-3.5 rounded-full border shrink-0 shadow-xs flex items-center justify-center ${
+                          c.colorCode === '#FFFFFF' ? 'border-gray-400' : 'border-black/20'
+                        }`}
+                        style={{ backgroundColor: c.colorCode }}
+                      >
+                        {isSelected && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-white shadow-xs" />
+                        )}
+                      </span>
+                      <span>{c.name}</span>
+                      {isSelected && (
+                        <span className="text-[10px] bg-white/25 px-1.5 py-0.2 rounded-md font-extrabold">✓</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {colorError && (
+                <p className="text-[11px] font-bold text-red-500 flex items-center gap-1 pt-1">
+                  <span>⚠️ {isRTL ? "يرجى اختيار لون واحد على الأقل للمجسم أولاً." : "Please select at least one color for the product."}</span>
+                </p>
+              )}
+            </div>
 
             {/* Quantity Selector & Action Buttons */}
             <div className="space-y-4 pt-2">

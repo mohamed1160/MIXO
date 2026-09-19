@@ -148,10 +148,10 @@ export default function Profile() {
 
         {/* Total Spent */}
         <div className="bg-gray-50 dark:bg-[#151C24] p-5 rounded-2xl border border-gray-100 dark:border-[#26313D] flex flex-col items-center text-center shadow-xs">
-          <div className="w-10 h-10 rounded-full bg-white dark:bg-[#0F151D] text-[#FF1F3D] flex items-center justify-center mb-2 shadow-xs font-bold text-base">
-            $
+          <div className="w-10 h-10 rounded-full bg-white dark:bg-[#0F151D] text-[#FF1F3D] flex items-center justify-center mb-2 shadow-xs font-bold text-xs">
+            ج.م
           </div>
-          <p className="text-xl font-extrabold text-gray-900 dark:text-white">${totalSpentAmount.toFixed(2)}</p>
+          <p className="text-xl font-extrabold text-gray-900 dark:text-white">{totalSpentAmount.toFixed(2)} ج.م</p>
           <span className="text-xs font-bold text-gray-700 dark:text-[#AAB4C0] mt-0.5">
             {isRTL ? "إجمالي المشتروات" : "Total Spent"}
           </span>

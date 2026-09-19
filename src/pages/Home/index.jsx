@@ -39,8 +39,22 @@ export default function Home() {
   const loadData = async () => {
     setIsLoading(true);
     try {
-      const data = await getProducts({ sort: "popular", limit: 6 });
-      setProducts(data);
+      const allData = await getProducts({ sort: "popular", limit: 30 });
+
+      // Separate mask products and non-mask products
+      const masks = allData.filter((p) =>
+        p.isMask ||
+        (p.category && p.category.toLowerCase().includes("mask")) ||
+        (p.categoryId && p.categoryId.toLowerCase().includes("mask"))
+      );
+      const nonMasks = allData.filter((p) => !masks.includes(p));
+
+      // Put top 4 mask products first, followed by non-masks
+      const firstFourMasks = masks.slice(0, 4);
+      const remainingMasks = masks.slice(4);
+      const ordered = [...firstFourMasks, ...nonMasks, ...remainingMasks].slice(0, 8);
+
+      setProducts(ordered);
     } catch (err) {
       console.error("Failed to load popular products:", err);
     } finally {
@@ -138,42 +152,42 @@ export default function Home() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="relative rounded-2xl sm:rounded-3xl bg-gradient-to-br from-[#1E293B] via-[#16202E] to-[#2A1D2D] text-white p-5 sm:p-10 lg:p-12 overflow-hidden shadow-xl border border-slate-700/50 dark:border-slate-700/60"
+          className="relative rounded-2xl sm:rounded-3xl bg-gradient-to-br from-[#1E293B] via-[#16202E] to-[#2A1D2D] text-white p-3.5 sm:p-10 lg:p-12 overflow-hidden shadow-xl border border-slate-700/50 dark:border-slate-700/60"
         >
           {/* Subtle Ambient Red Glow */}
           <div className="absolute top-0 right-0 w-96 h-96 bg-[#FF1F3D]/20 blur-3xl rounded-full pointer-events-none" />
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-8 items-center relative z-10">
             {/* Hero Content */}
             <div className="lg:col-span-7 flex flex-col items-start">
-              <span className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[#FF1F3D] mb-2 sm:mb-3 bg-[#FF1F3D]/15 px-3 py-1 rounded-full border border-[#FF1F3D]/30">
+              <span className="inline-flex items-center gap-1 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[#FF1F3D] mb-1.5 sm:mb-3 bg-[#FF1F3D]/15 px-2.5 py-0.5 rounded-full border border-[#FF1F3D]/30">
                 <Sparkles className="w-3 h-3" />
                 <span>{isRTL ? "طباعة ثلاثية الأبعاد مخصصة" : "CUSTOM 3D PRINTING"}</span>
               </span>
 
-              <h1 className="text-2xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight text-white">
+              <h1 className="text-xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-snug sm:leading-tight text-white">
                 {isRTL ? "حول أفكارك إلى " : "Turn Your Ideas Into "}
                 <br className="hidden sm:inline" />
                 <span className="text-[#FF1F3D]">{isRTL ? "منتجات حقيقية." : "Real Products."}</span>
               </h1>
 
-              <p className="mt-2 sm:mt-4 text-xs sm:text-base text-slate-200 max-w-lg leading-relaxed font-normal">
+              <p className="mt-1 sm:mt-4 text-[11px] sm:text-base text-slate-200 max-w-lg leading-relaxed font-normal">
                 {isRTL
                   ? "منتجات طباعة ثلاثية الأبعاد عالية الجودة مصممة خصيصاً لك."
                   : "Premium 3D printed products made for you."}
               </p>
 
               {/* Action Buttons */}
-              <div className="mt-5 sm:mt-8 flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
+              <div className="mt-3 sm:mt-8 flex items-center gap-2.5 sm:gap-4 w-full sm:w-auto">
                 <Link to="/shop" className="flex-1 sm:flex-initial">
-                  <button className="w-full bg-white hover:bg-slate-100 text-slate-950 font-extrabold px-5 py-3 sm:px-7 sm:py-3.5 rounded-full text-xs sm:text-base transition-all duration-300 shadow-lg hover:scale-105 active:scale-95 flex items-center justify-center gap-2">
+                  <button className="w-full bg-white hover:bg-slate-100 text-slate-950 font-extrabold px-4 py-2.5 sm:px-7 sm:py-3.5 rounded-full text-xs sm:text-base transition-all duration-300 shadow-lg hover:scale-105 active:scale-95 flex items-center justify-center gap-1.5">
                     <span>{isRTL ? "تسوق الآن" : "Shop Now"}</span>
                     {isRTL ? <ArrowLeft className="w-4 h-4 text-slate-950" /> : <ArrowRight className="w-4 h-4 text-slate-950" />}
                   </button>
                 </Link>
 
                 <Link to="/custom-order" className="flex-1 sm:flex-initial">
-                  <button className="w-full bg-white/10 hover:bg-white/20 text-white font-semibold px-5 py-3 sm:px-7 sm:py-3.5 rounded-full text-xs sm:text-base border border-white/25 hover:border-white/50 transition-all duration-300 backdrop-blur-sm active:scale-95 flex items-center justify-center gap-2">
+                  <button className="w-full bg-white/10 hover:bg-white/20 text-white font-semibold px-4 py-2.5 sm:px-7 sm:py-3.5 rounded-full text-xs sm:text-base border border-white/25 hover:border-white/50 transition-all duration-300 backdrop-blur-sm active:scale-95 flex items-center justify-center gap-1.5">
                     <PenTool className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#FF1F3D]" />
                     <span>{isRTL ? "تصميم خاص" : "Custom Design"}</span>
                   </button>
@@ -181,29 +195,29 @@ export default function Home() {
               </div>
 
               {/* Feature Badges under Hero */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 sm:mt-10 pt-4 sm:pt-6 border-t border-white/15 w-full text-[11px] sm:text-xs text-slate-200">
-                <div className="flex items-center gap-2">
-                  <Box className="w-4 h-4 text-[#FF1F3D] flex-shrink-0" />
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mt-3.5 sm:mt-10 pt-2.5 sm:pt-6 border-t border-white/15 w-full text-[10px] sm:text-xs text-slate-200">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <Box className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#FF1F3D] flex-shrink-0" />
                   <span className="font-medium">{isRTL ? "خامات فائقة" : "High Quality"}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Truck className="w-4 h-4 text-[#FF1F3D] flex-shrink-0" />
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <Truck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#FF1F3D] flex-shrink-0" />
                   <span className="font-medium">{isRTL ? "شحن سريع" : "Fast Shipping"}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Package className="w-4 h-4 text-[#FF1F3D] flex-shrink-0" />
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <Package className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#FF1F3D] flex-shrink-0" />
                   <span className="font-medium">{isRTL ? "طلب خاص" : "Custom Orders"}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Headphones className="w-4 h-4 text-[#FF1F3D] flex-shrink-0" />
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <Headphones className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#FF1F3D] flex-shrink-0" />
                   <span className="font-medium">{isRTL ? "دعم متواصل" : "24/7 Support"}</span>
                 </div>
               </div>
             </div>
 
             {/* Hero Right Visual */}
-            <div className="lg:col-span-5 relative flex items-center justify-center mt-2 lg:mt-0">
-              <div className="relative w-full aspect-4/3 sm:aspect-square lg:aspect-4/3 rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl border border-white/15 group">
+            <div className="lg:col-span-5 relative flex items-center justify-center mt-1 lg:mt-0">
+              <div className="relative w-full aspect-16/9 sm:aspect-square lg:aspect-4/3 max-h-44 sm:max-h-none rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl border border-white/15 group">
                 <img
                   src={heroDragonImg}
                   alt="3D Printed Dragon Figurine"
@@ -349,8 +363,8 @@ export default function Home() {
 
               <p className="text-xs sm:text-sm text-slate-200 max-w-md leading-relaxed font-normal">
                 {isRTL
-                  ? "أرسل لنا فكرتك أو ملف الـ 3D وسنقوم بطباعتها بدقة فائقة وتوصيلها لك."
-                  : "Send us your idea or 3D file and we'll print it with high precision."}
+                  ? "أرسل لنا فكرتك أو ملف الـ 3D/STL وسنقوم بطباعتها بدقة فائقة وتوصيلها لك."
+                  : "Send us your idea or 3D/STL file and we'll print it with high precision."}
               </p>
 
               <div className="pt-2">

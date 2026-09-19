@@ -130,7 +130,7 @@ export default function AccountOrders() {
         <div className="flex flex-col gap-5">
           {filteredOrders.map((ord) => {
             const status = ord.orderStatus || ord.status || "Processing";
-            const totalDisplay = ord.total > 0 ? `$${Number(ord.total).toFixed(2)}` : (isRTL ? "في انتظار التسعير" : "Quote Pending");
+            const totalDisplay = ord.total > 0 ? `${Number(ord.total).toFixed(2)} ج.م` : (isRTL ? "في انتظار التسعير" : "Quote Pending");
 
             return (
               <div
@@ -204,7 +204,7 @@ export default function AccountOrders() {
                       </div>
 
                       <div className="sm:text-right font-extrabold text-gray-900 dark:text-white text-sm">
-                        {item.price > 0 ? `$${(item.price * (item.quantity || 1)).toFixed(2)}` : (isRTL ? "قيد التسعير" : "Quote Pending")}
+                        {item.price > 0 ? `${(item.price * (item.quantity || 1)).toFixed(2)} ج.م` : (isRTL ? "قيد التسعير" : "Quote Pending")}
                       </div>
                     </div>
                   ))}

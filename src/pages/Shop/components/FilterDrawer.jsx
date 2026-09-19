@@ -160,7 +160,7 @@ export default function FilterDrawer() {
               {/* Price Range */}
               <div className="space-y-3 pt-3 border-t border-gray-100 dark:border-[#1E2630]">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-gray-800 dark:text-[#F5F7FA]">
-                  {isRTL ? "نطاق السعر ($)" : "Price Range ($)"}
+                  {isRTL ? "نطاق السعر (ج.م)" : "Price Range (EGP)"}
                 </h3>
                 <div className="grid grid-cols-2 gap-2 items-center">
                   <div>
