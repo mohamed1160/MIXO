@@ -10,4 +10,4 @@ Disallow: /forgot-password
 Disallow: /wishlist
 Disallow: /track-order
 
-Sitemap: https://mixo3d.com/sitemap.xml
+Sitemap: https://mixo-one.vercel.app/sitemap.xml
