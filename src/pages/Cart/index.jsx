@@ -6,11 +6,16 @@ import CartItem from "./components/CartItem";
 import OrderSummary from "./components/OrderSummary";
 import EmptyCart from "./components/EmptyCart";
 import RecommendedProducts from "./components/RecommendedProducts";
+import { useSEO } from "../../hooks/useSEO";
 
 import cartHeroImg from "../../assets/images/3dprint/cart_hero_3d.jpg";
 
 export default function Cart() {
   const { isRTL } = useLanguage();
+
+  // ── SEO (noindex) ──
+  useSEO({ noindex: true });
+
   const cart = useShopStore((state) => state.cart) || [];
   
   // Filter out any invalid items

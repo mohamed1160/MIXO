@@ -2,9 +2,13 @@ import React from 'react';
 import { Truck, Clock, ShieldCheck, MapPin, Sparkles, CheckCircle2, Box } from 'lucide-react';
 import { useLanguage } from '../../providers/LanguageContext';
 import { GOVERNORATE_RATES } from '../../utils/shippingRates';
+import { useSEO } from '../../hooks/useSEO';
 
 export default function ShippingDeliveryPage() {
   const { isRTL } = useLanguage();
+
+  // ── SEO ──
+  useSEO();
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#070B10] text-gray-900 dark:text-white pt-28 pb-20 px-4 sm:px-6 lg:px-8 font-sans transition-colors duration-200">

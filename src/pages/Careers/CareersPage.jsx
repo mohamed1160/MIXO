@@ -1,9 +1,13 @@
 import React from 'react';
 import { Sparkles, Users, Send, Box, ArrowRight, ArrowLeft } from 'lucide-react';
 import { useLanguage } from '../../providers/LanguageContext';
+import { useSEO } from '../../hooks/useSEO';
 
 export default function CareersPage() {
   const { isRTL } = useLanguage();
+
+  // ── SEO ──
+  useSEO();
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#070B10] text-gray-900 dark:text-white pt-28 pb-20 px-4 sm:px-6 lg:px-8 font-sans transition-colors duration-200">

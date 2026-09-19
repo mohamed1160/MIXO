@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { getFAQs, faqCategories } from '../../services/faq.service';
 import { useLanguage } from '../../providers/LanguageContext';
+import { useSEO } from '../../hooks/useSEO';
 
 export default function FAQsPage() {
   const [faqs, setFaqs] = useState([]);
@@ -22,6 +23,9 @@ export default function FAQsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [openFaqId, setOpenFaqId] = useState(null);
   const { isRTL } = useLanguage();
+
+  // ── SEO ──
+  useSEO();
 
   useEffect(() => {
     // Load active FAQs from service (synced with admin dashboard)

@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, RotateCcw, Star, Check } from "lucide-react";
 import { useShopStore } from "../../../store/useShopStore";
 import { useLanguage } from "../../../providers/LanguageContext";
-import { CATEGORIES } from "../../../services/products";
+import { getAllCategories, getCategoryCounts } from "../../../services/products";
+import { getSupabaseProducts } from "../../../services/db.service";
 
 export default function FilterDrawer() {
   const { isRTL } = useLanguage();
@@ -14,6 +15,39 @@ export default function FilterDrawer() {
   const resetFilters = useShopStore((state) => state.resetFilters);
 
   const [localFilters, setLocalFilters] = useState(filters);
+  const [categoriesList, setCategoriesList] = useState(() => getAllCategories());
+  const [countsMap, setCountsMap] = useState({});
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadCounts = async () => {
+      try {
+        let prods = [];
+        const supa = await getSupabaseProducts();
+        if (supa && supa.length > 0) {
+          prods = supa;
+        } else {
+          const saved = localStorage.getItem('MIXO_products');
+          if (saved) {
+            prods = JSON.parse(saved);
+          }
+        }
+        if (isMounted) {
+          setCategoriesList(getAllCategories());
+          setCountsMap(getCategoryCounts(prods));
+        }
+      } catch (e) {
+        console.error("Error loading category counts in drawer:", e);
+      }
+    };
+
+    if (isDrawerOpen) {
+      loadCounts();
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [isDrawerOpen]);
 
   useEffect(() => {
     setLocalFilters(filters);
@@ -96,7 +130,7 @@ export default function FilterDrawer() {
                   {isRTL ? "الأقسام (اختر أكثر من قسم)" : "Categories (Multi-Select)"}
                 </h3>
                 <div className="space-y-1">
-                  {CATEGORIES.map((cat) => {
+                  {categoriesList.map((cat) => {
                     const isSelected =
                       localCategories.includes(cat.id) ||
                       localCategories.includes(cat.defaultName);
@@ -108,7 +142,7 @@ export default function FilterDrawer() {
                         onClick={() => handleCategoryToggle(cat.id)}
                         className={`w-full flex items-center justify-between p-2.5 rounded-xl text-xs font-semibold transition-all ${
                           isSelected
-                            ? "bg-[#FF1F3D] text-white shadow-md shadow-red-500/20"
+                            ? "bg-[#FF1F3D] text-[#FFFFFF] shadow-md shadow-red-500/20 font-bold"
                             : "bg-gray-50 dark:bg-[#151C24] text-gray-700 dark:text-[#AAB4C0] hover:bg-gray-100 dark:hover:bg-[#1C2530]"
                         }`}
                       >
@@ -125,27 +159,47 @@ export default function FilterDrawer() {
 
               {/* Price Range */}
               <div className="space-y-3 pt-3 border-t border-gray-100 dark:border-[#1E2630]">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-gray-800 dark:text-[#F5F7FA]">
-                    {isRTL ? "نطاق السعر" : "Price Range"}
-                  </h3>
-                  <span className="text-xs text-[#FF1F3D] font-bold">
-                    $0 - ${localFilters.maxPrice || 100}
-                  </span>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-gray-800 dark:text-[#F5F7FA]">
+                  {isRTL ? "نطاق السعر ($)" : "Price Range ($)"}
+                </h3>
+                <div className="grid grid-cols-2 gap-2 items-center">
+                  <div>
+                    <label className="text-[10px] text-gray-500 dark:text-gray-400 mb-1 block">
+                      {isRTL ? "من (الأدنى)" : "From (Min)"}
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      value={localFilters.minPrice || ''}
+                      onChange={(e) =>
+                        setLocalFilters({
+                          ...localFilters,
+                          minPrice: e.target.value ? Number(e.target.value) : 0,
+                        })
+                      }
+                      className="w-full px-2.5 py-2 bg-gray-50 dark:bg-[#151C24] border border-gray-200 dark:border-[#1E2630] rounded-xl text-xs font-semibold text-gray-900 dark:text-white focus:outline-none focus:border-[#FF1F3D] transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-gray-500 dark:text-gray-400 mb-1 block">
+                      {isRTL ? "إلى (الأقصى)" : "To (Max)"}
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      placeholder="50000"
+                      value={localFilters.maxPrice === 50000 || !localFilters.maxPrice ? '' : localFilters.maxPrice}
+                      onChange={(e) =>
+                        setLocalFilters({
+                          ...localFilters,
+                          maxPrice: e.target.value ? Number(e.target.value) : 50000,
+                        })
+                      }
+                      className="w-full px-2.5 py-2 bg-gray-50 dark:bg-[#151C24] border border-gray-200 dark:border-[#1E2630] rounded-xl text-xs font-semibold text-gray-900 dark:text-white focus:outline-none focus:border-[#FF1F3D] transition-colors"
+                    />
+                  </div>
                 </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={localFilters.maxPrice || 100}
-                  onChange={(e) =>
-                    setLocalFilters({
-                      ...localFilters,
-                      maxPrice: Number(e.target.value),
-                    })
-                  }
-                  className="w-full accent-[#FF1F3D]"
-                />
               </div>
 
               {/* Minimum Rating */}

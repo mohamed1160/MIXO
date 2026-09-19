@@ -7,6 +7,7 @@ import { customOrderService } from "../services/customOrderService";
 import CustomImageUploader from "./CustomImageUploader";
 import DimensionInputs from "./DimensionInputs";
 import QuantitySelector from "./QuantitySelector";
+import { saveSupabaseOrder, saveSupabaseMessage } from "../services/db.service";
 
 export default function CustomDesignModal({ isOpen, onClose }) {
   const { isRTL } = useLanguage();
@@ -108,54 +109,63 @@ export default function CustomDesignModal({ isOpen, onClose }) {
       // 3. Add to existing Cart store
       addToCart(customItem, quantity);
 
-      // Save Pending Quote Order and Contact Message for Admin Dashboard
-      const newQuoteOrder = {
-        id: "MIX-3D-QUOTE-" + Math.floor(Math.random() * 9000 + 1000),
-        createdAt: new Date().toISOString(),
-        date: new Date().toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" }),
-        orderStatus: "Processing",
-        paymentStatus: "Pending Quote",
-        statusColor: "bg-amber-500/10 text-amber-500 border-amber-500/20",
-        total: 0,
-        paymentMethod: isRTL ? "في انتظار مراجعة وتحديد السعر" : "Price Quote Pending",
-        customer: {
-          name: isRTL ? "طلب 3D مخصص" : "Custom 3D Request",
-          phone: phoneNumber,
-          email: `${phoneNumber}@mixo3d.com`,
-          address: makerworldUrl ? `MakerWorld URL: ${makerworldUrl}` : "Custom Design Upload",
-        },
-        items: [
-          {
-            name: category ? `3D Print Quote Request (${category})` : "Custom 3D Model Quote Request",
-            quantity: Number(quantity) || 1,
-            price: 0,
-            category: category || "Custom 3D",
-            material: material || "High-Quality Eco PLA Filament",
-            faceHeight: maskHeight,
-            faceWidth: circularWidth,
-            makerworldUrl,
-          },
-        ],
-      };
-
+      // Save Pending Quote Order and Contact Message for Admin Dashboard & Supabase
       try {
-        const existingOrders = JSON.parse(localStorage.getItem("MIXO_customer_orders") || "[]");
-        localStorage.setItem("MIXO_customer_orders", JSON.stringify([newQuoteOrder, ...existingOrders]));
+        const primaryFileUrl = imageUrls && imageUrls.length > 0 ? imageUrls[0] : null;
 
-        const existingMessages = JSON.parse(localStorage.getItem("MIXO_contact_messages") || "[]");
+        const newQuoteOrder = {
+          id: "MIX-3D-QUOTE-" + Math.floor(Math.random() * 9000 + 1000),
+          type: "3d_custom",
+          createdAt: new Date().toISOString(),
+          date: new Date().toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" }),
+          status: "Pending Quote",
+          paymentMethod: isRTL ? "في انتظار مراجعة وتحديد السعر" : "Price Quote Pending",
+          total: 0,
+          customer: {
+            name: isRTL ? "طلب 3D مخصص" : "Custom 3D Request",
+            phone: phoneNumber,
+            email: `${phoneNumber}@mixo3d.com`,
+            address: makerworldUrl ? `MakerWorld URL: ${makerworldUrl}` : "تصميم 3D مخصص مرفوع",
+          },
+          customData: {
+            url: makerworldUrl,
+            fileUrl: primaryFileUrl,
+            uploadedFiles: imageUrls || [],
+            mask: isMask ? `${maskHeight || ''} x ${circularWidth || ''} cm` : `${length || ''} x ${width || ''} cm`,
+            filament: material || "PLA Plus",
+            notes: description,
+          },
+          items: [
+            {
+              name: category ? `3D Print Quote Request (${category})` : "Custom 3D Model Quote Request",
+              quantity: Number(quantity) || 1,
+              price: 0,
+              category: category || "Custom 3D",
+              material: material || "High-Quality Eco PLA Filament",
+              faceHeight: maskHeight,
+              faceWidth: circularWidth,
+              makerworldUrl,
+              images: imageUrls || [],
+            },
+          ],
+        };
+
+        await saveSupabaseOrder(newQuoteOrder);
+
         const newMessage = {
           id: "MSG-3D-" + Date.now(),
           name: isRTL ? "طلب 3D مخصص" : "Custom 3D Request",
           phone: phoneNumber,
           email: `${phoneNumber}@mixo3d.com`,
           subject: `Custom 3D Quote Request (${category || "General"})`,
-          message: `MakerWorld URL: ${makerworldUrl || "None"}\nDimensions: ${maskHeight || "N/A"}cm x ${circularWidth || "N/A"}cm\nDescription: ${description || "N/A"}`,
-          status: "Unread",
+          message: `MakerWorld URL: ${makerworldUrl || "None"}\nDimensions: ${maskHeight || "N/A"}cm x ${circularWidth || "N/A"}cm\nDescription: ${description || "N/A"}\nFiles: ${imageUrls.join(', ')}`,
+          status: "unread",
           date: new Date().toLocaleDateString(),
         };
-        localStorage.setItem("MIXO_contact_messages", JSON.stringify([newMessage, ...existingMessages]));
+
+        await saveSupabaseMessage(newMessage);
       } catch (e) {
-        console.error(e);
+        console.error("Custom Order Modal Save Error:", e);
       }
 
       // 4. Alert & Reset
@@ -365,10 +375,7 @@ export default function CustomDesignModal({ isOpen, onClose }) {
                 {isRTL ? "خامة الطباعة (Material):" : "Printing Material:"}
               </label>
               <div className="w-full bg-[#F3F4F6] dark:bg-[#151C24] text-gray-900 dark:text-[#F5F7FA] text-xs sm:text-sm rounded-xl p-2.5 border border-transparent dark:border-[#26313D] font-bold flex items-center justify-between">
-                <span>🌱 PLA (High-Quality Eco Filament)</span>
-                <span className="text-[10px] bg-red-500/10 text-[#FF1F3D] px-2 py-0.5 rounded-full font-semibold">
-                  {isRTL ? "الماتيريال الأساسي" : "Standard Material"}
-                </span>
+                <span>🌱 PLA</span>
               </div>
             </div>
           </div>

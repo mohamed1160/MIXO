@@ -11,6 +11,7 @@ import { useAuthStore } from '../../store/useAuthStore';
 import { checkoutSchema } from '../../utils/validators';
 import { useCreateOrder } from '../../hooks/useCreateOrder';
 import { useLanguage } from '../../providers/LanguageContext';
+import { useSEO } from '../../hooks/useSEO';
 
 import CheckoutProgress from '../../components/checkout/CheckoutProgress';
 import ShippingForm from '../../components/checkout/ShippingForm';
@@ -22,6 +23,10 @@ import { saveSupabaseOrder } from '../../services/db.service';
 
 export default function Checkout() {
   const { isRTL } = useLanguage();
+
+  // ── SEO (noindex) ──
+  useSEO({ noindex: true });
+
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const rawCart = useShopStore((state) => state.cart) || [];

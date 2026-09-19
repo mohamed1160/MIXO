@@ -1,37 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { Search, ShieldCheck, Trash2, Users, Mail, Phone, UserCheck, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
-
-const INITIAL_CUSTOMERS = [
-  {
-    id: 'usr-1',
-    name: 'محمد أحمد (الأدمن الرئيسي)',
-    email: 'admin@gmail.com',
-    phone: '01000000000',
-    role: 'admin',
-    joinedDate: '2026-08-15',
-    ordersCount: 0,
-    totalSpent: 0
-  }
-];
+import { getSupabaseUsers } from '../../../services/db.service';
 
 export default function Customers() {
   const [customers, setCustomers] = useState([]);
   const [search, setSearch] = useState('');
 
   useEffect(() => {
-    const loaded = localStorage.getItem('MIXO_users');
-    if (loaded) {
+    const loadUsers = async () => {
       try {
-        setCustomers(JSON.parse(loaded));
+        const supaUsers = await getSupabaseUsers();
+        if (supaUsers && supaUsers.length > 0) {
+          setCustomers(supaUsers);
+        } else {
+          const loaded = localStorage.getItem('MIXO_users');
+          setCustomers(loaded ? JSON.parse(loaded) : []);
+        }
       } catch (e) {
-        setCustomers(INITIAL_CUSTOMERS);
-        localStorage.setItem('MIXO_users', JSON.stringify(INITIAL_CUSTOMERS));
+        console.error(e);
+        setCustomers([]);
       }
-    } else {
-      setCustomers(INITIAL_CUSTOMERS);
-      localStorage.setItem('MIXO_users', JSON.stringify(INITIAL_CUSTOMERS));
-    }
+    };
+    loadUsers();
   }, []);
 
   const saveCustomers = (updated) => {

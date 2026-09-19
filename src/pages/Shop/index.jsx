@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useShopStore } from "../../store/useShopStore";
 import { shopService } from "../../services/shopService";
+import { useSEO } from "../../hooks/useSEO";
 
 import ShopHero from "./components/ShopHero";
 import ProductToolbar from "./components/ProductToolbar";
@@ -13,6 +14,9 @@ import BottomBanner from "./components/BottomBanner";
 import CustomDesignModal from "../../components/CustomDesignModal";
 
 export default function Shop() {
+  // ── SEO ──
+  useSEO();
+
   const [searchParams, setSearchParams] = useSearchParams();
   const filters = useShopStore((state) => state.filters);
   const sort = useShopStore((state) => state.sort);

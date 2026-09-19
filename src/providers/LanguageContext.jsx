@@ -94,7 +94,7 @@ export const translations = {
       q9: "Do you ship across Egypt?",
       a9: "Yes, express shipping to all governorates.",
       q10: "Can I choose custom color or scale?",
-      a10: "Yes, select over 20+ filament colors and custom sizes.",
+      a10: "Yes, select over 20+ PLA colors and custom sizes.",
     },
     footer: {
       about: "Ideas Into Reality",

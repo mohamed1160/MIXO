@@ -8,10 +8,15 @@ import { customOrderService } from "../../services/customOrderService";
 import CustomImageUploader from "../../components/CustomImageUploader";
 import DimensionInputs from "../../components/DimensionInputs";
 import QuantitySelector from "../../components/QuantitySelector";
+import { useSEO } from "../../hooks/useSEO";
+import { saveSupabaseOrder, saveSupabaseMessage } from "../../services/db.service";
 
 export default function CustomOrderPage() {
   const { isRTL } = useLanguage();
   const navigate = useNavigate();
+
+  // ── SEO ──
+  useSEO();
   const addToCart = useShopStore((state) => state.addToCart);
 
   const {
@@ -81,15 +86,17 @@ export default function CustomOrderPage() {
       // 3. Add to Cart store
       addToCart(customItem, quantity);
 
-      // Save order to MIXO_customer_orders and MIXO_contact_messages for Admin Dashboard
+      // Save order to Supabase orders and contact_messages
       try {
+        const primaryFileUrl = imageUrls && imageUrls.length > 0 ? imageUrls[0] : null;
+
         const newOrderObj = {
           id: 'ORD-3D-' + Math.floor(1000 + Math.random() * 9000),
           type: '3d_custom',
           customer: {
             name: isRTL ? 'عميل 3D مخصص' : 'Custom 3D Customer',
             phone: phoneNumber,
-            address: makerworldUrl ? `MakerWorld URL: ${makerworldUrl}` : 'تصميم مخصص مرفوع'
+            address: makerworldUrl ? `MakerWorld URL: ${makerworldUrl}` : 'تصميم 3D مخصص مرفوع'
           },
           date: new Date().toISOString().slice(0, 16).replace('T', ' '),
           total: 0,
@@ -97,17 +104,18 @@ export default function CustomOrderPage() {
           paymentMethod: isRTL ? 'بانتظار التسعير' : 'Pending Quote',
           customData: {
             url: makerworldUrl,
+            fileUrl: primaryFileUrl,
+            uploadedFiles: imageUrls || [],
             mask: isMask ? `${maskHeight || ''} x ${circularWidth || ''} cm` : `${length || ''} x ${width || ''} cm`,
             filament: material || 'PLA Plus',
             notes: description
           },
           items: [
-            { id: customItem.id, name: customItem.name, price: 0, quantity: Number(quantity) || 1 }
+            { id: customItem.id, name: customItem.name, price: 0, quantity: Number(quantity) || 1, images: imageUrls || [] }
           ]
         };
 
-        const existingOrders = JSON.parse(localStorage.getItem('MIXO_customer_orders') || '[]');
-        localStorage.setItem('MIXO_customer_orders', JSON.stringify([newOrderObj, ...existingOrders]));
+        await saveSupabaseOrder(newOrderObj);
 
         const newMessageObj = {
           id: 'MSG-3D-' + Date.now(),
@@ -116,17 +124,15 @@ export default function CustomOrderPage() {
           email: `${phoneNumber}@mixo3d.com`,
           subject: 'طلب تسعير مجسم 3D مخصص',
           type: 'custom_quote',
-          message: `وصف الموديل: ${description || 'لا يوجد'}\nأبعاد: ${isMask ? maskHeight + 'x' + circularWidth : length + 'x' + width} cm`,
-          link: makerworldUrl,
+          message: `وصف الموديل: ${description || 'لا يوجد'}\nأبعاد: ${isMask ? maskHeight + 'x' + circularWidth : length + 'x' + width} cm\nروابط الملفات: ${imageUrls.join(', ')}`,
+          link: makerworldUrl || primaryFileUrl,
           date: new Date().toISOString().slice(0, 16).replace('T', ' '),
           status: 'unread'
         };
 
-        const existingMsgs = JSON.parse(localStorage.getItem('MIXO_contact_messages') || '[]');
-        localStorage.setItem('MIXO_contact_messages', JSON.stringify([newMessageObj, ...existingMsgs]));
-        window.dispatchEvent(new Event('storage'));
+        await saveSupabaseMessage(newMessageObj);
       } catch (e) {
-        console.error('Custom Order save error:', e);
+        console.error('Custom Order Supabase save error:', e);
       }
 
       // 4. Alert & Redirect
@@ -337,10 +343,7 @@ export default function CustomOrderPage() {
                   {isRTL ? "خامة الطباعة (Material):" : "Printing Material:"}
                 </label>
                 <div className="w-full bg-[#F3F4F6] dark:bg-[#151C24] text-gray-900 dark:text-[#F5F7FA] text-xs sm:text-sm rounded-xl p-3 border border-transparent dark:border-[#26313D] font-bold flex items-center justify-between">
-                  <span>🌱 PLA (High-Quality Eco Filament)</span>
-                  <span className="text-[10px] bg-red-500/10 text-[#FF1F3D] px-2.5 py-0.5 rounded-full font-semibold">
-                    {isRTL ? "الماتيريال الأساسي" : "Standard Material"}
-                  </span>
+                  <span>🌱 PLA</span>
                 </div>
               </div>
             </div>

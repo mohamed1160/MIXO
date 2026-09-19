@@ -124,6 +124,12 @@ export default function OrderSummary({ cart, control, register, watch, selectedM
                   {isRTL ? "الكمية:" : "Qty:"} <span className="text-gray-900 dark:text-white font-mono">{item.quantity || 1}</span>
                   {item.material && ` • ${item.material}`}
                 </p>
+                {(item.size || item.maskHeight) && (
+                  <p className="text-[10px] text-[#FF1F3D] font-bold mt-0.5 flex items-center gap-1">
+                    <span>🎭 {isRTL ? "أبعاد الماسك:" : "Mask Dimensions:"}</span>
+                    <span>{item.size || `${item.maskHeight}×${item.circularWidth} cm`}</span>
+                  </p>
+                )}
               </div>
             </div>
 

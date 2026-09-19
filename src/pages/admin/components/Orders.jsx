@@ -287,11 +287,27 @@ export default function Orders() {
                                 href={order.customData.url}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="inline-flex items-center gap-1 text-xs text-[#FF1F3D] hover:underline font-semibold"
+                                className="inline-flex items-center gap-1 text-xs text-[#FF1F3D] hover:underline font-semibold block"
                               >
                                 <ExternalLink className="w-3 h-3" />
                                 فتح رابط MakerWorld
                               </a>
+                            )}
+                            {(order.customData?.fileUrl || (order.customData?.uploadedFiles && order.customData.uploadedFiles.length > 0)) && (
+                              <div className="flex flex-col gap-1">
+                                {(order.customData.uploadedFiles || [order.customData.fileUrl]).map((file, idx) => (
+                                  <a
+                                    key={idx}
+                                    href={file}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="inline-flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 hover:underline font-semibold"
+                                  >
+                                    <ExternalLink className="w-3 h-3" />
+                                    تحميل ملف الـ 3D / التصميم المرفوع #{idx + 1} 📦
+                                  </a>
+                                ))}
+                              </div>
                             )}
                             {order.customData?.mask && (
                               <div className="text-gray-600 dark:text-gray-300 text-[11px]">

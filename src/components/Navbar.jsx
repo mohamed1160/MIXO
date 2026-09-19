@@ -40,7 +40,6 @@ export default function Navbar() {
   const navLinks = [
     { path: "/", label: t.nav.home },
     { path: "/shop", label: t.nav.shop },
-    { path: "/categories", label: t.nav.categories },
     { path: "/custom-order", label: t.nav.customOrders },
     { path: "/track-order", label: isRTL ? "تتبع الطلب 🚚" : "Track Order 🚚" },
     { path: "/our-story", label: t.nav.aboutUs },

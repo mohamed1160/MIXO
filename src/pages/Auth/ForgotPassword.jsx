@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import { authService } from '../../api/auth';
+import { useSEO } from '../../hooks/useSEO';
 
 const forgotPasswordSchema = z.object({
   email: z.string().min(1, 'Email is required').email('Invalid email address'),
@@ -13,6 +14,9 @@ const forgotPasswordSchema = z.object({
 
 export default function ForgotPassword() {
   const [status, setStatus] = useState('idle'); // idle | loading | success | error
+
+  // ── SEO (noindex) ──
+  useSEO({ noindex: true });
   
   const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: zodResolver(forgotPasswordSchema),

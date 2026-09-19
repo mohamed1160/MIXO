@@ -19,6 +19,7 @@ import { useLanguage } from '../../providers/LanguageContext';
 import { formatCurrency } from '../../utils/formatCurrency';
 
 import { getSupabaseOrders, subscribeToRealtimeOrders } from '../../services/db.service';
+import { useSEO } from '../../hooks/useSEO';
 
 export default function TrackOrderPage() {
   const [searchParams] = useSearchParams();
@@ -27,6 +28,9 @@ export default function TrackOrderPage() {
   const [foundOrder, setFoundOrder] = useState(null);
   const [searched, setSearched] = useState(false);
   const { isRTL } = useLanguage();
+
+  // ── SEO (noindex) ──
+  useSEO({ noindex: true });
 
   const handleSearchOrder = async (queryToSearch = orderIdQuery) => {
     const q = (queryToSearch || '').trim().toLowerCase();

@@ -3,23 +3,24 @@ import { upload3DFileToSupabase } from './db.service';
 export const customOrderService = {
   validateFiles(files) {
     const maxFiles = 5;
-    const maxSizeMB = 10;
-    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    const maxSizeMB = 50;
+    const allowedExtensions = ["jpg", "jpeg", "png", "webp", "stl", "obj", "3mf", "step", "stp", "ply", "zip", "rar"];
 
     if (!files || files.length === 0) {
-      return { isValid: false, error: "Please upload at least one image of your design." };
+      return { isValid: false, error: "Please upload at least one image or 3D file of your design." };
     }
 
     if (files.length > maxFiles) {
-      return { isValid: false, error: `You can upload a maximum of ${maxFiles} images.` };
+      return { isValid: false, error: `You can upload a maximum of ${maxFiles} files.` };
     }
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      if (!allowedTypes.includes(file.type.toLowerCase())) {
+      const ext = file.name.split('.').pop().toLowerCase();
+      if (!allowedExtensions.includes(ext)) {
         return {
           isValid: false,
-          error: `File "${file.name}" is invalid. Allowed formats: JPG, PNG, WEBP.`,
+          error: `File "${file.name}" is invalid. Allowed formats: Images, STL, OBJ, 3MF, STEP, ZIP, RAR.`,
         };
       }
       if (file.size > maxSizeMB * 1024 * 1024) {

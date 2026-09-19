@@ -3,7 +3,7 @@ import { X, Sparkles, ShoppingBag, Check } from "lucide-react";
 import { useLanguage } from "../providers/LanguageContext";
 import { useShopStore } from "../store/useShopStore";
 
-export default function MaskDimensionsModal({ isOpen, onClose, product }) {
+export default function MaskDimensionsModal({ isOpen, onClose, product, quantity = 1, onSuccess }) {
   const { isRTL } = useLanguage();
   const addToCart = useShopStore((state) => state.addToCart);
 
@@ -43,16 +43,14 @@ export default function MaskDimensionsModal({ isOpen, onClose, product }) {
       ...product,
       maskHeight: h,
       circularWidth: w,
-      size: `${h}×${w} cm (Circular)`,
+      size: `${h}×${w} cm (${isRTL ? 'محيط الوجه' : 'Circular'})`,
     };
 
-    addToCart(maskProductItem, 1);
+    addToCart(maskProductItem, quantity);
 
-    alert(
-      isRTL
-        ? `تمت إضافة ${product.title || product.name} إلى السلة بأبعادك الخاصة (${h} × ${w} سم)!`
-        : `Added ${product.title || product.name} to cart with your custom mask dimensions (${h} × ${w} cm)!`
-    );
+    if (onSuccess) {
+      onSuccess(maskProductItem);
+    }
 
     setMaskHeight("");
     setCircularWidth("");

@@ -1,14 +1,56 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Star, RotateCcw } from "lucide-react";
 import { useShopStore } from "../../../store/useShopStore";
 import { useLanguage } from "../../../providers/LanguageContext";
-import { CATEGORIES, getCategoryCounts } from "../../../services/products";
+import { getAllCategories, getCategoryCounts } from "../../../services/products";
+import { getSupabaseProducts } from "../../../services/db.service";
 
 export default function FilterSidebar() {
   const { isRTL } = useLanguage();
   const filters = useShopStore((state) => state.filters);
   const setFilter = useShopStore((state) => state.setFilter);
   const resetFilters = useShopStore((state) => state.resetFilters);
+
+  const [categoriesList, setCategoriesList] = useState(() => getAllCategories());
+  const [countsMap, setCountsMap] = useState({});
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadCounts = async () => {
+      try {
+        let prods = [];
+        const supa = await getSupabaseProducts();
+        if (supa && supa.length > 0) {
+          prods = supa;
+        } else {
+          const saved = localStorage.getItem('MIXO_products');
+          if (saved) {
+            prods = JSON.parse(saved);
+          }
+        }
+        if (isMounted) {
+          setCategoriesList(getAllCategories());
+          setCountsMap(getCategoryCounts(prods));
+        }
+      } catch (e) {
+        console.error("Error loading category counts:", e);
+      }
+    };
+
+    loadCounts();
+
+    const handleUpdate = () => loadCounts();
+    window.addEventListener('storage', handleUpdate);
+    window.addEventListener('mixo_products_updated', handleUpdate);
+    window.addEventListener('mixo_categories_updated', handleUpdate);
+
+    return () => {
+      isMounted = false;
+      window.removeEventListener('storage', handleUpdate);
+      window.removeEventListener('mixo_products_updated', handleUpdate);
+      window.removeEventListener('mixo_categories_updated', handleUpdate);
+    };
+  }, []);
 
   const selectedCategories =
     Array.isArray(filters.categories) && filters.categories.length > 0
@@ -18,7 +60,6 @@ export default function FilterSidebar() {
       : [];
 
   const inStock = filters.inStock || false;
-  const countsMap = getCategoryCounts();
 
   const handleCategoryChange = (catId) => {
     let updated;
@@ -54,7 +95,7 @@ export default function FilterSidebar() {
           {isRTL ? "الأقسام (اختر أكثر من قسم)" : "Categories (Multi-Select)"}
         </h4>
         <div className="space-y-1 text-xs">
-          {CATEGORIES.map((cat) => {
+          {categoriesList.map((cat) => {
             const isSelected =
               selectedCategories.includes(cat.id) ||
               selectedCategories.includes(cat.defaultName);
@@ -93,22 +134,37 @@ export default function FilterSidebar() {
 
       {/* Price Range */}
       <div className="space-y-2.5 pt-3 border-t border-gray-100 dark:border-[#1E2630]">
-        <div className="flex items-center justify-between">
-          <h4 className="text-xs font-bold uppercase tracking-wider text-gray-800 dark:text-[#F5F7FA]">
-            {isRTL ? "نطاق السعر" : "Price Range"}
-          </h4>
-          <span className="text-xs text-[#FF1F3D] font-bold">
-            $0 - ${filters.maxPrice || 100}
-          </span>
+        <h4 className="text-xs font-bold uppercase tracking-wider text-gray-800 dark:text-[#F5F7FA]">
+          {isRTL ? "نطاق السعر ($)" : "Price Range ($)"}
+        </h4>
+        <div className="grid grid-cols-2 gap-2 items-center">
+          <div>
+            <label className="text-[10px] text-gray-500 dark:text-gray-400 mb-1 block">
+              {isRTL ? "من (الأدنى)" : "From (Min)"}
+            </label>
+            <input
+              type="number"
+              min="0"
+              placeholder="0"
+              value={filters.minPrice || ''}
+              onChange={(e) => setFilter("minPrice", e.target.value ? Number(e.target.value) : 0)}
+              className="w-full px-2.5 py-1.5 bg-gray-50 dark:bg-[#151C24] border border-gray-200 dark:border-[#1E2630] rounded-xl text-xs font-semibold text-gray-900 dark:text-white focus:outline-none focus:border-[#FF1F3D] transition-colors"
+            />
+          </div>
+          <div>
+            <label className="text-[10px] text-gray-500 dark:text-gray-400 mb-1 block">
+              {isRTL ? "إلى (الأقصى)" : "To (Max)"}
+            </label>
+            <input
+              type="number"
+              min="0"
+              placeholder="50000"
+              value={filters.maxPrice === 50000 || !filters.maxPrice ? '' : filters.maxPrice}
+              onChange={(e) => setFilter("maxPrice", e.target.value ? Number(e.target.value) : 50000)}
+              className="w-full px-2.5 py-1.5 bg-gray-50 dark:bg-[#151C24] border border-gray-200 dark:border-[#1E2630] rounded-xl text-xs font-semibold text-gray-900 dark:text-white focus:outline-none focus:border-[#FF1F3D] transition-colors"
+            />
+          </div>
         </div>
-        <input
-          type="range"
-          min="0"
-          max="100"
-          value={filters.maxPrice || 100}
-          onChange={(e) => setFilter("maxPrice", Number(e.target.value))}
-          className="w-full accent-[#FF1F3D]"
-        />
       </div>
 
       {/* Rating */}

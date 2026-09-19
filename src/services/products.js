@@ -12,9 +12,52 @@ export const CATEGORIES = [
   { id: "vases", nameKey: "vases", icon: "🏺", defaultName: "Vases & Art", arName: "فازات وتحف فنية" },
   { id: "gaming", nameKey: "gaming", icon: "🎮", defaultName: "Gaming & Cosplay", arName: "ألعاب وإكسسوارات" },
   { id: "keychains", nameKey: "keychains", icon: "🔑", defaultName: "Keychains & Tags", arName: "ميداليات وإكسسوارات" },
-  { id: "filaments", nameKey: "filaments", icon: "🧶", defaultName: "Filaments", arName: "خامات وفيلـامينت" },
   { id: "3d-models", nameKey: "3dModels", icon: "🧊", defaultName: "3D Models", arName: "موديلات 3D" },
 ];
+
+export function getAllCategories() {
+  const saved = localStorage.getItem('MIXO_custom_categories');
+  let custom = [];
+  if (saved) {
+    try {
+      custom = JSON.parse(saved);
+    } catch (e) {}
+  }
+
+  const list = [...CATEGORIES];
+  custom.forEach((cat) => {
+    if (!list.some((c) => c.id === cat.id || c.defaultName.toLowerCase() === cat.defaultName.toLowerCase())) {
+      list.push(cat);
+    }
+  });
+  return list;
+}
+
+export function saveCustomCategory(newCategoryName, icon = "📦") {
+  if (!newCategoryName || !newCategoryName.trim()) return null;
+  const cleanName = newCategoryName.trim();
+  const id = cleanName.toLowerCase().replace(/[^a-z0-9\u0600-\u06FF]+/gi, '-').replace(/(^-|-$)/g, '') || `cat-${Date.now()}`;
+
+  const existingCustom = localStorage.getItem('MIXO_custom_categories');
+  let custom = existingCustom ? JSON.parse(existingCustom) : [];
+
+  const newCatObj = {
+    id,
+    nameKey: id,
+    icon: icon || "📦",
+    defaultName: cleanName,
+    arName: cleanName,
+    custom: true
+  };
+
+  if (!custom.some((c) => c.id === id || c.defaultName.toLowerCase() === cleanName.toLowerCase())) {
+    custom.push(newCatObj);
+    localStorage.setItem('MIXO_custom_categories', JSON.stringify(custom));
+    window.dispatchEvent(new Event('storage'));
+    window.dispatchEvent(new CustomEvent('mixo_categories_updated'));
+  }
+  return newCatObj;
+}
 
 export const MOCK_3D_PRODUCTS = [];
 
@@ -30,27 +73,34 @@ export function mapCategoryToId(catName = "") {
   if (str.includes("vase") || str.includes("art") || str.includes("فازات") || str.includes("تحف")) return "vases";
   if (str.includes("game") || str.includes("gaming") || str.includes("cosplay") || str.includes("ألعاب") || str.includes("إكسسوارات")) return "gaming";
   if (str.includes("keychain") || str.includes("tag") || str.includes("ميداليات")) return "keychains";
-  if (str.includes("filament") || str.includes("فيلـامينت") || str.includes("فيلامينت")) return "filaments";
   if (str.includes("3d") || str.includes("model") || str.includes("موديل")) return "3d-models";
 
-  const found = CATEGORIES.find((c) => c.id === str);
+  const allCats = getAllCategories();
+  const found = allCats.find((c) => c.id === str || c.defaultName.toLowerCase() === str || c.arName.toLowerCase() === str);
   if (found) return found.id;
 
-  return "figures";
+  return str;
 }
 
-export function getCategoryCounts(products = MOCK_3D_PRODUCTS) {
+export function getCategoryCounts(products = []) {
   const counts = {};
-  CATEGORIES.forEach((cat) => {
+  const allCats = getAllCategories();
+  allCats.forEach((cat) => {
     counts[cat.id] = 0;
   });
 
+  if (!products || !Array.isArray(products)) return counts;
+
   products.forEach((prod) => {
-    const mappedId = prod.categoryId || mapCategoryToId(prod.category);
+    const rawCat = prod.category || prod.categoryId || "";
+    const mappedId = prod.categoryId && allCats.some((c) => c.id === prod.categoryId)
+      ? prod.categoryId
+      : mapCategoryToId(rawCat);
+
     if (counts[mappedId] !== undefined) {
       counts[mappedId] += 1;
     } else {
-      counts["figures"] = (counts["figures"] || 0) + 1;
+      counts[mappedId] = 1;
     }
   });
 

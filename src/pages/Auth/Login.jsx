@@ -8,6 +8,7 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { useLanguage } from "../../providers/LanguageContext";
 import mixoLogoImg from "../../assets/images/logo/mixo_red_logo.png";
 import heroDragonImg from "../../assets/images/3dprint/hero_dragon.jpg";
+import { useSEO } from "../../hooks/useSEO";
 
 const loginSchema = z.object({
   phone: z.string().min(6, "Valid phone number is required"),
@@ -16,6 +17,10 @@ const loginSchema = z.object({
 
 export default function Login() {
   const { isRTL } = useLanguage();
+
+  // ── SEO (noindex) ──
+  useSEO({ noindex: true });
+
   const [showPassword, setShowPassword] = useState(false);
   const { user, login, isLoading: authLoading, isAuthenticated, error: authError } = useAuthStore();
   const navigate = useNavigate();

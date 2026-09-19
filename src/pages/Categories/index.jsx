@@ -7,6 +7,7 @@ import customVaseImg from "../../assets/images/3dprint/custom_vase.jpg";
 import filamentImg from "../../assets/images/3dprint/filament_spools.jpg";
 import CustomDesignModal from "../../components/CustomDesignModal";
 import { getCategoryCounts } from "../../services/products";
+import { useSEO } from "../../hooks/useSEO";
 
 const CATEGORY_LIST = [
   {
@@ -116,6 +117,9 @@ export default function CategoriesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTag, setSelectedTag] = useState("all");
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
+
+  // ── SEO ──
+  useSEO();
 
   const countsMap = getCategoryCounts();
 

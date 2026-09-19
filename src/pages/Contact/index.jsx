@@ -20,10 +20,14 @@ import { useLanguage } from "../../providers/LanguageContext";
 import mixoLogoImg from "../../assets/images/logo/mixo_red_logo.png";
 import { saveSupabaseMessage } from "../../services/db.service";
 import CustomDesignModal from "../../components/CustomDesignModal";
+import { useSEO } from "../../hooks/useSEO";
 
 export default function Contact() {
   const { isRTL } = useLanguage();
   const navigate = useNavigate();
+
+  // ── SEO ──
+  useSEO();
 
   const [openFaq, setOpenFaq] = useState(null);
   const [submittedSuccess, setSubmittedSuccess] = useState(false);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   Star,
@@ -20,14 +20,19 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getProducts, MOCK_3D_PRODUCTS } from '../../services/products';
+import { getSupabaseReviews, saveSupabaseReview } from '../../services/db.service';
 import { useShopStore } from '../../store/useShopStore';
 import { useLanguage } from '../../providers/LanguageContext';
 import { formatCurrency } from '../../utils/formatCurrency';
+import { useSEO } from '../../hooks/useSEO';
+import JsonLd, { buildProductSchema, buildBreadcrumbSchema } from '../../components/seo/JsonLd';
+import { SITE_URL } from '../../config/seo';
+import MaskDimensionsModal from '../../components/MaskDimensionsModal';
 
 export default function ProductDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { isRTL } = useLanguage();
+  const { isRTL, lang } = useLanguage();
   const addToCart = useShopStore((state) => state.addToCart);
 
   const [product, setProduct] = useState(null);
@@ -36,30 +41,52 @@ export default function ProductDetails() {
   const [selectedScale, setSelectedScale] = useState('100% (Standard)');
   const [quantity, setQuantity] = useState(1);
   const [relatedProducts, setRelatedProducts] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [activeTab, setActiveTab] = useState('specs');
+
+  // Mask Dimensions Modal State
+  const [isMaskModalOpen, setIsMaskModalOpen] = useState(false);
+  const [pendingBuyNow, setPendingBuyNow] = useState(false);
 
   // Customer Review Modal State
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [newRating, setNewRating] = useState(5);
   const [reviewerName, setReviewerName] = useState('');
   const [reviewerComment, setReviewerComment] = useState('');
-  const [userReviewCountAdd, setUserReviewCountAdd] = useState(0);
 
-  const handleReviewSubmit = (e) => {
+  const handleReviewSubmit = async (e) => {
     e.preventDefault();
     if (!reviewerName.trim() || !reviewerComment.trim()) {
       toast.error(isRTL ? 'برجاء كتابة الاسم والتعليق' : 'Please enter your name and review');
       return;
     }
-    toast.success(
-      isRTL
-        ? 'شكراً لك! تم إضافة تقييمك للمنتج بنجاح 🎉'
-        : 'Thank you! Your review has been added successfully 🎉'
-    );
-    setUserReviewCountAdd((prev) => prev + 1);
-    setIsReviewModalOpen(false);
-    setReviewerName('');
-    setReviewerComment('');
+    const ratingNum = Number(newRating) || 5;
+
+    try {
+      await saveSupabaseReview({
+        productId: product.id,
+        userName: reviewerName.trim(),
+        rating: ratingNum,
+        comment: reviewerComment.trim(),
+        status: 'Published'
+      });
+
+      toast.success(
+        isRTL
+          ? 'شكراً لك! تم إضافة تقييمك للمنتج بنجاح 🎉'
+          : 'Thank you! Your review has been added successfully 🎉'
+      );
+
+      const updated = await getSupabaseReviews(product.id);
+      setReviews(updated);
+      setIsReviewModalOpen(false);
+      setReviewerName('');
+      setReviewerComment('');
+      setNewRating(5);
+    } catch (err) {
+      console.error(err);
+      toast.error(isRTL ? 'حدث خطأ أثناء حفظ التقييم' : 'Failed to submit review');
+    }
   };
 
   const COLOR_OPTIONS = [
@@ -93,6 +120,10 @@ export default function ProductDetails() {
         .filter((p) => String(p.id) !== String(id) && (p.category === found.category || p.categoryId === found.categoryId))
         .slice(0, 4);
       setRelatedProducts(related.length > 0 ? related : all.filter(p => String(p.id) !== String(id)).slice(0, 4));
+
+      // Fetch customer reviews from API / Supabase
+      const productReviews = await getSupabaseReviews(found.id);
+      setReviews(productReviews);
     } else {
       // Fallback to first mock product
       const fallback = MOCK_3D_PRODUCTS[0];
@@ -101,11 +132,41 @@ export default function ProductDetails() {
     }
   };
 
+  const finalPrice = product ? (Number(product.price) || 0) : 0;
+  const productName = product ? (product.title || product.name) : '';
+  const isMask = product?.isMask ||
+    String(product?.category || '').toLowerCase().includes('mask') ||
+    String(product?.category || '').includes('ماسكات') ||
+    String(product?.category || '').includes('أقنعة');
+
+  // ── Dynamic SEO (Hooks MUST be called unconditionally before early return) ──
+  useSEO({
+    title: productName ? `${productName} — MIXO 3D` : undefined,
+    description: product?.description
+      ? product.description.substring(0, 160)
+      : (lang === 'ar'
+        ? `${productName} — مجسم ثلاثي الأبعاد عالي الجودة من MIXO 3D. اطلب الآن مع الشحن لجميع المحافظات.`
+        : `${productName} — Premium 3D printed product by MIXO 3D. Order now with fast shipping across Egypt.`),
+    ogType: 'product',
+    ogImage: (product?.image || product?.images?.[0] || ''),
+  });
+
+  // ── Structured Data ──
+  const productSchema = useMemo(() => (product ? buildProductSchema(product, SITE_URL) : null), [product]);
+  const breadcrumbSchema = useMemo(() => (product ? buildBreadcrumbSchema([
+    { name: lang === 'ar' ? 'الرئيسية' : 'Home', url: '/' },
+    { name: lang === 'ar' ? 'المتجر' : 'Shop', url: '/shop' },
+    { name: productName },
+  ], SITE_URL) : null), [product, lang, productName]);
+
   if (!product) return null;
 
-  const finalPrice = Number(product.price) || 0;
-
   const handleAddToCart = () => {
+    if (isMask) {
+      setPendingBuyNow(false);
+      setIsMaskModalOpen(true);
+      return;
+    }
     addToCart({
       ...product,
       price: finalPrice,
@@ -119,6 +180,11 @@ export default function ProductDetails() {
   };
 
   const handleBuyNow = () => {
+    if (isMask) {
+      setPendingBuyNow(true);
+      setIsMaskModalOpen(true);
+      return;
+    }
     handleAddToCart();
     navigate('/checkout');
   };
@@ -127,6 +193,10 @@ export default function ProductDetails() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#070B10] text-gray-900 dark:text-white pt-24 pb-20 px-4 sm:px-6 lg:px-8 font-sans transition-colors duration-200">
+      {/* JSON-LD Structured Data */}
+      <JsonLd data={productSchema} />
+      <JsonLd data={breadcrumbSchema} />
+
       <div className="max-w-7xl mx-auto space-y-12">
         {/* Breadcrumb Navigation */}
         <nav className="flex items-center gap-2 text-xs text-gray-500 dark:text-[#7F8A96]">
@@ -150,7 +220,7 @@ export default function ProductDetails() {
             <div className="relative aspect-square rounded-3xl bg-white dark:bg-[#0F151D] border border-gray-200 dark:border-[#1E2630] overflow-hidden shadow-xl group">
               <img
                 src={selectedImage}
-                alt={product.title || product.name}
+                alt={`${productName} — 3D printed product by MIXO 3D`}
                 className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
               />
 
@@ -179,7 +249,7 @@ export default function ProductDetails() {
                         : 'border-gray-200 dark:border-[#1E2630] opacity-70 hover:opacity-100'
                     }`}
                   >
-                    <img src={img} alt="thumb" className="w-full h-full object-cover" />
+                    <img src={img} alt={`${productName} — view ${idx + 1}`} className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
@@ -217,10 +287,12 @@ export default function ProductDetails() {
                 <div className="flex items-center gap-1 text-amber-400">
                   <Star size={16} className="fill-current" />
                   <span className="font-bold text-gray-900 dark:text-white">
-                    {((product.reviewCount || product.reviewsCount || 0) + (userReviewCountAdd || 0)) > 0 ? (product.rating || 5.0) : 0}
+                    {reviews.length > 0
+                      ? (reviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0) / reviews.length).toFixed(1)
+                      : (product.rating ? Number(product.rating).toFixed(1) : '5.0')}
                   </span>
                   <span className="text-gray-500 dark:text-[#7F8A96]">
-                    ({(product.reviewCount || product.reviewsCount || 0) + (userReviewCountAdd || 0)} {isRTL ? 'تقييم' : 'reviews'})
+                    ({(product.reviewCount || product.reviewsCount || 0) + reviews.length} {isRTL ? 'تقييم' : 'reviews'})
                   </span>
                 </div>
 
@@ -323,8 +395,9 @@ export default function ProductDetails() {
                   <div className="aspect-square bg-gray-100 dark:bg-[#151C24] overflow-hidden relative">
                     <img
                       src={rel.image || rel.images?.[0]}
-                      alt={rel.title || rel.name}
+                      alt={`${rel.title || rel.name} — 3D printed product`}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      loading="lazy"
                     />
                   </div>
                   <div className="p-4 space-y-2 flex-1 flex flex-col justify-between">
@@ -348,6 +421,48 @@ export default function ProductDetails() {
             </div>
           </div>
         )}
+
+        {/* Customer Reviews List */}
+        <div className="pt-10 border-t border-gray-200 dark:border-[#1E2630] space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <Star className="text-amber-400 fill-current" size={20} />
+              <span>{isRTL ? `آراء وتقييمات العملاء (${reviews.length})` : `Customer Reviews (${reviews.length})`}</span>
+            </h2>
+            <button
+              onClick={() => setIsReviewModalOpen(true)}
+              className="px-4 py-2 bg-[#FF1F3D] hover:bg-[#D91832] text-white text-xs font-bold rounded-xl shadow-md transition-all cursor-pointer"
+            >
+              {isRTL ? 'كتابة تقييم جديد' : 'Write a Review'}
+            </button>
+          </div>
+
+          {reviews.length === 0 ? (
+            <div className="p-6 bg-white dark:bg-[#0F151D] rounded-2xl border border-gray-200 dark:border-[#1E2630] text-center space-y-2">
+              <p className="text-xs text-gray-500 dark:text-slate-400 font-medium">
+                {isRTL ? 'لا توجد تقييمات مكتوبة لهذا المنتج حتى الآن. كن أول من يكتب رأيه!' : 'No reviews written for this product yet. Be the first to leave a review!'}
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {reviews.map((rev) => (
+                <div key={rev.id} className="p-5 bg-white dark:bg-[#0F151D] rounded-2xl border border-gray-200 dark:border-[#1E2630] space-y-2 shadow-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-xs text-gray-900 dark:text-white">{rev.userName}</span>
+                    <div className="flex items-center gap-1 text-amber-400">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <Star key={s} size={13} className={s <= rev.rating ? 'fill-amber-400 text-amber-400' : 'text-gray-300 dark:text-gray-700'} />
+                      ))}
+                      <span className="text-xs font-bold text-gray-800 dark:text-gray-200 mr-1">{rev.rating}</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-600 dark:text-slate-300 leading-relaxed font-normal">{rev.comment}</p>
+                  <span className="text-[10px] text-gray-400 block pt-1">{rev.date}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Customer Review Modal */}
@@ -442,6 +557,28 @@ export default function ProductDetails() {
           </div>
         </div>
       )}
+
+      {/* Mask Dimensions Modal */}
+      <MaskDimensionsModal
+        isOpen={isMaskModalOpen}
+        onClose={() => {
+          setIsMaskModalOpen(false);
+          setPendingBuyNow(false);
+        }}
+        product={product}
+        quantity={quantity}
+        onSuccess={(itemWithDimensions) => {
+          toast.success(
+            isRTL
+              ? `تم تحديد المقاسات وإضافة (${product.title || product.name}) للسلة 🎭`
+              : `Added (${product.title || product.name}) to cart with your mask size 🎭`
+          );
+          if (pendingBuyNow) {
+            setPendingBuyNow(false);
+            navigate('/checkout');
+          }
+        }}
+      />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -9,29 +9,32 @@ import {
   ShieldCheck,
   ChevronDown,
   ChevronUp,
-  Sparkles,
-  Zap,
-  CreditCard,
   Headphones,
+  PenTool,
+  Sparkles,
+  Package,
 } from "lucide-react";
 import { useLanguage } from "../../providers/LanguageContext";
-import { getProducts, CATEGORIES } from "../../services/products";
-import SectionHeader from "../../components/SectionHeader";
+import { getProducts } from "../../services/products";
 import ProductCard from "../../components/ProductCard";
+import { useSEO } from "../../hooks/useSEO";
+import JsonLd, { buildWebSiteSchema, buildFAQSchema } from "../../components/seo/JsonLd";
+import { SITE_URL, SITE_NAME } from "../../config/seo";
 
 // Assets
 import heroDragonImg from "../../assets/images/3dprint/hero_dragon.jpg";
 import customVaseImg from "../../assets/images/3dprint/custom_vase.jpg";
-import filamentImg from "../../assets/images/3dprint/filament_spools.jpg";
 
 export default function Home() {
-  const { t, isRTL } = useLanguage();
+  const { t, isRTL, lang } = useLanguage();
   const navigate = useNavigate();
+
+  // ── SEO ──
+  useSEO();
 
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeFaq, setActiveFaq] = useState(null);
-  const [activeSlide, setActiveSlide] = useState(0);
 
   const loadData = async () => {
     setIsLoading(true);
@@ -49,11 +52,11 @@ export default function Home() {
     loadData();
 
     const handleStorageChange = () => loadData();
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('mixo_products_updated', handleStorageChange);
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("mixo_products_updated", handleStorageChange);
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('mixo_products_updated', handleStorageChange);
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("mixo_products_updated", handleStorageChange);
     };
   }, []);
 
@@ -61,175 +64,311 @@ export default function Home() {
     setActiveFaq(activeFaq === index ? null : index);
   };
 
-  const qnaItems = [
-    { q: t.qna.q1, a: t.qna.a1 },
-    { q: t.qna.q2, a: t.qna.a2 },
-    { q: t.qna.q3, a: t.qna.a3 },
-    { q: t.qna.q4, a: t.qna.a4 },
-    { q: t.qna.q5, a: t.qna.a5 },
-    { q: t.qna.q6, a: t.qna.a6 },
-    { q: t.qna.q7, a: t.qna.a7 },
-    { q: t.qna.q8, a: t.qna.a8 },
-    { q: t.qna.q9, a: t.qna.a9 },
-    { q: t.qna.q10, a: t.qna.a10 },
+  // Top 4 Categories as requested
+  const categoriesList = [
+    {
+      id: "figures",
+      name: isRTL ? "مجسمات" : "Figures",
+      fullName: isRTL ? "مجسمات ومقتنيات" : "Figures & Collectibles",
+      icon: "🐉",
+      color: "bg-red-500/10 text-[#FF1F3D]",
+    },
+    {
+      id: "masks",
+      name: isRTL ? "ماسكات" : "Masks",
+      fullName: isRTL ? "ماسكات وأقنعة" : "Masks & Wearables",
+      icon: "🎭",
+      color: "bg-blue-500/10 text-blue-500",
+    },
+    {
+      id: "decor",
+      name: isRTL ? "ديكور" : "Home Decor",
+      fullName: isRTL ? "ديكور المنزل" : "Home Decor",
+      icon: "🪴",
+      color: "bg-emerald-500/10 text-emerald-500",
+    },
+    {
+      id: "tools",
+      name: isRTL ? "أدوات" : "Parts",
+      fullName: isRTL ? "أجزاء وأدوات" : "Functional Parts",
+      icon: "⚙️",
+      color: "bg-purple-500/10 text-purple-500",
+    },
   ];
 
+  // Quick 3 FAQs
+  const qnaItems = [
+    {
+      q: isRTL ? "ما هي الطباعة ثلاثية الأبعاد (3D Printing)؟" : "What is 3D printing?",
+      a: isRTL
+        ? "عملية تصنيع رقمية تحول التصاميم الثلاثية الأبعاد إلى منتجات حقيقية طبقة تلو الأخرى باستخدام خامات متينة عالية الجودة."
+        : "Layer-by-layer digital manufacturing turning CAD models into physical products using durable materials.",
+    },
+    {
+      q: isRTL ? "ما هي المواد المستخدمة في الطباعة؟" : "What materials do you use?",
+      a: isRTL
+        ? "نستخدم خامات PLA الفاخرة والصديقة للبيئة لضمان المتانة والدقة العالية."
+        : "We use premium eco-friendly PLA for maximum durability and precision.",
+    },
+    {
+      q: isRTL ? "كم يستغرق الشحن والتوصيل؟" : "How long does printing & shipping take?",
+      a: isRTL
+        ? "تجهز الطلبات وتصلك خلال 1 إلى 3 أيام عمل لجميع المحافظات."
+        : "Orders are prepared and delivered within 1 to 3 business days across all governorates.",
+    },
+  ];
+
+  // ── Structured Data ──
+  const websiteSchema = useMemo(() => buildWebSiteSchema(SITE_URL, SITE_NAME), []);
+  const faqSchema = useMemo(() => buildFAQSchema(qnaItems), [lang]);
+
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#070B10] text-gray-900 dark:text-[#F5F7FA] transition-colors duration-200 pb-16">
-      
-      {/* Container */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-6 space-y-8 sm:space-y-12">
+    <div className="min-h-screen bg-slate-50/50 dark:bg-[#0F172A] text-gray-900 dark:text-[#F8FAFC] transition-colors duration-200 pb-16">
+      {/* JSON-LD Structured Data */}
+      <JsonLd data={websiteSchema} />
+      <JsonLd data={faqSchema} />
+
+      {/* Main Container */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 space-y-10 sm:space-y-16">
         
         {/* ========================================== */}
+        {/* 1. HERO SECTION                            */}
         {/* ========================================== */}
-        {/* 1. HERO SECTION (Light Soft Slate & Crimson Theme) */}
-        {/* ========================================== */}
-        <motion.section 
-          initial={{ opacity: 0, y: 30 }}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="relative rounded-2xl sm:rounded-3xl bg-gradient-to-br from-[#303E50] via-[#415166] to-[#442938] text-white p-4 sm:p-10 lg:p-12 overflow-hidden shadow-xl border border-slate-500/40"
+          transition={{ duration: 0.5 }}
+          className="relative rounded-2xl sm:rounded-3xl bg-gradient-to-br from-[#1E293B] via-[#16202E] to-[#2A1D2D] text-white p-5 sm:p-10 lg:p-12 overflow-hidden shadow-xl border border-slate-700/50 dark:border-slate-700/60"
         >
-          {/* Ambient Crimson Glow */}
-          <div className="absolute -top-24 -left-24 w-96 h-96 bg-[#FF1F3D]/25 blur-3xl rounded-full pointer-events-none" />
+          {/* Subtle Ambient Red Glow */}
+          <div className="absolute top-0 right-0 w-96 h-96 bg-[#FF1F3D]/20 blur-3xl rounded-full pointer-events-none" />
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-8 items-center relative z-10">
-            
-            {/* Hero Left Content */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center relative z-10">
+            {/* Hero Content */}
             <div className="lg:col-span-7 flex flex-col items-start">
-              <span className="inline-block text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[#FF1F3D] mb-1.5 sm:mb-3 bg-[#FF1F3D]/20 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full border border-[#FF1F3D]/40 animate-pulse-glow">
-                {t.hero.eyebrow}
+              <span className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[#FF1F3D] mb-2 sm:mb-3 bg-[#FF1F3D]/15 px-3 py-1 rounded-full border border-[#FF1F3D]/30">
+                <Sparkles className="w-3 h-3" />
+                <span>{isRTL ? "طباعة ثلاثية الأبعاد مخصصة" : "CUSTOM 3D PRINTING"}</span>
               </span>
 
-              <h1 className="text-xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-snug text-white">
-                {t.hero.titleLine1} <br />
-                <span className="text-[#FF1F3D]">{t.hero.titleLine2}</span>
+              <h1 className="text-2xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight text-white">
+                {isRTL ? "حول أفكارك إلى " : "Turn Your Ideas Into "}
+                <br className="hidden sm:inline" />
+                <span className="text-[#FF1F3D]">{isRTL ? "منتجات حقيقية." : "Real Products."}</span>
               </h1>
 
-              <p className="mt-1.5 sm:mt-4 text-xs sm:text-base text-gray-100 max-w-lg leading-relaxed font-normal">
-                {t.hero.subtitle}
+              <p className="mt-2 sm:mt-4 text-xs sm:text-base text-slate-200 max-w-lg leading-relaxed font-normal">
+                {isRTL
+                  ? "منتجات طباعة ثلاثية الأبعاد عالية الجودة مصممة خصيصاً لك."
+                  : "Premium 3D printed products made for you."}
               </p>
 
-              <div className="mt-3 sm:mt-8">
-                <Link to="/shop">
-                  <button className="bg-white hover:bg-black text-black hover:text-white font-extrabold px-4 py-2 sm:px-6 sm:py-3.5 rounded-full text-xs sm:text-base transition-all duration-300 shadow-lg hover:scale-105 active:scale-95 flex items-center gap-2">
-                    <span>{t.hero.cta}</span>
-                    {isRTL ? <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+              {/* Action Buttons */}
+              <div className="mt-5 sm:mt-8 flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
+                <Link to="/shop" className="flex-1 sm:flex-initial">
+                  <button className="w-full bg-white hover:bg-slate-100 text-slate-950 font-extrabold px-5 py-3 sm:px-7 sm:py-3.5 rounded-full text-xs sm:text-base transition-all duration-300 shadow-lg hover:scale-105 active:scale-95 flex items-center justify-center gap-2">
+                    <span>{isRTL ? "تسوق الآن" : "Shop Now"}</span>
+                    {isRTL ? <ArrowLeft className="w-4 h-4 text-slate-950" /> : <ArrowRight className="w-4 h-4 text-slate-950" />}
+                  </button>
+                </Link>
+
+                <Link to="/custom-order" className="flex-1 sm:flex-initial">
+                  <button className="w-full bg-white/10 hover:bg-white/20 text-white font-semibold px-5 py-3 sm:px-7 sm:py-3.5 rounded-full text-xs sm:text-base border border-white/25 hover:border-white/50 transition-all duration-300 backdrop-blur-sm active:scale-95 flex items-center justify-center gap-2">
+                    <PenTool className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#FF1F3D]" />
+                    <span>{isRTL ? "تصميم خاص" : "Custom Design"}</span>
                   </button>
                 </Link>
               </div>
 
-              {/* Feature badges at bottom */}
-              <div className="hidden sm:grid mt-6 sm:mt-12 pt-4 sm:pt-6 border-t border-slate-400/30 grid-cols-3 gap-2 sm:gap-4 w-full text-[10px] sm:text-xs text-gray-100">
-                <div className="flex items-center gap-1.5 sm:gap-2.5">
-                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-white/15 border border-white/30 flex items-center justify-center text-[#FF1F3D] flex-shrink-0 animate-float">
-                    <Box className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                  </div>
-                  <span className="font-medium line-clamp-1">{t.hero.features.quality}</span>
+              {/* Feature Badges under Hero */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 sm:mt-10 pt-4 sm:pt-6 border-t border-white/15 w-full text-[11px] sm:text-xs text-slate-200">
+                <div className="flex items-center gap-2">
+                  <Box className="w-4 h-4 text-[#FF1F3D] flex-shrink-0" />
+                  <span className="font-medium">{isRTL ? "خامات فائقة" : "High Quality"}</span>
                 </div>
-
-                <div className="flex items-center gap-1.5 sm:gap-2.5">
-                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-white/15 border border-white/30 flex items-center justify-center text-[#FF1F3D] flex-shrink-0 animate-float" style={{ animationDelay: '0.6s' }}>
-                    <Truck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                  </div>
-                  <span className="font-medium line-clamp-1">{t.hero.features.fast}</span>
+                <div className="flex items-center gap-2">
+                  <Truck className="w-4 h-4 text-[#FF1F3D] flex-shrink-0" />
+                  <span className="font-medium">{isRTL ? "شحن سريع" : "Fast Shipping"}</span>
                 </div>
-
-                <div className="flex items-center gap-1.5 sm:gap-2.5">
-                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-white/15 border border-white/30 flex items-center justify-center text-[#FF1F3D] flex-shrink-0 animate-float" style={{ animationDelay: '1.2s' }}>
-                    <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                  </div>
-                  <span className="font-medium line-clamp-1">{t.hero.features.custom}</span>
+                <div className="flex items-center gap-2">
+                  <Package className="w-4 h-4 text-[#FF1F3D] flex-shrink-0" />
+                  <span className="font-medium">{isRTL ? "طلب خاص" : "Custom Orders"}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Headphones className="w-4 h-4 text-[#FF1F3D] flex-shrink-0" />
+                  <span className="font-medium">{isRTL ? "دعم متواصل" : "24/7 Support"}</span>
                 </div>
               </div>
             </div>
 
             {/* Hero Right Visual */}
-            <div className="hidden sm:flex lg:col-span-5 relative items-center justify-center">
-              <div className="relative w-full aspect-16/9 sm:aspect-square lg:aspect-4/3 rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl border border-white/30 group">
+            <div className="lg:col-span-5 relative flex items-center justify-center mt-2 lg:mt-0">
+              <div className="relative w-full aspect-4/3 sm:aspect-square lg:aspect-4/3 rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl border border-white/15 group">
                 <img
                   src={heroDragonImg}
                   alt="3D Printed Dragon Figurine"
-                  className="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-700"
+                  className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#303E50]/50 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent" />
               </div>
             </div>
-
           </div>
         </motion.section>
 
         {/* ========================================== */}
-        {/* 2. CATEGORY NAVIGATION (Sleek Horizontal Pills on Mobile) */}
+        {/* 2. CATEGORIES SECTION                      */}
         {/* ========================================== */}
-        <motion.section 
+        <motion.section
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="pt-1"
+          transition={{ duration: 0.5 }}
         >
-          <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto pb-2 sm:pb-3 no-scrollbar scroll-smooth">
-            {CATEGORIES.map((cat) => {
-              const label = t.categories[cat.nameKey] || cat.defaultName;
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => navigate(`/shop?category=${cat.id}`)}
-                  className="flex-shrink-0 flex flex-row sm:flex-col items-center gap-1.5 p-2 sm:p-3.5 px-3 sm:px-3.5 w-auto sm:w-32 bg-white dark:bg-[#10161D] rounded-full sm:rounded-2xl border border-gray-100 dark:border-[#1E2630] hover:border-gray-300 dark:hover:border-[#FF1F3D]/50 hover:shadow-md transition-all duration-200 group text-center active:scale-95"
-                >
-                  <div className="w-6 h-6 sm:w-12 sm:h-12 rounded-full sm:rounded-xl bg-gray-100 dark:bg-[#151C24] flex items-center justify-center text-xs sm:text-2xl group-hover:scale-110 transition-transform">
-                    {cat.icon}
-                  </div>
-                  <span className="text-xs font-semibold text-gray-800 dark:text-[#F5F7FA] whitespace-nowrap">
-                    {label}
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+              {isRTL ? "استكشف الأقسام" : "Shop by Category"}
+            </h2>
+            <Link
+              to="/categories"
+              className="text-xs sm:text-sm font-bold text-[#FF1F3D] hover:underline flex items-center gap-1"
+            >
+              <span>{isRTL ? "عرض الكل" : "View All"}</span>
+              {isRTL ? <ArrowLeft className="w-3.5 h-3.5" /> : <ArrowRight className="w-3.5 h-3.5" />}
+            </Link>
+          </div>
+
+          {/* Simple horizontal scrolling cards on mobile / grid on desktop */}
+          <div className="flex sm:grid sm:grid-cols-4 gap-3 overflow-x-auto pb-2 sm:pb-0 no-scrollbar scroll-smooth">
+            {categoriesList.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => navigate(`/shop?category=${cat.id}`)}
+                className="flex-shrink-0 w-36 sm:w-auto p-4 bg-white dark:bg-[#1E293B]/70 rounded-2xl border border-gray-200/80 dark:border-slate-700/60 hover:border-[#FF1F3D]/50 dark:hover:border-[#FF1F3D]/50 transition-all duration-200 text-left group flex flex-col items-start justify-between min-h-[100px] active:scale-95 shadow-sm"
+              >
+                <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-[#0F172A] flex items-center justify-center text-xl shadow-sm border border-gray-100 dark:border-slate-700/50 group-hover:scale-110 transition-transform">
+                  {cat.icon}
+                </div>
+                <div className="mt-3">
+                  <span className="block text-sm font-bold text-gray-900 dark:text-white group-hover:text-[#FF1F3D] transition-colors">
+                    {cat.name}
                   </span>
-                </button>
-              );
-            })}
+                  <span className="block text-[11px] text-gray-500 dark:text-slate-400 mt-0.5 line-clamp-1">
+                    {cat.fullName}
+                  </span>
+                </div>
+              </button>
+            ))}
+
+            {/* View All Card */}
+            <button
+              onClick={() => navigate("/categories")}
+              className="flex-shrink-0 w-36 sm:w-auto p-4 bg-white dark:bg-[#1E293B]/70 rounded-2xl border border-dashed border-gray-300 dark:border-slate-700/80 hover:border-[#FF1F3D] transition-all duration-200 text-left group flex flex-col items-start justify-between min-h-[100px] active:scale-95 shadow-sm"
+            >
+              <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-[#0F172A] flex items-center justify-center text-[#FF1F3D] shadow-sm border border-gray-100 dark:border-slate-700/50 group-hover:scale-110 transition-transform">
+                {isRTL ? <ArrowLeft className="w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}
+              </div>
+              <div className="mt-3">
+                <span className="block text-sm font-bold text-gray-900 dark:text-white group-hover:text-[#FF1F3D] transition-colors">
+                  {isRTL ? "كل الأقسام" : "More Categories"}
+                </span>
+                <span className="block text-[11px] text-gray-500 dark:text-slate-400 mt-0.5">
+                  {isRTL ? "استكشف المزيد" : "Explore All"}
+                </span>
+              </div>
+            </button>
           </div>
         </motion.section>
 
         {/* ========================================== */}
-        {/* 3. CUSTOM 3D PRINTING BANNER (Light Soft Slate Theme) */}
+        {/* 3. POPULAR PRODUCTS SECTION                */}
         {/* ========================================== */}
-        <motion.section 
+        <motion.section
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="rounded-2xl sm:rounded-3xl bg-gradient-to-r from-[#303E50] via-[#415166] to-[#442938] text-white p-4 sm:p-10 overflow-hidden shadow-xl border border-slate-500/40 relative"
+          transition={{ duration: 0.5 }}
         >
-          {/* Ambient Crimson Glow */}
-          <div className="absolute top-0 right-0 w-80 h-80 bg-[#FF1F3D]/20 blur-3xl rounded-full pointer-events-none" />
-
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 items-center relative z-10">
-            <div className="md:col-span-7 space-y-2 sm:space-y-3">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <div>
               <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[#FF1F3D]">
-                {t.customBanner.eyebrow}
+                {isRTL ? "منتجات مميزة" : "FEATURED PRODUCTS"}
               </span>
-              <h2 className="text-lg sm:text-4xl font-bold tracking-tight text-white">
-                {t.customBanner.title}
+              <h2 className="text-lg sm:text-2xl font-bold tracking-tight text-gray-900 dark:text-white mt-0.5">
+                {isRTL ? "المنتجات الأكثر شعبية" : "Popular 3D Printed Products"}
               </h2>
-              <p className="text-xs sm:text-sm text-gray-100 max-w-md leading-relaxed">
-                {t.customBanner.description}
+            </div>
+            <Link
+              to="/shop"
+              className="text-xs sm:text-sm font-bold text-[#FF1F3D] hover:underline flex items-center gap-1"
+            >
+              <span>{isRTL ? "عرض الكل" : "View All"}</span>
+              {isRTL ? <ArrowLeft className="w-3.5 h-3.5" /> : <ArrowRight className="w-3.5 h-3.5" />}
+            </Link>
+          </div>
+
+          {isLoading ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
+              {[1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="bg-gray-200 dark:bg-[#1E293B]/70 rounded-2xl h-64 animate-pulse border border-gray-200 dark:border-slate-700/60"
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
+              {products.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          )}
+        </motion.section>
+
+        {/* ========================================== */}
+        {/* 4. CUSTOM PRINTING BANNER                  */}
+        {/* ========================================== */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="relative rounded-2xl sm:rounded-3xl bg-gradient-to-br from-[#1E293B] via-[#16202E] to-[#2A1D2D] text-white p-5 sm:p-10 overflow-hidden shadow-xl border border-slate-700/50 dark:border-slate-700/60"
+        >
+          {/* Ambient Glow */}
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#FF1F3D]/20 blur-3xl rounded-full pointer-events-none" />
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center relative z-10">
+            <div className="lg:col-span-7 space-y-2 sm:space-y-4">
+              <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[#FF1F3D] bg-[#FF1F3D]/15 px-2.5 py-1 rounded-full border border-[#FF1F3D]/30 inline-block">
+                {isRTL ? "طباعة مخصصة" : "CUSTOM 3D PRINTING"}
+              </span>
+
+              <h2 className="text-xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
+                {isRTL ? "هل تحتاج إلى تصميم خاص؟" : "Need a Custom Design?"}
+              </h2>
+
+              <p className="text-xs sm:text-sm text-slate-200 max-w-md leading-relaxed font-normal">
+                {isRTL
+                  ? "أرسل لنا فكرتك أو ملف الـ 3D وسنقوم بطباعتها بدقة فائقة وتوصيلها لك."
+                  : "Send us your idea or 3D file and we'll print it with high precision."}
               </p>
-              <div className="pt-1 sm:pt-2">
+
+              <div className="pt-2">
                 <Link to="/custom-order">
-                  <button className="bg-white hover:bg-black text-black hover:text-white font-extrabold px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm transition-all duration-300 shadow-md hover:scale-105 active:scale-95 flex items-center gap-2">
-                    <span>{t.customBanner.cta}</span>
+                  <button className="bg-white hover:bg-slate-100 text-slate-900 font-bold px-6 py-3 rounded-full text-xs sm:text-sm transition-all duration-300 shadow-md hover:scale-105 active:scale-95 flex items-center gap-2">
+                    <span>{isRTL ? "طلب تصميم خاص" : "Customize"}</span>
                     {isRTL ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
                   </button>
                 </Link>
               </div>
             </div>
 
-            <div className="hidden sm:block md:col-span-5 relative">
-              <div className="aspect-16/9 md:aspect-4/3 rounded-xl sm:rounded-2xl overflow-hidden border border-white/30 shadow-inner group">
+            <div className="hidden sm:block lg:col-span-5 relative">
+              <div className="aspect-16/9 lg:aspect-4/3 rounded-xl sm:rounded-2xl overflow-hidden border border-white/15 shadow-inner group">
                 <img
                   src={customVaseImg}
-                  alt="Custom 3D Printing Vase"
-                  className="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-500"
+                  alt="3D Printer Nozzle Printing"
+                  className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
                 />
               </div>
             </div>
@@ -237,163 +376,52 @@ export default function Home() {
         </motion.section>
 
         {/* ========================================== */}
-        {/* 5. PREMIUM FILAMENTS BANNER                */}
+        {/* 5. QUICK FAQ SECTION                       */}
         {/* ========================================== */}
-        <motion.section 
+        <motion.section
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.25 }}
-          className="rounded-2xl sm:rounded-3xl bg-[#F6F4EF] dark:bg-[#151C24] text-slate-900 dark:text-[#F5F7FA] p-4 sm:p-10 overflow-hidden shadow-sm border border-amber-100 dark:border-[#26313D]"
+          transition={{ duration: 0.5 }}
+          className="max-w-3xl mx-auto"
         >
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 items-center">
-            <div className="md:col-span-7 space-y-2 sm:space-y-3">
-              <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-[#FF1F3D]">
-                {t.filamentsBanner.eyebrow}
-              </span>
-              <h2 className="text-lg sm:text-4xl font-bold tracking-tight">
-                {t.filamentsBanner.title}
-              </h2>
-              <p className="text-xs sm:text-sm text-gray-600 dark:text-[#AAB4C0] max-w-md leading-relaxed">
-                {t.filamentsBanner.description}
-              </p>
-              <div className="pt-1 sm:pt-2">
-                <Link to="/shop?category=filaments">
-                  <button className="bg-slate-950 dark:bg-[#26313D] hover:bg-slate-800 dark:hover:bg-[#323F4E] text-white font-semibold px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm transition-all duration-200 active:scale-95 flex items-center gap-2">
-                    <span>{t.filamentsBanner.cta}</span>
-                    {isRTL ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
-                  </button>
-                </Link>
-              </div>
-            </div>
-
-            <div className="hidden sm:block md:col-span-5 relative">
-              <div className="aspect-16/9 md:aspect-4/3 rounded-xl sm:rounded-2xl overflow-hidden border border-gray-200 dark:border-[#26313D] shadow-sm group">
-                <img
-                  src={filamentImg}
-                  alt="Premium Filaments"
-                  className="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-500"
-                />
-              </div>
-            </div>
+          <div className="text-center mb-6">
+            <h2 className="text-lg sm:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+              {isRTL ? "أسئلة شائعة" : "Quick FAQ"}
+            </h2>
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-slate-400 mt-1">
+              {isRTL
+                ? "إجابات سريعة لأهم استفسارات الطباعة والتوصيل."
+                : "Common questions about 3D printing & delivery."}
+            </p>
           </div>
-        </motion.section>
 
-        {/* ========================================== */}
-        {/* 6. WHY CHOOSE US                           */}
-        {/* ========================================== */}
-        <motion.section 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="py-1 sm:py-4"
-        >
-          <SectionHeader
-            title={t.whyChooseUs.title}
-            subtitle={t.whyChooseUs.subtitle}
-          />
-
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-5">
-            <div className="p-3 sm:p-5 bg-white dark:bg-[#10161D] rounded-xl sm:rounded-2xl border border-gray-100 dark:border-[#1E2630] mixo-card-hover flex flex-col items-start gap-1.5 sm:gap-3">
-              <div className="p-1.5 sm:p-3 bg-amber-50 dark:bg-red-500/10 text-amber-600 dark:text-[#FF1F3D] rounded-lg sm:rounded-xl animate-float">
-                <Sparkles className="w-4 h-4 sm:w-6 sm:h-6" />
-              </div>
-              <div>
-                <h3 className="font-bold text-xs sm:text-base text-gray-900 dark:text-[#F5F7FA]">
-                  {t.whyChooseUs.f1Title}
-                </h3>
-                <p className="hidden sm:block text-[10px] sm:text-xs text-gray-500 dark:text-[#AAB4C0] mt-0.5 sm:mt-1">
-                  {t.whyChooseUs.f1Desc}
-                </p>
-              </div>
-            </div>
-
-            <div className="p-3 sm:p-5 bg-white dark:bg-[#10161D] rounded-xl sm:rounded-2xl border border-gray-100 dark:border-[#1E2630] mixo-card-hover flex flex-col items-start gap-1.5 sm:gap-3">
-              <div className="p-1.5 sm:p-3 bg-amber-50 dark:bg-red-500/10 text-amber-600 dark:text-[#FF1F3D] rounded-lg sm:rounded-xl animate-float" style={{ animationDelay: '0.5s' }}>
-                <Zap className="w-4 h-4 sm:w-6 sm:h-6" />
-              </div>
-              <div>
-                <h3 className="font-bold text-xs sm:text-base text-gray-900 dark:text-[#F5F7FA]">
-                  {t.whyChooseUs.f2Title}
-                </h3>
-                <p className="hidden sm:block text-[10px] sm:text-xs text-gray-500 dark:text-[#AAB4C0] mt-0.5 sm:mt-1">
-                  {t.whyChooseUs.f2Desc}
-                </p>
-              </div>
-            </div>
-
-            <div className="p-3 sm:p-5 bg-white dark:bg-[#10161D] rounded-xl sm:rounded-2xl border border-gray-100 dark:border-[#1E2630] mixo-card-hover flex flex-col items-start gap-1.5 sm:gap-3">
-              <div className="p-1.5 sm:p-3 bg-amber-50 dark:bg-red-500/10 text-amber-600 dark:text-[#FF1F3D] rounded-lg sm:rounded-xl animate-float" style={{ animationDelay: '1s' }}>
-                <CreditCard className="w-4 h-4 sm:w-6 sm:h-6" />
-              </div>
-              <div>
-                <h3 className="font-bold text-xs sm:text-base text-gray-900 dark:text-[#F5F7FA]">
-                  {t.whyChooseUs.f3Title}
-                </h3>
-                <p className="hidden sm:block text-[10px] sm:text-xs text-gray-500 dark:text-[#AAB4C0] mt-0.5 sm:mt-1">
-                  {t.whyChooseUs.f3Desc}
-                </p>
-              </div>
-            </div>
-
-            <div className="p-3 sm:p-5 bg-white dark:bg-[#10161D] rounded-xl sm:rounded-2xl border border-gray-100 dark:border-[#1E2630] mixo-card-hover flex flex-col items-start gap-1.5 sm:gap-3">
-              <div className="p-1.5 sm:p-3 bg-amber-50 dark:bg-red-500/10 text-amber-600 dark:text-[#FF1F3D] rounded-lg sm:rounded-xl animate-float" style={{ animationDelay: '1.5s' }}>
-                <Headphones className="w-4 h-4 sm:w-6 sm:h-6" />
-              </div>
-              <div>
-                <h3 className="font-bold text-xs sm:text-base text-gray-900 dark:text-[#F5F7FA]">
-                  {t.whyChooseUs.f4Title}
-                </h3>
-                <p className="hidden sm:block text-[10px] sm:text-xs text-gray-500 dark:text-[#AAB4C0] mt-0.5 sm:mt-1">
-                  {t.whyChooseUs.f4Desc}
-                </p>
-              </div>
-            </div>
-          </div>
-        </motion.section>
-
-        {/* ========================================== */}
-        {/* 7. 3D PRINTING Q&A (FAQ)                   */}
-        {/* ========================================== */}
-        <motion.section 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.35 }}
-          className="py-1 sm:py-4"
-        >
-          <SectionHeader
-            title={t.qna.title}
-            subtitle={t.qna.subtitle}
-          />
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-4">
-            {qnaItems.slice(0, 4).map((item, index) => {
+          <div className="space-y-3">
+            {qnaItems.map((item, index) => {
               const isOpen = activeFaq === index;
               return (
                 <div
                   key={index}
-                  className="bg-white dark:bg-[#10161D] rounded-xl sm:rounded-2xl border border-gray-100 dark:border-[#1E2630] overflow-hidden transition-all duration-200 hover:border-[#FF1F3D]/40"
+                  className="bg-white dark:bg-[#1E293B]/70 rounded-2xl border border-gray-200/80 dark:border-slate-700/60 overflow-hidden transition-all duration-200 hover:border-[#FF1F3D]/40 shadow-sm"
                 >
                   <button
                     onClick={() => toggleFaq(index)}
-                    className="w-full text-left px-3.5 py-3 sm:px-5 sm:py-4 flex items-center justify-between gap-3 text-xs sm:text-sm font-semibold text-gray-900 dark:text-[#F5F7FA] hover:bg-gray-50 dark:hover:bg-[#151C24]/50 transition-colors"
+                    className="w-full text-left px-4 py-3.5 sm:px-5 sm:py-4 flex items-center justify-between gap-3 text-xs sm:text-sm font-semibold text-gray-900 dark:text-[#F8FAFC] hover:bg-slate-50 dark:hover:bg-[#1E293B]/90 transition-colors"
                   >
                     <span>{item.q}</span>
                     {isOpen ? (
-                      <ChevronUp className="w-4 h-4 text-gray-500 dark:text-[#7F8A96] flex-shrink-0" />
+                      <ChevronUp className="w-4 h-4 text-[#FF1F3D] flex-shrink-0" />
                     ) : (
-                      <ChevronDown className="w-4 h-4 text-gray-500 dark:text-[#7F8A96] flex-shrink-0" />
+                      <ChevronDown className="w-4 h-4 text-gray-400 dark:text-slate-400 flex-shrink-0" />
                     )}
                   </button>
 
                   {isOpen && (
-                    <motion.div 
+                    <motion.div
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
                       exit={{ opacity: 0, height: 0 }}
-                      className="px-3.5 pb-3 sm:px-5 sm:pb-4 text-[11px] sm:text-xs text-gray-600 dark:text-[#AAB4C0] leading-relaxed border-t border-gray-100 dark:border-[#1E2630] pt-2 sm:pt-3"
+                      className="px-4 pb-4 sm:px-5 sm:pb-4 text-xs text-gray-600 dark:text-slate-300 leading-relaxed border-t border-gray-100 dark:border-slate-700/50 pt-3"
                     >
                       {item.a}
                     </motion.div>
@@ -403,14 +431,47 @@ export default function Home() {
             })}
           </div>
 
-          <div className="text-center pt-3 sm:pt-4">
+          <div className="text-center pt-4">
             <Link
               to="/faqs"
-              className="inline-flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 bg-white dark:bg-[#10161D] border border-gray-200 dark:border-[#1E2630] text-[#FF1F3D] rounded-xl text-xs font-bold hover:border-[#FF1F3D] transition-all shadow-sm active:scale-95"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#FF1F3D] hover:underline"
             >
-              <span>{isRTL ? "عرض جميع الأسئلة الشائعة بمركز المساعدة" : "View All FAQs in Help Center"}</span>
-              {isRTL ? <ArrowLeft size={14} /> : <ArrowRight size={14} />}
+              <span>{isRTL ? "عرض جميع الأسئلة بمركز المساعدة" : "View All FAQs"}</span>
+              {isRTL ? <ArrowLeft className="w-3.5 h-3.5" /> : <ArrowRight className="w-3.5 h-3.5" />}
             </Link>
+          </div>
+        </motion.section>
+
+        {/* ========================================== */}
+        {/* 6. COMPACT BENEFITS ROW                    */}
+        {/* ========================================== */}
+        <motion.section
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.4 }}
+          className="pt-2 border-t border-gray-200/80 dark:border-slate-800"
+        >
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-8 text-xs font-medium text-gray-600 dark:text-slate-300 text-center">
+            <span className="flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-[#FF1F3D]" />
+              <span>{isRTL ? "جودة فائقة" : "Quality"}</span>
+            </span>
+            <span className="text-gray-300 dark:text-slate-700">•</span>
+            <span className="flex items-center gap-1.5">
+              <Truck className="w-3.5 h-3.5 text-[#FF1F3D]" />
+              <span>{isRTL ? "شحن سريع" : "Fast Shipping"}</span>
+            </span>
+            <span className="text-gray-300 dark:text-slate-700">•</span>
+            <span className="flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#FF1F3D]" />
+              <span>{isRTL ? "دفع آمن" : "Secure Payment"}</span>
+            </span>
+            <span className="text-gray-300 dark:text-slate-700">•</span>
+            <span className="flex items-center gap-1.5">
+              <Headphones className="w-3.5 h-3.5 text-[#FF1F3D]" />
+              <span>{isRTL ? "دعم متواصل" : "Support"}</span>
+            </span>
           </div>
         </motion.section>
 

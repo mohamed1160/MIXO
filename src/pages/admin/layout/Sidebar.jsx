@@ -14,6 +14,8 @@ import {
   Sparkles,
   HelpCircle,
   ShieldCheck,
+  Star,
+  Tag,
 } from "lucide-react";
 import { useAdminStore } from "../../../store/useAdminStore";
 import { useAuthStore } from "../../../store/useAuthStore";
@@ -23,8 +25,10 @@ const NAV_ITEMS = [
   { to: "/admin", label: "Overview", labelAr: "نظرة عامة", icon: LayoutDashboard, end: true },
   { to: "/admin/orders", label: "Orders & 3D Quotes", labelAr: "الطلبات والتسعير", icon: ShoppingBag },
   { to: "/admin/products", label: "3D Products Catalog", labelAr: "منتجات المتجر 3D", icon: Box },
+  { to: "/admin/promo-codes", label: "Promo Codes & Coupons", labelAr: "أكواد الخصم والكوبونات", icon: Tag },
   { to: "/admin/customers", label: "Registered Customers", labelAr: "العملاء المسجلين", icon: Users },
   { to: "/admin/messages", label: "Messages & Requests", labelAr: "الرسائل والطلبات المخصصة", icon: MessageSquare },
+  { to: "/admin/reviews", label: "Customer Reviews", labelAr: "تقييمات العملاء", icon: Star },
   { to: "/admin/faqs", label: "Q&A / FAQs", labelAr: "الأسئلة الشائعة", icon: HelpCircle },
   { to: "/admin/security", label: "Security & Passwords", labelAr: "أمان الحساب وكلمة السر", icon: ShieldCheck },
   { to: "/admin/settings", label: "Store Settings", labelAr: "إعدادات المتجر", icon: Settings },

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { getSupabaseProducts, saveSupabaseProduct, deleteSupabaseProduct, upload3DFileToSupabase } from '../../../services/db.service';
-import { MOCK_PRODUCTS } from '../../../services/products';
+import { getSupabaseProducts, saveSupabaseProduct, deleteSupabaseProduct, upload3DFileToSupabase, subscribeToRealtimeProducts } from '../../../services/db.service';
+import { MOCK_PRODUCTS, getAllCategories, saveCustomCategory } from '../../../services/products';
 import {
   Search,
   Plus,
@@ -27,6 +27,26 @@ export default function Products() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
 
+  // Dynamic Categories state
+  const [availableCategories, setAvailableCategories] = useState(() => getAllCategories());
+  const [showAddCategoryInput, setShowAddCategoryInput] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+
+  const handleAddNewCategory = () => {
+    if (!newCategoryName.trim()) {
+      toast.error('برجاء كتابة اسم التصنيف الجديد');
+      return;
+    }
+    const added = saveCustomCategory(newCategoryName.trim());
+    if (added) {
+      toast.success(`تم إضافة تصنيف "${added.defaultName}" بنجاح! 🎉`);
+      setAvailableCategories(getAllCategories());
+      setFormData((prev) => ({ ...prev, category: added.defaultName }));
+      setNewCategoryName('');
+      setShowAddCategoryInput(false);
+    }
+  };
+
   // Form state
   const [formData, setFormData] = useState({
     name: '',
@@ -43,41 +63,55 @@ export default function Products() {
     try {
       const supaData = await getSupabaseProducts();
       if (supaData && supaData.length > 0) {
-        const supaIds = new Set(supaData.map((p) => String(p.id)));
-        const defaultRemain = MOCK_PRODUCTS.filter((p) => !supaIds.has(String(p.id)));
-        setProducts([...supaData, ...defaultRemain]);
+        setProducts(supaData);
       } else {
         const saved = localStorage.getItem('MIXO_products');
         if (saved) {
           const localList = JSON.parse(saved);
-          const localIds = new Set(localList.map((p) => String(p.id)));
-          const defaultRemain = MOCK_PRODUCTS.filter((p) => !localIds.has(String(p.id)));
-          setProducts([...localList, ...defaultRemain]);
+          setProducts(localList);
         } else {
-          setProducts(MOCK_PRODUCTS);
+          setProducts([]);
         }
       }
     } catch (e) {
       console.error(e);
-      setProducts(MOCK_PRODUCTS);
+      setProducts([]);
     }
   };
 
   useEffect(() => {
     loadProducts();
 
-    const handleStorageChange = () => loadProducts();
+    const handleStorageChange = () => {
+      loadProducts();
+      setAvailableCategories(getAllCategories());
+    };
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener('mixo_products_updated', handleStorageChange);
+    window.addEventListener('mixo_categories_updated', handleStorageChange);
+
+    // Subscribe to realtime changes from Supabase
+    const unsubscribe = subscribeToRealtimeProducts(() => {
+      loadProducts();
+    });
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('mixo_products_updated', handleStorageChange);
+      window.removeEventListener('mixo_categories_updated', handleStorageChange);
+      if (unsubscribe) unsubscribe();
+    };
   }, []);
 
   const handleOpenAddModal = () => {
     setEditingProduct(null);
+    setShowAddCategoryInput(false);
+    setNewCategoryName('');
     setFormData({
       name: '',
       price: '',
       originalPrice: '',
-      category: '3D Models',
+      category: availableCategories[0]?.defaultName || 'Figures & Collectibles',
       material: 'PLA Plus',
       image: '',
       description: '',
@@ -88,11 +122,13 @@ export default function Products() {
 
   const handleOpenEditModal = (product) => {
     setEditingProduct(product);
+    setShowAddCategoryInput(false);
+    setNewCategoryName('');
     setFormData({
       name: product.name,
       price: product.price,
       originalPrice: product.originalPrice || '',
-      category: product.category || '3D Models',
+      category: product.category || 'Figures & Collectibles',
       material: product.material || 'PLA Plus',
       image: product.image || '',
       description: product.description || '',
@@ -141,7 +177,7 @@ export default function Products() {
       const supaUrl = await upload3DFileToSupabase(file);
       if (supaUrl) {
         setFormData((prev) => ({ ...prev, image: supaUrl }));
-        toast.success("تم رفع صورة المنتج بنجاح إلى Supabase! 📷");
+        toast.success("تم رفع صورة المنتج بنجاح إلى السحابة! 📷");
       } else {
         const compressed = await compressImage(file);
         if (compressed) {
@@ -177,9 +213,13 @@ export default function Products() {
       stock: formData.inStock !== false ? 10 : 0
     };
 
-    await saveSupabaseProduct(prodObj);
+    const res = await saveSupabaseProduct(prodObj);
     window.dispatchEvent(new CustomEvent('mixo_products_updated'));
-    toast.success(editingProduct ? 'تم تعديل المنتج بنجاح 🎉' : 'تم إضافة المنتج الجديد بنجاح 🎉');
+    if (res?.supaSuccess) {
+      toast.success(editingProduct ? 'تم تعديل المنتج بنجاح وحفظه في السحابة لجميع الأجهزة 🎉' : 'تم إضافة المنتج الجديد وحفظه في السحابة لجميع الأجهزة 🎉');
+    } else {
+      toast.success(editingProduct ? 'تم تعديل المنتج بنجاح 🎉' : 'تم إضافة المنتج الجديد بنجاح 🎉');
+    }
 
     setIsModalOpen(false);
     loadProducts();
@@ -211,18 +251,7 @@ export default function Products() {
     return p.category === categoryFilter;
   });
 
-  const categories = [
-    'All',
-    'Figures & Collectibles',
-    'Masks & Wearables',
-    'Home Decor',
-    'Phone Stands',
-    'Tools & Functional',
-    'Vases & Art',
-    'Gaming & Cosplay',
-    'Filaments',
-    '3D Models',
-  ];
+  const categories = ['All', ...availableCategories.map(c => c.defaultName)];
 
   return (
     <div className="p-4 md:p-6 space-y-6 text-gray-900 dark:text-white min-h-screen dir-rtl" style={{ fontFamily: 'Tajawal, sans-serif' }}>
@@ -413,23 +442,66 @@ export default function Products() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">التصنيف</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300">التصنيف</label>
+                    <button
+                      type="button"
+                      onClick={() => setShowAddCategoryInput((prev) => !prev)}
+                      className="text-[11px] font-bold text-[#FF1F3D] hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      إضافة تصنيف
+                    </button>
+                  </div>
+
+                  {showAddCategoryInput && (
+                    <div className="bg-gray-100 dark:bg-[#1A2332] p-2 rounded-xl border border-gray-300 dark:border-gray-700/80 flex items-center gap-1.5 mb-2">
+                      <input
+                        type="text"
+                        placeholder="اسم التصنيف..."
+                        value={newCategoryName}
+                        onChange={(e) => setNewCategoryName(e.target.value)}
+                        className="flex-1 bg-white dark:bg-[#121923] border border-gray-300 dark:border-gray-700 rounded-lg px-2 py-1 text-xs text-gray-900 dark:text-white focus:outline-none focus:border-[#FF1F3D]"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddNewCategory();
+                          }
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddNewCategory}
+                        className="px-2.5 py-1 bg-[#FF1F3D] hover:bg-[#D91832] text-white text-xs font-bold rounded-lg transition-all cursor-pointer shrink-0"
+                      >
+                        حفظ
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowAddCategoryInput(false)}
+                        className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-white"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
+
                   <select
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                     className="w-full bg-gray-50 dark:bg-[#1A2332] border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 text-xs text-gray-900 dark:text-white focus:outline-none focus:border-[#FF1F3D]"
                   >
-                    {categories.filter(c => c !== 'All').map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
+                    {availableCategories.map(cat => (
+                      <option key={cat.id} value={cat.defaultName}>{cat.defaultName}</option>
                     ))}
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">نوع الخامة / الفيلـامينت</label>
+                  <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">نوع الخامة (PLA)</label>
                   <input
                     type="text"
-                    placeholder="PLA+, PETG, Silk"
+                    placeholder="PLA, PLA Plus"
                     value={formData.material}
                     onChange={(e) => setFormData({ ...formData, material: e.target.value })}
                     className="w-full bg-gray-50 dark:bg-[#1A2332] border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-2 text-xs text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-[#FF1F3D]"

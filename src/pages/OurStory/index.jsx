@@ -21,12 +21,17 @@ import mixoLogoImg from "../../assets/images/logo/mixo_red_logo.png";
 import heroDragonImg from "../../assets/images/3dprint/hero_dragon.jpg";
 import customVaseImg from "../../assets/images/3dprint/custom_vase.jpg";
 import filamentImg from "../../assets/images/3dprint/filament_spools.jpg";
+import oniMaskImg from "../../assets/images/3dprint/oni_mask.jpg";
 import CustomDesignModal from "../../components/CustomDesignModal";
+import { useSEO } from "../../hooks/useSEO";
 
 export default function OurStory() {
   const { isRTL } = useLanguage();
   const navigate = useNavigate();
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
+
+  // ── SEO ──
+  useSEO();
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#070B10] text-gray-900 dark:text-[#F5F7FA] font-sans pb-24 transition-colors duration-200">
@@ -65,7 +70,7 @@ export default function OurStory() {
             <p className="text-xs sm:text-base text-gray-400 max-w-2xl leading-relaxed">
               {isRTL
                 ? "ميكسو هي وجهتك الأولى في عالم الطباعة 3D. نقدم أدق التفاصيل بخامات PLA العالية الجودة، مع دعم تصميم الموديلات وتوفير المقاسات المخصصة للماسكات والأقنعة والمجسمات."
-                : "Mixo is your premier destination for additive manufacturing & 3D printing. We craft high-precision models with premium PLA filaments and custom mask fitting options."}
+                : "Mixo is your premier destination for additive manufacturing & 3D printing. We craft high-precision models with premium PLA and custom mask fitting options."}
             </p>
 
             {/* CTA Action Buttons */}
@@ -136,8 +141,8 @@ export default function OurStory() {
               </div>
               <div className="aspect-square rounded-3xl overflow-hidden shadow-lg border border-gray-100 dark:border-[#1E2630]">
                 <img
-                  src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80"
-                  alt="3D Printed Mask"
+                  src={oniMaskImg}
+                  alt="3D Printed Oni Mask"
                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                 />
               </div>
@@ -189,7 +194,7 @@ export default function OurStory() {
             <p className="text-xs sm:text-sm text-gray-600 dark:text-[#AAB4C0] leading-relaxed">
               {isRTL
                 ? "نحن نستخدم أحدث طابعات الـ 3D بخامة PLA العالية الجودة، ونتيح للعملاء إمكانية اختيار مجسماتهم من موقع MakerWorld.com أو رفع صورهم وتواصل فريقنا معهم مباشرة لتحديد الأسعار والمقاسات."
-                : "We utilize state-of-the-art 3D printers with premium PLA filaments. Customers can easily pick models from MakerWorld.com or upload their images for instant consultation and pricing."}
+                : "We utilize state-of-the-art 3D printers with premium PLA. Customers can easily pick models from MakerWorld.com or upload their images for instant consultation and pricing."}
             </p>
 
             <div className="grid grid-cols-2 gap-4 pt-2">

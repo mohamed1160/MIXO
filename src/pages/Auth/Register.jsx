@@ -8,6 +8,7 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { useLanguage } from "../../providers/LanguageContext";
 import mixoLogoImg from "../../assets/images/logo/mixo_red_logo.png";
 import heroDragonImg from "../../assets/images/3dprint/hero_dragon.jpg";
+import { useSEO } from "../../hooks/useSEO";
 
 const registerSchema = z
   .object({
@@ -32,6 +33,10 @@ const getPasswordStrength = (password) => {
 
 export default function Register() {
   const { isRTL } = useLanguage();
+
+  // ── SEO (noindex) ──
+  useSEO({ noindex: true });
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isCustomLoading, setIsCustomLoading] = useState(false);

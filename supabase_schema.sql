@@ -16,6 +16,8 @@ CREATE TABLE IF NOT EXISTS public.products (
   review_count INT DEFAULT 120,
   is_bestseller BOOLEAN DEFAULT false,
   description TEXT,
+  material TEXT DEFAULT 'PLA Plus',
+  in_stock BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -110,7 +112,8 @@ CREATE TABLE IF NOT EXISTS public.notifications (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Enable Realtime Live Tracking for Orders & Messages
+-- Enable Realtime Live Tracking for Orders, Messages & Products
+ALTER PUBLICATION supabase_realtime ADD TABLE public.products;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.orders;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.contact_messages;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.notifications;

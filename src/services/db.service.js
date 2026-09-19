@@ -131,7 +131,7 @@ export function subscribeToRealtimeOrders(onUpdate) {
 }
 
 // ==========================================
-// 2. PRODUCTS SERVICE (Supabase CRUD)
+// 2. PRODUCTS SERVICE (Supabase CRUD & Realtime)
 // ==========================================
 export async function getSupabaseProducts() {
   try {
@@ -141,7 +141,7 @@ export async function getSupabaseProducts() {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    if (data && data.length > 0) {
+    if (Array.isArray(data)) {
       const formatted = data.map(p => ({
         id: p.id,
         name: p.name,
@@ -154,29 +154,17 @@ export async function getSupabaseProducts() {
         rating: p.rating || 0,
         reviewCount: p.review_count || 0,
         isBestSeller: p.is_bestseller || false,
-        description: p.description,
+        description: p.description || '',
         material: p.material || 'PLA Plus',
         inStock: p.in_stock !== false
       }));
 
-      // Merge local storage products that might not be in Supabase yet
-      const saved = localStorage.getItem('MIXO_products');
-      if (saved) {
-        try {
-          const localProducts = JSON.parse(saved);
-          const supaIds = new Set(formatted.map(p => String(p.id)));
-          const localOnly = localProducts.filter(lp => !supaIds.has(String(lp.id)));
-          const merged = [...formatted, ...localOnly];
-          localStorage.setItem('MIXO_products', JSON.stringify(merged));
-          return merged;
-        } catch (e) {}
-      }
-
+      // Cache to LocalStorage for offline speed
       localStorage.setItem('MIXO_products', JSON.stringify(formatted));
       return formatted;
     }
   } catch (err) {
-    console.warn('Supabase products fallback:', err);
+    console.warn('Supabase products fetch fallback to LocalStorage:', err);
   }
 
   const saved = localStorage.getItem('MIXO_products');
@@ -184,40 +172,45 @@ export async function getSupabaseProducts() {
 }
 
 export async function saveSupabaseProduct(product) {
+  let supaSuccess = false;
   try {
     const payload = {
       id: String(product.id || Date.now()),
       name: product.name || product.title,
       title: product.title || product.name,
       category: product.category || 'Figures & Collectibles',
-      price: product.price,
-      original_price: product.originalPrice || null,
+      price: Number(product.price),
+      original_price: product.originalPrice ? Number(product.originalPrice) : null,
       image: product.image,
       images: product.images || [product.image],
       rating: product.rating || 0,
       review_count: product.reviewCount || 0,
       is_bestseller: product.isBestSeller || false,
-      description: product.description || '',
-      material: product.material || 'PLA Plus',
-      in_stock: product.inStock !== false
+      description: product.description || ''
     };
 
     const { error } = await supabase
       .from('products')
       .upsert([payload]);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase save product error:', error);
+    } else {
+      supaSuccess = true;
+    }
   } catch (err) {
-    console.error('Failed to save product in Supabase:', err);
+    console.error('Failed to save product in Supabase API:', err);
   }
 
+  // Update LocalStorage & notify app components
   const saved = localStorage.getItem('MIXO_products');
   const existingList = saved ? JSON.parse(saved) : [];
   const updated = [product, ...existingList.filter(p => String(p.id) !== String(product.id))];
   localStorage.setItem('MIXO_products', JSON.stringify(updated));
   window.dispatchEvent(new Event('storage'));
   window.dispatchEvent(new CustomEvent('mixo_products_updated'));
-  return product;
+
+  return { product, supaSuccess };
 }
 
 export async function deleteSupabaseProduct(productId) {
@@ -240,6 +233,23 @@ export async function deleteSupabaseProduct(productId) {
     window.dispatchEvent(new Event('storage'));
     window.dispatchEvent(new CustomEvent('mixo_products_updated'));
   }
+}
+
+export function subscribeToRealtimeProducts(onUpdate) {
+  const subscription = supabase
+    .channel('public:products')
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'products' },
+      (payload) => {
+        onUpdate(payload);
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(subscription);
+  };
 }
 
 // ==========================================
@@ -571,7 +581,7 @@ export async function saveSupabaseReview(reviewObj) {
       id: reviewObj.id || `REV-${Date.now()}`,
       product_id: String(reviewObj.productId),
       user_name: reviewObj.userName || 'مشتري مؤكد',
-      rating: reviewObj.rating || 5,
+      rating: Number(reviewObj.rating || 5),
       comment: reviewObj.comment,
       status: reviewObj.status || 'approved'
     };
@@ -585,6 +595,32 @@ export async function saveSupabaseReview(reviewObj) {
   } catch (err) {
     console.error('Failed to save review in Supabase:', err);
     throw err;
+  }
+}
+
+export async function updateSupabaseReviewStatus(reviewId, status) {
+  try {
+    const { error } = await supabase
+      .from('reviews')
+      .update({ status })
+      .eq('id', reviewId);
+
+    if (error) throw error;
+  } catch (err) {
+    console.error('Failed to update review status in Supabase:', err);
+  }
+}
+
+export async function deleteSupabaseReview(reviewId) {
+  try {
+    const { error } = await supabase
+      .from('reviews')
+      .delete()
+      .eq('id', reviewId);
+
+    if (error) throw error;
+  } catch (err) {
+    console.error('Failed to delete review in Supabase:', err);
   }
 }
 

@@ -21,6 +21,7 @@ import {
   ListOrdered,
 } from 'lucide-react';
 import { getAdminData } from '../../../services/adminMockData';
+import { saveCustomCategory } from '../../../services/products';
 
 const GOLD = '#d99a3f';
 
@@ -170,6 +171,7 @@ const Categories = () => {
         order: nextOrder,
       };
       setCategories((prev) => [...prev, newCategory]);
+      saveCustomCategory(form.name, form.icon || '🏷️');
     }
     setShowFormModal(false);
     setForm(emptyForm);
