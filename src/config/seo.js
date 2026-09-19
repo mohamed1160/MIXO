@@ -1,7 +1,7 @@
 // ─── Centralized SEO Configuration ───
 // All SEO metadata for every route, plus site-wide defaults.
 
-export const SITE_URL = 'https://mixo3d.com';
+export const SITE_URL = 'https://mixo-one.vercel.app/';
 export const SITE_NAME = 'MIXO 3D';
 export const DEFAULT_OG_IMAGE = '/favicon.png';
 
