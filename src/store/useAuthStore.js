@@ -125,7 +125,7 @@ export const useAuthStore = create((set, get) => ({
     );
 
     if (!foundUser) {
-      const errMsg = 'رقم الهاتف غير مسجل لدينا، يرجى إنشاء حساب جديد أولاً ⚠️';
+      const errMsg = 'البريد الإلكتروني أو رقم الهاتف غير مسجل لدينا، يرجى إنشاء حساب جديد أولاً ⚠️';
       set({ isLoading: false, error: errMsg });
       throw new Error(errMsg);
     }

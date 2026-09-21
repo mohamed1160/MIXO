@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useLocation, Link } from "react-router-dom";
-import { Eye, EyeOff, Loader2, Phone, Lock, Apple, ArrowRight, ArrowLeft, Printer, Sparkles } from "lucide-react";
+import { Eye, EyeOff, Loader2, User, Phone, Mail, Lock, Apple, ArrowRight, ArrowLeft, Printer, Sparkles } from "lucide-react";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useLanguage } from "../../providers/LanguageContext";
 import mixoLogoImg from "../../assets/images/logo/mixo_red_logo.png";
@@ -11,8 +11,8 @@ import heroDragonImg from "../../assets/images/3dprint/hero_dragon.jpg";
 import { useSEO } from "../../hooks/useSEO";
 
 const loginSchema = z.object({
-  phone: z.string().min(6, "Valid phone number is required"),
-  password: z.string().min(1, "Password is required"),
+  identifier: z.string().min(3, "البريد الإلكتروني أو رقم الهاتف مطلوب / Email or Phone number is required"),
+  password: z.string().min(1, "كلمة المرور مطلوبة / Password is required"),
 });
 
 export default function Login() {
@@ -28,8 +28,8 @@ export default function Login() {
 
   const from = location.state?.from?.pathname || "/";
 
-  const isAdminCheck = (u, phoneInput) => {
-    if (phoneInput === "01000000000" || phoneInput === "admin@gmail.com") return true;
+  const isAdminCheck = (u, inputVal) => {
+    if (inputVal === "01000000000" || inputVal?.toLowerCase() === "admin@gmail.com") return true;
     if (u?.role === "admin" || u?.phone === "01000000000" || u?.email?.toLowerCase() === "admin@gmail.com") return true;
     return false;
   };
@@ -51,16 +51,16 @@ export default function Login() {
   } = useForm({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      phone: "",
+      identifier: "",
       password: "",
     },
   });
 
   const onSubmit = async (data) => {
     try {
-      const loggedUser = await login(data.phone, data.password);
+      const loggedUser = await login(data.identifier, data.password);
       if (loggedUser) {
-        if (isAdminCheck(loggedUser, data.phone)) {
+        if (isAdminCheck(loggedUser, data.identifier)) {
           navigate("/admin", { replace: true });
         } else {
           navigate(from, { replace: true });
@@ -98,8 +98,8 @@ export default function Login() {
             </h2>
             <p className="text-xs text-gray-300 leading-relaxed">
               {isRTL
-                ? "سجل دخولك برقم التليفون لمتابعة طلبات الطباعة ثلاثية الأبعاد الخاصة بك وحفظ التصاميم المفضلة."
-                : "Sign in with your phone number to track your custom 3D orders and request price quotes."}
+                ? "سجل دخولك بالبريد الإلكتروني أو رقم الهاتف لمتابعة طلبات الطباعة ثلاثية الأبعاد الخاصة بك."
+                : "Sign in with your email or phone number to track your custom 3D orders and request price quotes."}
             </p>
           </div>
 
@@ -119,10 +119,10 @@ export default function Login() {
               <img src={mixoLogoImg} alt="Mixo Logo" className="h-10 w-auto mx-auto object-contain" />
             </Link>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white">
-              {isRTL ? "تسجيل الدخول برقم التليفون" : "Sign In with Phone Number"}
+              {isRTL ? "تسجيل الدخول" : "Sign In"}
             </h2>
             <p className="text-xs text-gray-500 dark:text-[#7F8A96]">
-              {isRTL ? "أدخل رقم تليفونك وكلمة المرور للمتابعة" : "Enter your registered phone number and password to access your profile"}
+              {isRTL ? "أدخل البريد الإلكتروني أو رقم الهاتف وكلمة المرور للمتابعة" : "Enter your email or phone number and password to access your account"}
             </p>
           </div>
 
@@ -135,26 +135,26 @@ export default function Login() {
               </div>
             )}
 
-            {/* Phone Number Field */}
+            {/* Email or Phone Field */}
             <div className="space-y-1.5">
               <label className="block text-xs font-bold uppercase tracking-wider text-gray-800 dark:text-[#F5F7FA]">
-                {isRTL ? "رقم الهاتف *" : "Phone Number *"}
+                {isRTL ? "البريد الإلكتروني أو رقم الهاتف *" : "Email or Phone Number *"}
               </label>
               <div className="relative">
                 <input
-                  type="tel"
-                  {...register("phone")}
-                  placeholder={isRTL ? "أدخل رقم تليفونك (مثال: 01012345678)" : "e.g. 01012345678"}
+                  type="text"
+                  {...register("identifier")}
+                  placeholder={isRTL ? "أدخل البريد أو رقم الهاتف (مثال: 01012345678 أو email@example.com)" : "e.g. 01012345678 or name@example.com"}
                   className={`w-full bg-[#F3F4F6] dark:bg-[#151C24] text-gray-900 dark:text-[#F5F7FA] placeholder-gray-400 text-xs sm:text-sm rounded-xl py-3 pl-3.5 pr-10 border transition-all ${
-                    errors.phone
+                    errors.identifier
                       ? "border-red-500 focus:border-red-500"
                       : "border-transparent dark:border-[#26313D] focus:border-[#FF1F3D] focus:outline-none"
                   }`}
                 />
-                <Phone className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <User className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               </div>
-              {errors.phone && (
-                <p className="text-[11px] font-medium text-red-500">{errors.phone.message}</p>
+              {errors.identifier && (
+                <p className="text-[11px] font-medium text-red-500">{errors.identifier.message}</p>
               )}
             </div>
 
