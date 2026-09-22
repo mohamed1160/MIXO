@@ -144,7 +144,7 @@ export async function getSupabaseProducts(forceRefresh = false) {
   try {
     const { data, error } = await supabase
       .from('products')
-      .select('id, name, title, category, price, original_price, image, images, rating, review_count, is_bestseller, in_stock, material, description')
+      .select('id, name, title, category, price, original_price, image, images, rating, review_count, is_bestseller, description')
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -163,7 +163,7 @@ export async function getSupabaseProducts(forceRefresh = false) {
         isBestSeller: p.is_bestseller || false,
         description: p.description || '',
         material: p.material || 'PLA Plus',
-        inStock: p.in_stock !== false
+        inStock: true
       }));
 
       productsCache = formatted;
