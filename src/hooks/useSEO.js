@@ -31,8 +31,11 @@ export function useSEO(options = {}) {
 
     const title = options.title || langSeo.title || `${SITE_NAME} — 3D Printing & Custom Design`;
     const description = options.description || langSeo.description || 'Premium 3D printing and custom design studio in Egypt.';
-    const canonical = options.canonical || `${SITE_URL}${routePath === '/' ? '' : routePath}`;
-    const ogImage = options.ogImage || `${SITE_URL}${DEFAULT_OG_IMAGE}`;
+    const cleanSiteUrl = SITE_URL.replace(/\/+$/, '');
+    const cleanPath = routePath === '/' ? '' : (routePath.startsWith('/') ? routePath : `/${routePath}`);
+    const canonical = options.canonical || `${cleanSiteUrl}${cleanPath}`;
+    const rawOgImg = options.ogImage || DEFAULT_OG_IMAGE;
+    const ogImage = rawOgImg.startsWith('http') ? rawOgImg : `${cleanSiteUrl}${rawOgImg.startsWith('/') ? rawOgImg : `/${rawOgImg}`}`;
     const ogType = options.ogType || 'website';
     const ogLocale = lang === 'ar' ? 'ar_EG' : 'en_US';
 

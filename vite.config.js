@@ -8,6 +8,7 @@ export default defineConfig({
   build: {
     target: 'esnext',
     cssCodeSplit: true,
+    modulePreload: false,
     rollupOptions: {
       output: {
         manualChunks(id) {
@@ -24,7 +25,7 @@ export default defineConfig({
             if (id.includes('framer-motion')) {
               return 'vendor-motion';
             }
-            return 'vendor-misc';
+            return 'vendor-core';
           }
         },
       },

@@ -308,12 +308,16 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Hero Right Visual */}
-            <div className="lg:col-span-5 relative flex items-center justify-center mt-1 lg:mt-0">
-              <div className="relative w-full aspect-16/9 sm:aspect-square lg:aspect-4/3 max-h-44 sm:max-h-none rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl border border-white/15 group">
+            {/* Hero Right Visual (Desktop only) */}
+            <div className="hidden lg:flex lg:col-span-5 relative items-center justify-center mt-0">
+              <div className="relative w-full aspect-4/3 rounded-2xl overflow-hidden shadow-2xl border border-white/15 group">
                 <img
                   src={heroDragonImg}
                   alt="3D Printed Dragon Figurine"
+                  fetchPriority="high"
+                  decoding="async"
+                  width="600"
+                  height="450"
                   className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent" />

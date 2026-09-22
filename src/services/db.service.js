@@ -130,14 +130,21 @@ export function subscribeToRealtimeOrders(onUpdate) {
   };
 }
 
-// ==========================================
-// 2. PRODUCTS SERVICE (Supabase CRUD & Realtime)
-// ==========================================
-export async function getSupabaseProducts() {
+// Cache memory for fast duplicate requests
+let productsCache = null;
+let productsCacheTime = 0;
+const CACHE_TTL_MS = 15000;
+
+export async function getSupabaseProducts(forceRefresh = false) {
+  const now = Date.now();
+  if (!forceRefresh && productsCache && (now - productsCacheTime < CACHE_TTL_MS)) {
+    return productsCache;
+  }
+
   try {
     const { data, error } = await supabase
       .from('products')
-      .select('*')
+      .select('id, name, title, category, price, original_price, image, images, rating, review_count, is_bestseller, in_stock, material, description')
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -159,7 +166,8 @@ export async function getSupabaseProducts() {
         inStock: p.in_stock !== false
       }));
 
-      // Cache to LocalStorage for offline speed
+      productsCache = formatted;
+      productsCacheTime = now;
       localStorage.setItem('MIXO_products', JSON.stringify(formatted));
       return formatted;
     }
@@ -168,7 +176,10 @@ export async function getSupabaseProducts() {
   }
 
   const saved = localStorage.getItem('MIXO_products');
-  return saved ? JSON.parse(saved) : [];
+  const parsed = saved ? JSON.parse(saved) : [];
+  productsCache = parsed;
+  productsCacheTime = now;
+  return parsed;
 }
 
 export async function saveSupabaseProduct(product) {
