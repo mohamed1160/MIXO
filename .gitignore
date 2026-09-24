@@ -13,6 +13,8 @@ dist-ssr
 *.local
 .env
 .env.*
+service-account.json
+test-fcm.mjs
 
 # Editor directories and files
 .vscode/*

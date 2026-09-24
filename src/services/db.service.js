@@ -1,4 +1,43 @@
 import { supabase } from './supabaseClient';
+import { useAuthStore } from '../store/useAuthStore';
+
+async function sendPushNotification({ userId, title, body, data = {} }) {
+  try {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+    const response = await fetch(
+      `${supabaseUrl}/functions/v1/send-push-notification`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${supabaseAnonKey}`,
+          apikey: supabaseAnonKey,
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          title,
+          body,
+          data,
+        }),
+      }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      console.error('Push notification failed:', result);
+      return null;
+    }
+
+    console.log('Push notification sent:', result);
+    return result;
+  } catch (error) {
+    console.error('Push notification error:', error);
+    return null;
+  }
+}
 
 // ==========================================
 // 1. ORDERS SERVICE (With Supabase & Realtime Sync)
@@ -14,6 +53,7 @@ export async function getSupabaseOrders() {
     if (data && data.length > 0) {
       const formatted = data.map(d => ({
         id: d.id,
+        user_id: d.user_id,
         customer: d.customer,
         items: d.items,
         customData: d.custom_data,
@@ -39,6 +79,7 @@ export async function saveSupabaseOrder(newOrder) {
       .from('orders')
       .insert([{
         id: newOrder.id,
+        user_id: newOrder.user_id || null,
         customer: newOrder.customer,
         items: newOrder.items,
         custom_data: newOrder.customData || null,
@@ -48,6 +89,16 @@ export async function saveSupabaseOrder(newOrder) {
       }]);
 
     if (error) throw error;
+
+    await sendPushNotification({
+      userId: 'CUS-3848',
+      title: 'طلب جديد 🛒',
+      body: `تم استلام طلب جديد ${newOrder.id}`,
+      data: {
+        type: 'new_order',
+        order_id: newOrder.id,
+      },
+    });
   } catch (err) {
     console.error('Failed to insert order into Supabase, saving locally:', err);
   }

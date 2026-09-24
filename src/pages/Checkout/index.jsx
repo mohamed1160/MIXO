@@ -70,6 +70,7 @@ export default function Checkout() {
     const totalAmount = cart.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0);
     const newOrderObj = {
       id: "ORD-" + Math.floor(Math.random() * 90000 + 10000),
+      user_id: user?.id || null,
       createdAt: new Date().toISOString(),
       date: new Date().toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" }),
       orderStatus: "Processing",
