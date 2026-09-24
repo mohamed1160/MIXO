@@ -1,9 +1,22 @@
 import { create } from 'zustand';
 import { authService } from '../api/auth';
 import { findSupabaseUser, saveSupabaseUser } from '../services/db.service';
+import { requestNotificationPermission } from '../notifications';
 
 const USERS_STORAGE_KEY = 'MIXO_registered_users';
 const CURRENT_USER_KEY = 'MIXO_current_user';
+
+const setupAdminNotifications = async (userData) => {
+  if (userData?.role !== "admin") {
+    return;
+  }
+
+  try {
+    await requestNotificationPermission();
+  } catch (error) {
+    console.warn("Admin notification setup failed:", error);
+  }
+};
 
 const DEFAULT_USERS = [
   {
@@ -77,6 +90,7 @@ export const useAuthStore = create((set, get) => ({
           }
           localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(userData));
           set({ user: userData, isAuthenticated: true, isLoading: false, error: null });
+          await setupAdminNotifications(userData);
           return userData;
         } else {
           const errMsg = 'كلمة السر غير صحيحة، يرجى إعادة المحاولة ⚠️';
@@ -108,6 +122,7 @@ export const useAuthStore = create((set, get) => ({
 
         localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(userData));
         set({ user: userData, isAuthenticated: true, isLoading: false, error: null });
+        await setupAdminNotifications(userData);
         return userData;
       }
     } catch (e) {
@@ -143,6 +158,7 @@ export const useAuthStore = create((set, get) => ({
 
     localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(userData));
     set({ user: userData, isAuthenticated: true, isLoading: false, error: null });
+    await setupAdminNotifications(userData);
     return userData;
   },
 
