@@ -20,7 +20,6 @@ import ProductCard from "../../components/ProductCard";
 import { useSEO } from "../../hooks/useSEO";
 import JsonLd, { buildWebSiteSchema, buildFAQSchema } from "../../components/seo/JsonLd";
 import { SITE_URL, SITE_NAME } from "../../config/seo";
-import { requestNotificationPermission } from "../../notifications";
 
 // Assets
 import heroDragonImg from "../../assets/images/3dprint/hero_dragon.jpg";
@@ -33,16 +32,6 @@ export default function Home() {
 
   // ── SEO ──
   useSEO();
-
-  const enableNotifications = async () => {
-    try {
-      const token = await requestNotificationPermission();
-
-      console.log("FCM TOKEN:", token);
-    } catch (error) {
-      console.error("Notification error:", error);
-    }
-  };
 
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -296,13 +285,6 @@ export default function Home() {
                     <span>{isRTL ? "تصميم خاص" : "Custom Design"}</span>
                   </button>
                 </Link>
-
-                <button
-                  onClick={enableNotifications}
-                  className="bg-[#FF1F3D] hover:bg-[#E01935] text-white font-semibold px-4 py-2.5 sm:px-6 sm:py-3.5 rounded-full text-xs sm:text-base transition-all duration-300 shadow-md hover:scale-105 active:scale-95 flex items-center justify-center gap-1.5"
-                >
-                  Enable Notifications
-                </button>
               </div>
 
               {/* Feature Badges under Hero */}
