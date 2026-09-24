@@ -8,9 +8,26 @@ export async function requestNotificationPermission() {
     throw new Error("This browser does not support notifications.");
   }
 
+  // Web Push on iPhone/iPad requires an installed Home Screen web app.
+  const isIOS =
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+  const isStandalone =
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.navigator.standalone === true;
+
+  if (isIOS && !isStandalone) {
+    console.warn(
+      "On iPhone/iPad, the website must be added to the Home Screen before enabling notifications."
+    );
+    return null;
+  }
+
   const permission = await Notification.requestPermission();
 
   if (permission !== "granted") {
+    console.log("Notification permission:", permission);
     return null;
   }
 
@@ -24,9 +41,7 @@ export async function requestNotificationPermission() {
     "/firebase-messaging-sw.js"
   );
 
-  if (!registration.active) {
-    await navigator.serviceWorker.ready;
-  }
+  await navigator.serviceWorker.ready;
 
   const token = await getToken(messaging, {
     vapidKey: VAPID_KEY,
@@ -37,12 +52,14 @@ export async function requestNotificationPermission() {
     throw new Error("Failed to generate FCM token.");
   }
 
-  // Get current custom MIXO user
   const user = useAuthStore.getState().user;
-
   const userId = user?.id ?? null;
 
-  // Save token in Supabase
+  if (!userId) {
+    console.warn("No logged-in user found. FCM token was not saved.");
+    return token;
+  }
+
   const { error } = await supabase
     .from("push_tokens")
     .upsert(
@@ -62,7 +79,7 @@ export async function requestNotificationPermission() {
     throw error;
   }
 
-  console.log("✅ FCM token saved to Supabase");
+  console.log("✅ FCM token saved to Supabase for:", userId);
 
   return token;
 }
