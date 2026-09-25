@@ -418,6 +418,18 @@ export default function Orders() {
                   <span className="text-amber-600 dark:text-yellow-400 font-bold">{selectedOrder.paymentMethod}</span>
                 </div>
               </div>
+
+              {selectedOrder.transferReceipt && (
+                <div className="pt-2 border-t border-gray-200 dark:border-gray-800 space-y-2">
+                  <div className="text-xs font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-green-500" />
+                    <span>إيصال التحويل المرفق من العميل:</span>
+                  </div>
+                  <a href={selectedOrder.transferReceipt} target="_blank" rel="noreferrer" className="block border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:opacity-95 transition-opacity max-w-sm">
+                    <img src={selectedOrder.transferReceipt} alt="إيصال التحويل" className="w-full max-h-64 object-contain bg-black/5 dark:bg-black/40 p-2" />
+                  </a>
+                </div>
+              )}
             </div>
 
             {/* 3D Custom Quote Details if applicable */}

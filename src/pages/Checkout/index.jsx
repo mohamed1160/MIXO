@@ -78,6 +78,7 @@ export default function Checkout() {
       statusColor: "bg-[#FF1F3D]/10 text-[#FF1F3D] border-[#FF1F3D]/20",
       total: totalAmount,
       paymentMethod: data.paymentMethod?.toUpperCase() || "InstaPay / Vodafone Cash",
+      transferReceipt: data.transferReceipt || null,
       customer: {
         name: `${data.shipping?.fullName || (isRTL ? 'عميل المتجر' : 'Store Customer')}`.trim(),
         phone: data.shipping?.phone || '01012345678',
@@ -147,7 +148,7 @@ export default function Checkout() {
         setStep(4);
         window.scrollTo(0, 0);
       } else {
-        toast.error(isRTL ? "يرجى التأكد من بيانات وسيلة الدفع والإيصال" : "Please verify your payment details.");
+        toast.error(isRTL ? "يرجى رفع صورة إيصال التحويل أولاً لإتمام العملية" : "Please upload the transfer receipt image to proceed.");
       }
     }
   };

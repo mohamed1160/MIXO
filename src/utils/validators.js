@@ -18,4 +18,12 @@ export const checkoutSchema = z.object({
     errorMap: () => ({ message: "رجاء اختيار طريقة الدفع / Please select a payment method" }),
   }),
   transferReceipt: z.string().optional(),
+}).superRefine((data, ctx) => {
+  if ((data.paymentMethod === "instapay" || data.paymentMethod === "vodafone") && (!data.transferReceipt || data.transferReceipt.trim() === "")) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "يرجى رفع صورة إيصال التحويل لإتمام عملية الدفع / Please upload the transfer receipt image to proceed",
+      path: ["transferReceipt"],
+    });
+  }
 });
