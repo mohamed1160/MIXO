@@ -105,7 +105,9 @@ export default function Checkout() {
         items: cart,
       };
       
-      await createOrderMutation.mutateAsync(orderData).catch(() => {});
+      if (import.meta.env.VITE_API_URL) {
+        await createOrderMutation.mutateAsync(orderData).catch(() => {});
+      }
       
       if (emptyCart) {
         emptyCart();
