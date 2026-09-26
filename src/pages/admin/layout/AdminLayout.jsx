@@ -1,19 +1,32 @@
 import { useState, useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { useAdminStore } from '../../../store/useAdminStore';
 import { useTheme } from '../../../providers/ThemeContext';
 import { getAdminData } from '../../../services/adminMockData';
+import { setupForegroundNotifications } from '../../../notifications';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
 import '../admin.css';
 
 export default function AdminLayout() {
+  const navigate = useNavigate();
   const { sidebarCollapsed } = useAdminStore();
   const { isDark } = useTheme();
   const { stats } = getAdminData();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  /* ── Foreground push notification listener ── */
+  useEffect(() => {
+    let unsubscribe;
+    setupForegroundNotifications(navigate).then((unsub) => {
+      unsubscribe = unsub;
+    });
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, [navigate]);
 
   /* ── Sync Theme attribute with global ThemeContext ── */
   useEffect(() => {

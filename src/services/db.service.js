@@ -96,7 +96,8 @@ export async function saveSupabaseOrder(newOrder) {
       body: `تم استلام طلب جديد ${newOrder.id}`,
       data: {
         type: 'new_order',
-        order_id: newOrder.id,
+        order_id: String(newOrder.id),
+        url: `/admin/orders?orderId=${newOrder.id}`,
       },
     });
   } catch (err) {

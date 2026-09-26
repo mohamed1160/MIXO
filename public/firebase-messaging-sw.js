@@ -21,17 +21,54 @@ messaging.onBackgroundMessage((payload) => {
   console.log("[firebase-messaging-sw.js] Background message:", payload);
 
   const notificationTitle =
-    payload.notification?.title || "MIXO 3D";
+    payload.notification?.title || payload.data?.title || "MIXO 3D";
+
+  const notificationBody =
+    payload.notification?.body || payload.data?.body || "You have a new notification.";
+
+  const orderId = payload.data?.order_id || payload.data?.orderId;
+  const targetUrl =
+    payload.data?.url ||
+    (orderId ? `/admin/orders?orderId=${orderId}` : "/admin/orders");
 
   const notificationOptions = {
-    body:
-      payload.notification?.body ||
-      "You have a new notification.",
+    body: notificationBody,
     icon: "/favicon.png",
+    badge: "/favicon.png",
+    data: {
+      url: targetUrl,
+      orderId: orderId,
+    },
   };
 
   self.registration.showNotification(
     notificationTitle,
     notificationOptions
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  console.log("[firebase-messaging-sw.js] Notification click:", event);
+  event.notification.close();
+
+  const targetUrl = event.notification.data?.url || "/admin/orders";
+
+  event.waitUntil(
+    clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((clientList) => {
+        for (const client of clientList) {
+          if (client.url.includes("/admin") && "focus" in client) {
+            client.focus();
+            if ("navigate" in client) {
+              return client.navigate(targetUrl);
+            }
+            return;
+          }
+        }
+        if (clients.openWindow) {
+          return clients.openWindow(targetUrl);
+        }
+      })
   );
 });

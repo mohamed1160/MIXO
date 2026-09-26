@@ -1,4 +1,6 @@
-import { getToken } from "firebase/messaging";
+import React from "react";
+import { getToken, onMessage } from "firebase/messaging";
+import toast from "react-hot-toast";
 import { getFirebaseMessaging, VAPID_KEY } from "./firebase";
 import { supabase } from "./services/supabaseClient";
 import { useAuthStore } from "./store/useAuthStore";
@@ -82,4 +84,42 @@ export async function requestNotificationPermission() {
   console.log("✅ FCM token saved to Supabase for:", userId);
 
   return token;
+}
+
+export async function setupForegroundNotifications(navigate) {
+  try {
+    const messaging = await getFirebaseMessaging();
+    if (!messaging) return;
+
+    return onMessage(messaging, (payload) => {
+      console.log("Foreground notification received:", payload);
+      const title = payload.notification?.title || payload.data?.title || "طلب جديد 🛒";
+      const body = payload.notification?.body || payload.data?.body || "تم استلام طلب جديد";
+      const orderId = payload.data?.order_id || payload.data?.orderId;
+      const targetUrl = payload.data?.url || (orderId ? `/admin/orders?orderId=${orderId}` : "/admin/orders");
+
+      toast((t) => (
+        React.createElement("div", {
+          className: "flex flex-col gap-1 cursor-pointer p-1 text-right dir-rtl",
+          onClick: () => {
+            toast.dismiss(t.id);
+            if (navigate) {
+              navigate(targetUrl);
+            } else {
+              window.location.href = targetUrl;
+            }
+          }
+        }, [
+          React.createElement("span", { key: "title", className: "font-bold text-sm text-[#FF1F3D]" }, title),
+          React.createElement("span", { key: "body", className: "text-xs text-gray-700 dark:text-gray-200" }, body),
+          React.createElement("span", { key: "link", className: "text-[11px] font-bold text-blue-600 dark:text-blue-400 mt-1 underline" }, "اضغط هنا لفتح تفاصيل الطلب مباشرة ←")
+        ])
+      ), {
+        duration: 10000,
+        position: 'top-right',
+      });
+    });
+  } catch (err) {
+    console.warn("Foreground notification setup skipped:", err);
+  }
 }

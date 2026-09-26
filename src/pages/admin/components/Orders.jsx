@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   getSupabaseOrders,
   updateSupabaseOrderStatus,
@@ -38,6 +39,9 @@ const STATUS_CONFIG = {
 const INITIAL_DEMO_ORDERS = [];
 
 export default function Orders() {
+  const [searchParams] = useSearchParams();
+  const urlOrderId = searchParams.get('orderId') || searchParams.get('id');
+
   const [orders, setOrders] = useState([]);
   const [search, setSearch] = useState('');
   const [filterTab, setFilterTab] = useState('all');
@@ -59,6 +63,19 @@ export default function Orders() {
 
     return () => unsubscribe();
   }, []);
+
+  // Auto select order if orderId query parameter is present in URL
+  useEffect(() => {
+    if (urlOrderId && orders.length > 0) {
+      const match = orders.find(o => String(o.id).toLowerCase() === String(urlOrderId).toLowerCase());
+      if (match) {
+        setSelectedOrder(match);
+        setQuotePriceInput(match.total ? String(match.total) : '');
+      } else {
+        setSearch(urlOrderId);
+      }
+    }
+  }, [urlOrderId, orders]);
 
   const handleStatusChange = async (orderId, newStatus) => {
     await updateSupabaseOrderStatus(orderId, newStatus);
