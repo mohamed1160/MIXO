@@ -78,14 +78,15 @@ export default function Orders() {
 
   // Auto select order if orderId query parameter is present in URL
   useEffect(() => {
-    if (urlOrderId && orders.length > 0) {
-      const match = orders.find(o => String(o.id).toLowerCase() === String(urlOrderId).toLowerCase());
-      if (match) {
-        setSelectedOrder(match);
-        setQuotePriceInput(match.total ? String(match.total) : '');
-      } else {
-        setSearch(urlOrderId);
-      }
+    if (!urlOrderId || orders.length === 0) return;
+
+    const match = orders.find(
+      (o) => String(o.id).toLowerCase() === String(urlOrderId).toLowerCase()
+    );
+
+    if (match) {
+      setSelectedOrder(match);
+      setQuotePriceInput(match.total ? String(match.total) : '');
     }
   }, [urlOrderId, orders]);
 

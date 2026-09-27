@@ -1,10 +1,12 @@
 import { supabase } from './supabaseClient';
 import { useAuthStore } from '../store/useAuthStore';
 
-async function sendPushNotification({ userId, title, body, data = {} }) {
+async function sendPushNotification({ userId, title, body, orderId, order_id, data = {} }) {
   try {
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
     const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+    const targetOrderId = order_id || orderId || data.order_id || data.orderId;
 
     const response = await fetch(
       `${supabaseUrl}/functions/v1/send-push-notification`,
@@ -19,6 +21,7 @@ async function sendPushNotification({ userId, title, body, data = {} }) {
           user_id: userId,
           title,
           body,
+          order_id: targetOrderId,
           data,
         }),
       }

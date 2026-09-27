@@ -20,6 +20,7 @@ serve(async (req) => {
       user_id,
       title,
       body,
+      order_id,
       data = {},
     } = await req.json();
 
@@ -37,6 +38,16 @@ serve(async (req) => {
         }
       );
     }
+
+    const notificationData = {
+      ...data,
+      ...(order_id
+        ? {
+            order_id: String(order_id),
+            url: data.url || `/admin/orders?orderId=${encodeURIComponent(String(order_id))}`,
+          }
+        : {}),
+    };
 
     // Supabase credentials
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
@@ -126,7 +137,12 @@ serve(async (req) => {
                 title,
                 body,
               },
-              data,
+              data: Object.fromEntries(
+                Object.entries(notificationData).map(([key, value]) => [
+                  key,
+                  String(value),
+                ])
+              ),
             },
           }),
         }
