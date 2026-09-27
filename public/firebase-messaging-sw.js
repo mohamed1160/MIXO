@@ -52,22 +52,25 @@ self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
   const targetUrl = event.notification.data?.url || "/admin/orders";
+  const absoluteUrl = new URL(targetUrl, self.location.origin).href;
 
   event.waitUntil(
     clients
       .matchAll({ type: "window", includeUncontrolled: true })
       .then((clientList) => {
+        // Focus and navigate any open tab belonging to our site
         for (const client of clientList) {
-          if (client.url.includes("/admin") && "focus" in client) {
+          if (client.url && client.url.startsWith(self.location.origin) && "focus" in client) {
             client.focus();
             if ("navigate" in client) {
-              return client.navigate(targetUrl);
+              return client.navigate(absoluteUrl);
             }
             return;
           }
         }
+        // If all tabs were closed, open a new window
         if (clients.openWindow) {
-          return clients.openWindow(targetUrl);
+          return clients.openWindow(absoluteUrl);
         }
       })
   );
