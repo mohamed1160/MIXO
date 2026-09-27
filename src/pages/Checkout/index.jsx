@@ -74,7 +74,7 @@ export default function Checkout() {
       createdAt: new Date().toISOString(),
       date: new Date().toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" }),
       orderStatus: "Processing",
-      paymentStatus: data.paymentMethod === "cod" ? "Pending" : "Paid",
+      paymentStatus: "Pending",
       statusColor: "bg-[#FF1F3D]/10 text-[#FF1F3D] border-[#FF1F3D]/20",
       total: totalAmount,
       paymentMethod: data.paymentMethod?.toUpperCase() || "InstaPay / Vodafone Cash",
@@ -235,6 +235,10 @@ export default function Checkout() {
                       <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-800 pb-2">
                         <span className="text-gray-500 dark:text-gray-400">{isRTL ? "طريقة الدفع المحددة:" : "Selected Payment Method:"}</span>
                         <span className="font-bold text-[#FF1F3D] dark:text-yellow-400 uppercase">{watch("paymentMethod")}</span>
+                      </div>
+                      <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-800 pb-2">
+                        <span className="text-gray-500 dark:text-gray-400">{isRTL ? "وقت التأكد من التحويل:" : "Payment Verification:"}</span>
+                        <span className="font-bold text-amber-600 dark:text-yellow-400">{isRTL ? "خلال 2 - 5 ساعات عمل" : "Within 2 - 5 working hours"}</span>
                       </div>
                       {(watch("paymentMethod") === "instapay" || watch("paymentMethod") === "vodafone") && watch("transferReceipt") && (
                         <div className="flex items-center justify-between pt-1">

@@ -33,32 +33,56 @@ export default function TrackOrderPage() {
   useSEO({ noindex: true });
 
   const handleSearchOrder = async (queryToSearch = orderIdQuery) => {
-    const q = (queryToSearch || '').trim().toLowerCase();
+    const raw = (queryToSearch || '').trim();
     setSearched(true);
-    if (!q) {
+    if (!raw) {
       setFoundOrder(null);
       return;
     }
 
+    const clean = raw.toLowerCase().replace(/^#/, '').trim();
+    const digitsOnly = clean.replace(/[^0-9]/g, '');
+
+    const checkMatch = (ordersList) => {
+      if (!Array.isArray(ordersList)) return null;
+      return ordersList.find((o) => {
+        if (!o || !o.id) return false;
+        const orderIdClean = String(o.id).toLowerCase().replace(/^#/, '').trim();
+        const orderIdDigits = orderIdClean.replace(/[^0-9]/g, '');
+
+        if (orderIdClean === clean) return true;
+        if (digitsOnly && digitsOnly.length >= 4 && orderIdDigits.includes(digitsOnly)) return true;
+        if (orderIdClean.includes(clean)) return true;
+        if (o.customer?.phone && o.customer.phone.replace(/[^0-9]/g, '').includes(digitsOnly || clean)) return true;
+        if (o.customer?.name && o.customer.name.toLowerCase().includes(clean)) return true;
+
+        return false;
+      });
+    };
+
     try {
       const orders = await getSupabaseOrders();
-      if (orders && orders.length > 0) {
-        const match = orders.find(
-          (o) =>
-            o.id.toLowerCase() === q ||
-            o.id.toLowerCase().replace(/[^a-z0-9]/g, '') === q.replace(/[^a-z0-9]/g, '') ||
-            (o.customer && o.customer.phone && o.customer.phone.includes(q))
-        );
-        if (match) {
-          setFoundOrder(match);
-          return;
-        }
+      const match = checkMatch(orders);
+      if (match) {
+        setFoundOrder(match);
+        return;
       }
     } catch (e) {
       console.error(e);
     }
 
-    // No order found in database
+    try {
+      const localStr = localStorage.getItem('MIXO_customer_orders') || localStorage.getItem('MIXO_orders');
+      if (localStr) {
+        const localList = JSON.parse(localStr);
+        const match = checkMatch(localList);
+        if (match) {
+          setFoundOrder(match);
+          return;
+        }
+      }
+    } catch (e) {}
+
     setFoundOrder(null);
   };
 
@@ -241,6 +265,18 @@ export default function TrackOrderPage() {
                 >
                   {isCancelled ? <XCircle size={15} /> : <Clock size={15} />}
                   <span>{getStatusDisplayLabel(rawStatus)}</span>
+                </span>
+
+                <span
+                  className={`px-3.5 py-2 rounded-full text-xs font-bold flex items-center gap-1 border shadow-xs ${
+                    (foundOrder.paymentStatus === 'Paid' || foundOrder.paymentStatus === 'تم تأكيد الدفع')
+                      ? 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/30'
+                      : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30'
+                  }`}
+                >
+                  {(foundOrder.paymentStatus === 'Paid' || foundOrder.paymentStatus === 'تم تأكيد الدفع')
+                    ? (isRTL ? 'تم تأكيد الدفع ✓' : 'Payment Confirmed ✓')
+                    : (isRTL ? 'لم يتم التأكد من التحويل (خلال 2-5 ساعات) ⏳' : 'Transfer Pending Verification (2-5h) ⏳')}
                 </span>
 
                 <button

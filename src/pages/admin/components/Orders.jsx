@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import {
   getSupabaseOrders,
   updateSupabaseOrderStatus,
+  updateSupabaseOrderPaymentStatus,
   deleteSupabaseOrder,
   subscribeToRealtimeOrders
 } from '../../../services/db.service';
@@ -23,7 +24,8 @@ import {
   MapPin,
   X,
   Printer,
-  ChevronDown
+  ChevronDown,
+  CreditCard
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -84,6 +86,18 @@ export default function Orders() {
       setSelectedOrder({ ...selectedOrder, status: newStatus });
     }
     toast.success(`تم تحديث حالة الطلب إلى: ${newStatus}`);
+  };
+
+  const handlePaymentStatusChange = async (orderId, newPaymentStatus) => {
+    await updateSupabaseOrderPaymentStatus(orderId, newPaymentStatus);
+    fetchOrders();
+    if (selectedOrder && selectedOrder.id === orderId) {
+      setSelectedOrder({ ...selectedOrder, paymentStatus: newPaymentStatus });
+    }
+    const label = (newPaymentStatus === 'Paid' || newPaymentStatus === 'تم تأكيد الدفع') 
+      ? 'تم تأكيد الدفع بنجاح ✓' 
+      : 'لم يتم التأكد من التحويل (قيد المراجعة)';
+    toast.success(`تم تحديث حالة الدفع إلى: ${label}`);
   };
 
   const handleApproveQuote = async (orderId) => {
@@ -339,12 +353,23 @@ export default function Orders() {
                         )}
                       </td>
 
-                      {/* Total Price */}
+                      {/* Total Price & Payment Status */}
                       <td className="p-4">
                         <div className="font-extrabold text-sm text-[#FF1F3D]">
                           {order.total ? `${order.total} ج.م` : 'بانتظار التسعير ⏳'}
                         </div>
                         <div className="text-[10px] text-gray-500 dark:text-gray-400">{order.paymentMethod}</div>
+                        <div className="mt-1">
+                          {(order.paymentStatus === 'Paid' || order.paymentStatus === 'تم تأكيد الدفع') ? (
+                            <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-green-500/15 text-green-600 dark:text-green-400 border border-green-500/30">
+                              تم تأكيد الدفع ✓
+                            </span>
+                          ) : (
+                            <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                              لم يتم التأكد من التحويل ⏳
+                            </span>
+                          )}
+                        </div>
                       </td>
 
                       {/* Status */}
@@ -447,6 +472,58 @@ export default function Orders() {
                   </a>
                 </div>
               )}
+            </div>
+
+            {/* 💳 Payment Verification Control Box */}
+            <div className="bg-white dark:bg-[#121923] p-4 rounded-2xl border-2 border-amber-500/30 space-y-3 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-xs font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
+                    <CreditCard className="w-4 h-4 text-[#FF1F3D]" />
+                    <span>تأكيد حالة التحويل والدفع:</span>
+                  </div>
+                  <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
+                    (وقت التأكد للعميل: من 2 إلى 5 ساعات عمل)
+                  </div>
+                </div>
+                <span className={`px-2.5 py-1 rounded-lg text-xs font-extrabold ${
+                  (selectedOrder.paymentStatus === 'Paid' || selectedOrder.paymentStatus === 'تم تأكيد الدفع')
+                    ? 'bg-green-500/15 text-green-600 dark:text-green-400 border border-green-500/30'
+                    : 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30'
+                }`}>
+                  {(selectedOrder.paymentStatus === 'Paid' || selectedOrder.paymentStatus === 'تم تأكيد الدفع')
+                    ? 'تم تأكيد الدفع ✓'
+                    : 'لم يتم التأكد من التحويل ⏳'}
+                </span>
+              </div>
+
+              <div className="flex gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => handlePaymentStatusChange(selectedOrder.id, 'Paid')}
+                  className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs ${
+                    (selectedOrder.paymentStatus === 'Paid' || selectedOrder.paymentStatus === 'تم تأكيد الدفع')
+                      ? 'bg-green-600 text-white shadow-md font-extrabold ring-2 ring-green-400'
+                      : 'bg-gray-100 dark:bg-[#1A2332] text-gray-700 dark:text-gray-300 hover:bg-green-600 hover:text-white'
+                  }`}
+                >
+                  <CheckCircle2 size={16} />
+                  <span>تم تأكيد الدفع</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handlePaymentStatusChange(selectedOrder.id, 'Pending')}
+                  className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs ${
+                    (selectedOrder.paymentStatus !== 'Paid' && selectedOrder.paymentStatus !== 'تم تأكيد الدفع')
+                      ? 'bg-amber-600 text-white shadow-md font-extrabold ring-2 ring-amber-400'
+                      : 'bg-gray-100 dark:bg-[#1A2332] text-gray-700 dark:text-gray-300 hover:bg-amber-600 hover:text-white'
+                  }`}
+                >
+                  <Clock size={16} />
+                  <span>لم يتم التأكد من التحويل</span>
+                </button>
+              </div>
             </div>
 
             {/* 3D Custom Quote Details if applicable */}

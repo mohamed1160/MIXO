@@ -253,7 +253,7 @@ export default function PaymentMethods({ register, errors, watch, setValue, cart
                       <span>{isRTL ? "تم إرفاق إيصال التحويل بنجاح" : "Transfer receipt attached successfully"}</span>
                     </div>
                     <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
-                      {isRTL ? "سيتم مراجعته وتأكيد شحنتك فوراً" : "Receipt will be reviewed and order confirmed"}
+                      {isRTL ? "سيتم التأكد من صحة التحويل خلال وقت العمل (من 2 إلى 5 ساعات)" : "Receipt will be verified during working hours (2 to 5 hours)"}
                     </p>
                   </div>
                 </div>
@@ -267,6 +267,15 @@ export default function PaymentMethods({ register, errors, watch, setValue, cart
                 </button>
               </div>
             )}
+
+            <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 text-amber-700 dark:text-amber-300 text-[11px] flex items-center gap-2">
+              <span className="font-bold text-base">⏳</span>
+              <span>
+                {isRTL 
+                  ? "ملاحظة: سيتم التأكد من صحة التحويل وتأكيد الدفع خلال ساعات العمل الرسمية (من 2 إلى 5 ساعات)."
+                  : "Notice: The transfer receipt will be verified during working hours (2 to 5 hours)."}
+              </span>
+            </div>
 
             {errors.transferReceipt && (
               <p className="text-red-500 dark:text-red-400 text-xs font-bold flex items-center gap-1 mt-1">

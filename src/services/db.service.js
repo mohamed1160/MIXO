@@ -58,6 +58,9 @@ export async function getSupabaseOrders() {
         items: d.items,
         customData: d.custom_data,
         status: d.status,
+        paymentStatus: d.customer?.paymentStatus || d.payment_status || d.paymentStatus || 'Pending',
+        paymentMethod: d.payment_method || d.paymentMethod || 'InstaPay / Vodafone Cash',
+        transferReceipt: d.transfer_receipt || d.transferReceipt || null,
         total: d.total,
         date: d.date,
         createdAt: d.created_at
@@ -74,16 +77,24 @@ export async function getSupabaseOrders() {
 }
 
 export async function saveSupabaseOrder(newOrder) {
+  const customerObj = {
+    ...(newOrder.customer || {}),
+    paymentStatus: newOrder.paymentStatus || 'Pending',
+  };
+
   try {
     const { error } = await supabase
       .from('orders')
       .insert([{
         id: newOrder.id,
         user_id: newOrder.user_id || null,
-        customer: newOrder.customer,
+        customer: customerObj,
         items: newOrder.items,
         custom_data: newOrder.customData || null,
         status: newOrder.status || 'Processing',
+        payment_status: newOrder.paymentStatus || 'Pending',
+        payment_method: newOrder.paymentMethod || null,
+        transfer_receipt: newOrder.transferReceipt || null,
         total: newOrder.total || null,
         date: newOrder.date || new Date().toISOString().split('T')[0]
       }]);
@@ -104,11 +115,12 @@ export async function saveSupabaseOrder(newOrder) {
     console.error('Failed to insert order into Supabase, saving locally:', err);
   }
 
+  const orderToSave = { ...newOrder, customer: customerObj };
   const existing = await getSupabaseOrders();
-  const updated = [newOrder, ...existing.filter(o => o.id !== newOrder.id)];
+  const updated = [orderToSave, ...existing.filter(o => o.id !== newOrder.id)];
   localStorage.setItem('MIXO_customer_orders', JSON.stringify(updated));
   window.dispatchEvent(new Event('storage'));
-  return newOrder;
+  return orderToSave;
 }
 
 export async function updateSupabaseOrderStatus(orderId, newStatus, newTotal = null) {
@@ -142,6 +154,95 @@ export async function updateSupabaseOrderStatus(orderId, newStatus, newTotal = n
     localStorage.setItem('MIXO_customer_orders', JSON.stringify(updated));
     window.dispatchEvent(new Event('storage'));
   }
+}
+
+export async function notifyCustomerPaymentStatus(order, newPaymentStatus) {
+  if (!order) return;
+
+  const isApproved = (newPaymentStatus === 'Paid' || newPaymentStatus === 'تم تأكيد الدفع');
+  const title = isApproved ? 'تم تأكيد الدفع بنجاح 🟢' : 'تحديث على حالة الدفع 🟡';
+  const message = isApproved
+    ? `تم مراجعة إيصال التحويل وتأكيد عملية الدفع بنجاح للطلب رقم ${order.id}. جاري تجهيز شحنتك 📦`
+    : `لم يتم التأكد من إيصال التحويل للطلب رقم ${order.id}. برجاء مراجعة بيانات الدفع والتواصل مع الدعم 📞`;
+
+  const notifObj = {
+    id: `PAY-NOTIF-${order.id}-${Date.now()}`,
+    title,
+    message,
+    type: isApproved ? 'success' : 'warning',
+    date: new Date().toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' })
+  };
+
+  const targets = [
+    order.user_id,
+    order.customer?.phone,
+    order.customer?.email,
+    'all',
+    'default'
+  ].filter(Boolean);
+
+  targets.forEach(target => {
+    saveSupabaseNotification(target, notifObj).catch(() => {});
+  });
+
+  targets.forEach(target => {
+    const key = `MIXO_user_notifications_${target}`;
+    try {
+      const existing = JSON.parse(localStorage.getItem(key) || '[]');
+      const updated = [notifObj, ...existing.filter(n => n.id !== notifObj.id)];
+      localStorage.setItem(key, JSON.stringify(updated));
+    } catch (e) {}
+  });
+
+  window.dispatchEvent(new Event('storage'));
+}
+
+export async function updateSupabaseOrderPaymentStatus(orderId, newPaymentStatus) {
+  let targetOrder = null;
+  const saved = localStorage.getItem('MIXO_customer_orders');
+  if (saved) {
+    const list = JSON.parse(saved);
+    const updated = list.map(o => {
+      if (o.id === orderId) {
+        targetOrder = {
+          ...o,
+          paymentStatus: newPaymentStatus,
+          payment_status: newPaymentStatus,
+          customer: {
+            ...(o.customer || {}),
+            paymentStatus: newPaymentStatus,
+          },
+        };
+        return targetOrder;
+      }
+      return o;
+    });
+    localStorage.setItem('MIXO_customer_orders', JSON.stringify(updated));
+  }
+
+  try {
+    const updatePayload = {
+      payment_status: newPaymentStatus,
+    };
+    if (targetOrder?.customer) {
+      updatePayload.customer = targetOrder.customer;
+    }
+
+    const { error } = await supabase
+      .from('orders')
+      .update(updatePayload)
+      .eq('id', orderId);
+
+    if (error) console.warn('Supabase update payment_status warning:', error.message);
+  } catch (err) {
+    console.error('Failed to update payment status in Supabase:', err);
+  }
+
+  if (targetOrder) {
+    await notifyCustomerPaymentStatus(targetOrder, newPaymentStatus);
+  }
+
+  window.dispatchEvent(new Event('storage'));
 }
 
 export async function deleteSupabaseOrder(orderId) {
