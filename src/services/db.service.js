@@ -101,16 +101,23 @@ export async function saveSupabaseOrder(newOrder) {
 
     if (error) throw error;
 
-    await sendPushNotification({
-      userId: 'CUS-3848',
-      title: 'طلب جديد 🛒',
-      body: `تم استلام طلب جديد ${newOrder.id}`,
-      data: {
-        type: 'new_order',
-        order_id: String(newOrder.id),
-        url: `/admin/orders?orderId=${newOrder.id}`,
-      },
-    });
+    const currentUserId = useAuthStore.getState().user?.id;
+    const targetUserIds = new Set(['CUS-3848']);
+    if (currentUserId) targetUserIds.add(currentUserId);
+    if (newOrder.user_id) targetUserIds.add(newOrder.user_id);
+
+    for (const uid of targetUserIds) {
+      await sendPushNotification({
+        userId: uid,
+        title: 'طلب جديد 🛒',
+        body: `تم استلام طلب جديد ${newOrder.id}`,
+        data: {
+          type: 'new_order',
+          order_id: String(newOrder.id),
+          url: `/admin/orders?orderId=${newOrder.id}`,
+        },
+      }).catch(() => {});
+    }
   } catch (err) {
     console.error('Failed to insert order into Supabase, saving locally:', err);
   }
