@@ -109,19 +109,24 @@ export default function Checkout() {
         await createOrderMutation.mutateAsync(orderData).catch(() => {});
       }
       
+      setOrderSuccess(newOrderObj.id);
+      
       if (emptyCart) {
         emptyCart();
       } else {
         useShopStore.setState({ cart: [] });
       }
-      
-      setOrderSuccess(newOrderObj.id);
+
       window.scrollTo(0, 0);
     } catch (error) {
       await saveSupabaseOrder(newOrderObj);
 
       setOrderSuccess(newOrderObj.id);
-      useShopStore.setState({ cart: [] });
+      if (emptyCart) {
+        emptyCart();
+      } else {
+        useShopStore.setState({ cart: [] });
+      }
       window.scrollTo(0, 0);
     }
   };
