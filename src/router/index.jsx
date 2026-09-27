@@ -1,5 +1,6 @@
+import { useEffect } from 'react'
 import { lazy, Suspense } from 'react'
-import { Routes, Route, useLocation } from 'react-router-dom'
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import PageTransition from '../components/common/PageTransition'
 import Navbar from '../components/Navbar'
@@ -8,6 +9,7 @@ import Footer from '../components/Footer'
 import ProtectedRoute from '../components/ProtectedRoute'
 import WhatsAppButton from '../components/common/WhatsAppButton'
 import AnnouncementBar from '../components/AnnouncementBar'
+import { setupForegroundNotifications } from '../notifications'
 
 /* ── Lazy Loaded Main Pages ── */
 const Shop = lazy(() => import('../pages/Shop'))
@@ -69,7 +71,18 @@ const RouteFallback = () => (
 
 export default function AppRouter() {
   const location = useLocation();
+  const navigate = useNavigate();
   const isAdminRoute = location.pathname.startsWith('/admin');
+
+  useEffect(() => {
+    let unsubscribe;
+    setupForegroundNotifications(navigate).then((unsub) => {
+      unsubscribe = unsub;
+    });
+    return () => {
+      if (typeof unsubscribe === 'function') unsubscribe();
+    };
+  }, [navigate]);
 
   return (
     <>

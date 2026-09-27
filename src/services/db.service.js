@@ -106,15 +106,42 @@ export async function saveSupabaseOrder(newOrder) {
     if (currentUserId) targetUserIds.add(currentUserId);
     if (newOrder.user_id) targetUserIds.add(newOrder.user_id);
 
+    const customerNotif = {
+      id: `ORD-NOTIF-${newOrder.id}-${Date.now()}`,
+      title: 'تم استلام طلبك بنجاح 🛒',
+      message: `شكراً لتسوقك من Mixo 3D! تم استلام طلبك رقم ${newOrder.id} بقيمة ${newOrder.total || 0} ج.م وجاري مراجعته وتجهيزه.`,
+      type: 'order',
+      date: new Date().toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' })
+    };
+
+    const notifTargets = [
+      newOrder.user_id,
+      newOrder.customer?.phone,
+      newOrder.customer?.email,
+      'all',
+      'default'
+    ].filter(Boolean);
+
+    notifTargets.forEach(target => {
+      saveSupabaseNotification(target, customerNotif).catch(() => {});
+      const key = `MIXO_user_notifications_${target}`;
+      try {
+        const existing = JSON.parse(localStorage.getItem(key) || '[]');
+        const updated = [customerNotif, ...existing.filter(n => n.id !== customerNotif.id)];
+        localStorage.setItem(key, JSON.stringify(updated));
+      } catch (e) {}
+    });
+
     for (const uid of targetUserIds) {
+      const isAdmin = (uid === 'CUS-3848');
       await sendPushNotification({
         userId: uid,
-        title: 'طلب جديد 🛒',
-        body: `تم استلام طلب جديد ${newOrder.id}`,
+        title: isAdmin ? 'طلب جديد 🛒' : 'تم استلام طلبك بنجاح 🛒',
+        body: isAdmin ? `تم استلام طلب جديد ${newOrder.id} بقيمة ${newOrder.total || 0} ج.م` : `تم استلام طلبك رقم ${newOrder.id} وجاري مراجعته وتجهيزه 📦`,
         data: {
           type: 'new_order',
           order_id: String(newOrder.id),
-          url: `/admin/orders?orderId=${newOrder.id}`,
+          url: isAdmin ? `/admin/orders?orderId=${newOrder.id}` : `/track-order?orderId=${newOrder.id}`,
         },
       }).catch(() => {});
     }
