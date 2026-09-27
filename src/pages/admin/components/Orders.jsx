@@ -41,7 +41,7 @@ const STATUS_CONFIG = {
 const INITIAL_DEMO_ORDERS = [];
 
 export default function Orders() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const urlOrderId = searchParams.get('orderId') || searchParams.get('id');
 
   const [orders, setOrders] = useState([]);
@@ -49,6 +49,16 @@ export default function Orders() {
   const [filterTab, setFilterTab] = useState('all');
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [quotePriceInput, setQuotePriceInput] = useState('');
+
+  const handleCloseModal = () => {
+    setSelectedOrder(null);
+    if (urlOrderId) {
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('orderId');
+      newParams.delete('id');
+      setSearchParams(newParams, { replace: true });
+    }
+  };
 
   // Load orders from Supabase & LocalStorage fallback
   const fetchOrders = async () => {
@@ -109,7 +119,7 @@ export default function Orders() {
     await updateSupabaseOrderStatus(orderId, 'Processing', priceNum);
     fetchOrders();
     toast.success(`تم اعتماد سعر الطباعة 3D (${priceNum} ج.م) وتغيير حالة الطلب إلى جاري التجهيز 🎉`);
-    setSelectedOrder(null);
+    handleCloseModal();
   };
 
   const handleDeleteOrder = async (orderId) => {
@@ -117,7 +127,7 @@ export default function Orders() {
       await deleteSupabaseOrder(orderId);
       fetchOrders();
       toast.success('تم حذف الطلب بنجاح');
-      if (selectedOrder?.id === orderId) setSelectedOrder(null);
+      if (selectedOrder?.id === orderId) handleCloseModal();
     }
   };
 
@@ -421,7 +431,7 @@ export default function Orders() {
           <div className="bg-white dark:bg-[#121923] border border-gray-200 dark:border-gray-800 rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 space-y-6 text-gray-900 dark:text-white dir-rtl relative shadow-2xl">
             {/* Close Button */}
             <button
-              onClick={() => setSelectedOrder(null)}
+              onClick={handleCloseModal}
               className="absolute left-5 top-5 p-2 rounded-full bg-gray-100 dark:bg-[#1A2332] text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
             >
               <X className="w-5 h-5" />
