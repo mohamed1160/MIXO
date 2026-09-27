@@ -92,14 +92,16 @@ export async function saveSupabaseOrder(newOrder) {
         items: newOrder.items,
         custom_data: newOrder.customData || null,
         status: newOrder.status || 'Processing',
-        payment_status: newOrder.paymentStatus || 'Pending',
         payment_method: newOrder.paymentMethod || null,
         transfer_receipt: newOrder.transferReceipt || null,
         total: newOrder.total || null,
         date: newOrder.date || new Date().toISOString().split('T')[0]
       }]);
 
-    if (error) throw error;
+    if (error) console.warn('Supabase order insert warning:', error.message);
+  } catch (err) {
+    console.error('Failed to insert order into Supabase, saving locally:', err);
+  }
 
     const currentUserId = useAuthStore.getState().user?.id;
     const targetUserIds = new Set(['CUS-3848']);
@@ -145,9 +147,6 @@ export async function saveSupabaseOrder(newOrder) {
         },
       }).catch(() => {});
     }
-  } catch (err) {
-    console.error('Failed to insert order into Supabase, saving locally:', err);
-  }
 
   const orderToSave = { ...newOrder, customer: customerObj };
   const existing = await getSupabaseOrders();
