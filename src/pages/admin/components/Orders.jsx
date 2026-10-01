@@ -1045,9 +1045,9 @@ export default function Orders() {
                             <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-[11px] font-bold">
                               <span>🎭 {isRTL ? "مقاسات الماسك:" : "Mask Dimensions:"}</span>
                               <span>
-                                {(item.maskHeight || item.faceHeight) ? `${isRTL ? "الارتفاع:" : "H:"} ${item.maskHeight || item.faceHeight} cm` : ''}
+                                {(item.maskHeight || item.faceHeight) ? `${isRTL ? "الارتفاع:" : "Height:"} ${item.maskHeight || item.faceHeight} cm` : ''}
                                 {(item.maskHeight || item.faceHeight) && (item.circularWidth || item.faceWidth) ? ' | ' : ''}
-                                {(item.circularWidth || item.faceWidth) ? `${isRTL ? "عرض/محيط الوجه:" : "W:"} ${item.circularWidth || item.faceWidth} cm` : ''}
+                                {(item.circularWidth || item.faceWidth) ? `${isRTL ? "محيط الوجه:" : "Circumference:"} ${item.circularWidth || item.faceWidth} cm` : ''}
                                 {item.size && !(item.maskHeight || item.faceHeight) ? item.size : ''}
                                 {item.dimensions && !(item.maskHeight || item.faceHeight) ? item.dimensions : ''}
                               </span>
@@ -1109,9 +1109,9 @@ export default function Orders() {
                                   <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-[11px] font-bold">
                                     <span>🎭 {isRTL ? "مقاسات الماسك:" : "Mask Dimensions:"}</span>
                                     <span>
-                                      {(item.maskHeight || item.faceHeight) ? `${isRTL ? "الارتفاع:" : "H:"} ${item.maskHeight || item.faceHeight} cm` : ''}
+                                      {(item.maskHeight || item.faceHeight) ? `${isRTL ? "الارتفاع:" : "Height:"} ${item.maskHeight || item.faceHeight} cm` : ''}
                                       {(item.maskHeight || item.faceHeight) && (item.circularWidth || item.faceWidth) ? ' | ' : ''}
-                                      {(item.circularWidth || item.faceWidth) ? `${isRTL ? "عرض/محيط الوجه:" : "W:"} ${item.circularWidth || item.faceWidth} cm` : ''}
+                                      {(item.circularWidth || item.faceWidth) ? `${isRTL ? "محيط الوجه:" : "Circumference:"} ${item.circularWidth || item.faceWidth} cm` : ''}
                                       {item.size && !(item.maskHeight || item.faceHeight) ? item.size : ''}
                                       {item.dimensions && !(item.maskHeight || item.faceHeight) ? item.dimensions : ''}
                                     </span>
