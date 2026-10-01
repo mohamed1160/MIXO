@@ -16,9 +16,11 @@ import {
   ShieldCheck,
   Star,
   Tag,
+  Globe
 } from "lucide-react";
 import { useAdminStore } from "../../../store/useAdminStore";
 import { useAuthStore } from "../../../store/useAuthStore";
+import { useLanguage } from "../../../providers/LanguageContext";
 import mixoLogoImg from "../../../assets/images/logo/mixo_red_logo.png";
 
 const NAV_ITEMS = [
@@ -38,6 +40,7 @@ export default function Sidebar({ mobileSidebarOpen, setMobileSidebarOpen, isMob
   const { sidebarCollapsed } = useAdminStore();
   const navigate = useNavigate();
   const logout = useAuthStore((state) => state.logout);
+  const { isRTL, lang, toggleLanguage } = useLanguage();
 
   const isVisible = isMobile ? mobileSidebarOpen : true;
   const width = isMobile ? 260 : sidebarCollapsed ? 72 : 260;
@@ -90,6 +93,7 @@ export default function Sidebar({ mobileSidebarOpen, setMobileSidebarOpen, isMob
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1 text-xs font-semibold">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
+          const displayLabel = isRTL ? item.labelAr : item.label;
 
           return (
             <NavLink
@@ -107,7 +111,7 @@ export default function Sidebar({ mobileSidebarOpen, setMobileSidebarOpen, isMob
             >
               <Icon size={18} className="shrink-0 text-current" />
               {!collapsed && (
-                <span className="flex-1 truncate text-white">{item.label}</span>
+                <span className="flex-1 truncate text-white">{displayLabel}</span>
               )}
             </NavLink>
           );
@@ -116,12 +120,21 @@ export default function Sidebar({ mobileSidebarOpen, setMobileSidebarOpen, isMob
 
       {/* ── Footer Actions ── */}
       <div className="p-3 border-t border-[#1E2630] flex flex-col gap-2 shrink-0">
+        <button
+          type="button"
+          onClick={toggleLanguage}
+          className="flex items-center justify-center gap-2 py-2 px-3 bg-[#151C24] hover:bg-[#1E2630] text-white rounded-xl border border-[#26313D] transition-all text-xs font-bold cursor-pointer"
+        >
+          <Globe size={16} className="text-[#FF1F3D]" />
+          {!collapsed && <span>{isRTL ? "English 🇬🇧" : "العربية 🇪🇬"}</span>}
+        </button>
+
         <Link
           to="/"
           className="flex items-center justify-center gap-2 py-2.5 px-3 bg-[#151C24] hover:bg-red-500/10 text-white hover:text-[#FF1F3D] rounded-xl border border-[#26313D] transition-all text-xs font-bold cursor-pointer"
         >
           <Store size={16} className="text-[#FF1F3D]" />
-          {!collapsed && <span className="text-white font-bold">Return to Store</span>}
+          {!collapsed && <span className="text-white font-bold">{isRTL ? "الرجوع للمتجر" : "Return to Store"}</span>}
         </Link>
 
         <button
@@ -130,10 +143,9 @@ export default function Sidebar({ mobileSidebarOpen, setMobileSidebarOpen, isMob
           className="flex items-center justify-center gap-2 py-2 px-3 text-white hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all text-xs font-semibold cursor-pointer"
         >
           <LogOut size={16} />
-          {!collapsed && <span className="text-white">Log Out</span>}
+          {!collapsed && <span className="text-white">{isRTL ? "تسجيل الخروج" : "Log Out"}</span>}
         </button>
       </div>
-
     </aside>
   );
 }

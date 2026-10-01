@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Search, Bell, Menu, ArrowLeft, Store, ShieldCheck, Sun, Moon } from "lucide-react";
+import { Search, Bell, Menu, ArrowLeft, Store, ShieldCheck, Sun, Moon, Globe } from "lucide-react";
 import { useAdminStore } from "../../../store/useAdminStore";
 import { useAuthStore } from "../../../store/useAuthStore";
 import { useTheme } from "../../../providers/ThemeContext";
+import { useLanguage } from "../../../providers/LanguageContext";
 import heroDragonImg from "../../../assets/images/3dprint/hero_dragon.jpg";
 
 export default function Topbar({ mobileSidebarOpen, setMobileSidebarOpen, isMobile }) {
@@ -11,6 +12,7 @@ export default function Topbar({ mobileSidebarOpen, setMobileSidebarOpen, isMobi
   const [query, setQuery] = useState("");
   const { user } = useAuthStore();
   const { isDark, toggleTheme } = useTheme();
+  const { isRTL, toggleLanguage } = useLanguage();
   
   const adminName = user ? `${user.firstName || "Admin"} ${user.lastName || ""}`.trim() : "Mixo Admin";
   const adminPhone = user?.phone || "01000000000";
@@ -51,10 +53,10 @@ export default function Topbar({ mobileSidebarOpen, setMobileSidebarOpen, isMobi
           type="button"
           onClick={() => navigate(-1)}
           className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-xl bg-gray-50 dark:bg-[#151C24] hover:bg-gray-100 dark:hover:bg-[#1C2530] text-gray-700 dark:text-[#F5F7FA] border border-gray-200 dark:border-[#26313D] transition-all shrink-0 cursor-pointer shadow-2xs"
-          title="Go Back"
+          title={isRTL ? "رجـوع" : "Go Back"}
         >
           <ArrowLeft size={15} className="text-[#FF1F3D]" />
-          <span className="hidden sm:inline">Back</span>
+          <span className="hidden sm:inline">{isRTL ? "رجوع" : "Back"}</span>
         </button>
 
         {/* Global Search Bar */}
@@ -67,22 +69,33 @@ export default function Topbar({ mobileSidebarOpen, setMobileSidebarOpen, isMobi
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search orders, MakerWorld URLs, customers..."
+            placeholder={isRTL ? "بحث في الطلبات، روابط MakerWorld، العملاء..." : "Search orders, MakerWorld URLs, customers..."}
             className="w-full pl-10 pr-10 py-2 text-xs sm:text-sm bg-gray-50 dark:bg-[#151C24] text-gray-900 dark:text-white rounded-xl border border-gray-200 dark:border-[#26313D] focus:outline-none focus:border-[#FF1F3D] transition-colors"
           />
         </form>
       </div>
 
-      {/* ── Right: Theme, Return to Store & Profile ── */}
+      {/* ── Right: Theme, Language Switcher, Return to Store & Profile ── */}
       <div className="flex items-center gap-3 shrink-0">
         
+        {/* Language Switcher */}
+        <button
+          type="button"
+          onClick={toggleLanguage}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gray-50 dark:bg-[#151C24] text-gray-700 dark:text-[#F5F7FA] border border-gray-200 dark:border-[#26313D] hover:border-[#FF1F3D] text-xs font-bold transition-all cursor-pointer shadow-2xs"
+          title={isRTL ? "Switch to English" : "التحويل للغة العربية"}
+        >
+          <Globe size={16} className="text-[#FF1F3D]" />
+          <span>{isRTL ? "EN" : "عربي"}</span>
+        </button>
+
         {/* Return to Store Button */}
         <Link
           to="/"
           className="hidden md:flex items-center gap-1.5 px-3.5 py-2 bg-red-500/10 hover:bg-[#FF1F3D] text-[#FF1F3D] hover:text-white rounded-xl text-xs font-bold border border-[#FF1F3D]/20 transition-all cursor-pointer shadow-xs"
         >
           <Store size={15} />
-          <span>Return to Store</span>
+          <span>{isRTL ? "المتجر" : "Return to Store"}</span>
         </Link>
 
         {/* Theme Toggle */}
