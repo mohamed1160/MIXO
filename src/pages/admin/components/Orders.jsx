@@ -991,7 +991,7 @@ export default function Orders() {
                   <span className="text-xs text-gray-500 dark:text-gray-400 font-bold">{isRTL ? `السعر الحالي: ${selectedOrder.total} ج.م` : `Current Price: ${selectedOrder.total} EGP`}</span>
                 )}
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2.5">
                 <input
                   type="number"
                   placeholder={isRTL ? "أدخل السعر المتفق عليه هنا (مثال: 450)" : "Enter agreed price (e.g. 450)"}
@@ -1001,7 +1001,7 @@ export default function Orders() {
                 />
                 <button
                   onClick={() => handleApproveQuote(selectedOrder.id)}
-                  className="px-6 py-2.5 bg-[#FF1F3D] hover:bg-[#D91832] text-white font-bold rounded-xl text-xs transition-all shadow-lg shadow-[#FF1F3D]/20 cursor-pointer flex items-center gap-1.5"
+                  className="w-full sm:w-auto px-6 py-2.5 bg-[#FF1F3D] hover:bg-[#D91832] text-white font-bold rounded-xl text-xs transition-all shadow-lg shadow-[#FF1F3D]/20 cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap"
                 >
                   <CheckCircle2 size={16} />
                   <span>{isRTL ? "اعتماد السعر وتأكيد الطلب" : "Approve & Confirm"}</span>
@@ -1009,11 +1009,70 @@ export default function Orders() {
               </div>
             </div>
 
-            {/* Standard Order Items Table */}
+            {/* Standard Order Items List / Table */}
             {selectedOrder.items && selectedOrder.items.length > 0 && (
               <div className="space-y-3">
                 <h3 className="text-xs font-bold text-gray-700 dark:text-gray-300">{isRTL ? "محتويات الشحنة والمنتجات:" : "Order Items & Details:"}</h3>
-                <div className="bg-gray-50 dark:bg-[#1A2332] rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+                
+                {/* Mobile Cards View (< sm) */}
+                <div className="sm:hidden space-y-2.5">
+                  {selectedOrder.items.map((item, idx) => {
+                    const hasMaskDimensions = (
+                      item.maskHeight ||
+                      item.circularWidth ||
+                      item.faceHeight ||
+                      item.faceWidth ||
+                      item.size ||
+                      item.dimensions
+                    );
+                    const itemColor = item.color || item.selectedColor;
+
+                    return (
+                      <div key={idx} className="bg-gray-50 dark:bg-[#1A2332] p-3.5 rounded-xl border border-gray-200 dark:border-gray-800 space-y-2 text-xs">
+                        <div className="font-bold text-gray-900 dark:text-white text-sm">
+                          {item.name}
+                        </div>
+
+                        {/* Badges */}
+                        <div className="flex flex-wrap gap-1.5">
+                          {itemColor && (
+                            <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-500/10 dark:bg-red-500/20 border border-red-500/30 text-[#FF1F3D] dark:text-red-400 text-[11px] font-bold">
+                              <span>🎨 {isRTL ? "اللون:" : "Color:"}</span>
+                              <span>{itemColor}</span>
+                            </div>
+                          )}
+                          {hasMaskDimensions && (
+                            <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-[11px] font-bold">
+                              <span>🎭 {isRTL ? "مقاسات الماسك:" : "Mask Dimensions:"}</span>
+                              <span>
+                                {(item.maskHeight || item.faceHeight) ? `${isRTL ? "الارتفاع:" : "H:"} ${item.maskHeight || item.faceHeight} cm` : ''}
+                                {(item.maskHeight || item.faceHeight) && (item.circularWidth || item.faceWidth) ? ' | ' : ''}
+                                {(item.circularWidth || item.faceWidth) ? `${isRTL ? "عرض/محيط الوجه:" : "W:"} ${item.circularWidth || item.faceWidth} cm` : ''}
+                                {item.size && !(item.maskHeight || item.faceHeight) ? item.size : ''}
+                                {item.dimensions && !(item.maskHeight || item.faceHeight) ? item.dimensions : ''}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Quantity and Prices */}
+                        <div className="pt-2 border-t border-gray-200 dark:border-gray-800/60 flex items-center justify-between text-gray-600 dark:text-gray-400">
+                          <div>
+                            <span>{isRTL ? "الكمية:" : "Qty:"} <strong className="text-gray-900 dark:text-white font-mono">{item.quantity || 1}</strong></span>
+                            <span className="mx-2">•</span>
+                            <span>{item.price} {currencyText}</span>
+                          </div>
+                          <div className="font-bold text-[#FF1F3D] text-xs">
+                            {(item.price * (item.quantity || 1)).toLocaleString()} {currencyText}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Desktop Table View (>= sm) */}
+                <div className="hidden sm:block bg-gray-50 dark:bg-[#1A2332] rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden">
                   <table className={`w-full ${isRTL ? 'text-right' : 'text-left'} text-xs`}>
                     <thead className="bg-gray-100 dark:bg-[#121923] text-gray-700 dark:text-gray-400 border-b border-gray-200 dark:border-gray-800">
                       <tr>
