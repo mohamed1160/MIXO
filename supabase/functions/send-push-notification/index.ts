@@ -44,7 +44,7 @@ serve(async (req) => {
       ...(order_id
         ? {
             order_id: String(order_id),
-            url: data.url || `/admin/orders?orderId=${encodeURIComponent(String(order_id))}`,
+            url: data.url || `/admin/orders/${encodeURIComponent(String(order_id))}`,
           }
         : {}),
     };

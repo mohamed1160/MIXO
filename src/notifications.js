@@ -96,7 +96,7 @@ export async function setupForegroundNotifications(navigate) {
       const title = payload.notification?.title || payload.data?.title || "طلب جديد 🛒";
       const body = payload.notification?.body || payload.data?.body || "تم استلام طلب جديد";
       const orderId = payload.data?.order_id || payload.data?.orderId;
-      const targetUrl = payload.data?.url || (orderId ? `/admin/orders?orderId=${orderId}` : "/admin/orders");
+      const targetUrl = payload.data?.url || (orderId ? `/admin/orders/${orderId}` : "/admin/orders");
 
       toast((t) => (
         React.createElement("div", {

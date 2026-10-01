@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useParams, useNavigate } from 'react-router-dom';
 import {
   getSupabaseOrders,
   updateSupabaseOrderStatus,
@@ -41,8 +41,10 @@ const STATUS_CONFIG = {
 const INITIAL_DEMO_ORDERS = [];
 
 export default function Orders() {
+  const navigate = useNavigate();
+  const { id: paramOrderId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
-  const urlOrderId = searchParams.get('orderId') || searchParams.get('id');
+  const urlOrderId = paramOrderId || searchParams.get('orderId') || searchParams.get('id');
 
   const [orders, setOrders] = useState([]);
   const [search, setSearch] = useState('');
@@ -52,7 +54,9 @@ export default function Orders() {
 
   const handleCloseModal = () => {
     setSelectedOrder(null);
-    if (urlOrderId) {
+    if (paramOrderId) {
+      navigate('/admin/orders', { replace: true });
+    } else if (searchParams.get('orderId') || searchParams.get('id')) {
       const newParams = new URLSearchParams(searchParams);
       newParams.delete('orderId');
       newParams.delete('id');

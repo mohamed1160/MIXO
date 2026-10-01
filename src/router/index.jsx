@@ -161,6 +161,7 @@ export default function AppRouter() {
             <Route path="/admin" element={<ProtectedRoute requireAdmin><AdminLayout /></ProtectedRoute>}>
               <Route index             element={<Overview />} />
               <Route path="orders"        element={<Orders />} />
+              <Route path="orders/:id"    element={<Orders />} />
               <Route path="customers"     element={<Customers />} />
               <Route path="payments"      element={<Payments />} />
               <Route path="products"      element={<Products />} />

@@ -146,7 +146,7 @@ export async function saveSupabaseOrder(newOrder) {
         data: {
           type: 'new_order',
           order_id: String(newOrder.id),
-          url: isAdmin ? `/admin/orders?orderId=${newOrder.id}` : `/track-order?orderId=${newOrder.id}`,
+          url: isAdmin ? `/admin/orders/${newOrder.id}` : `/track-order?orderId=${newOrder.id}`,
         },
       }).catch(() => {});
     }

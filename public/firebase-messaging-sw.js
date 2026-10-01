@@ -29,7 +29,7 @@ messaging.onBackgroundMessage((payload) => {
   const orderId = payload.data?.order_id || payload.data?.orderId;
   const targetUrl =
     payload.data?.url ||
-    (orderId ? `/admin/orders?orderId=${orderId}` : "/admin/orders");
+    (orderId ? `/admin/orders/${orderId}` : "/admin/orders");
 
   const notificationOptions = {
     body: notificationBody,
