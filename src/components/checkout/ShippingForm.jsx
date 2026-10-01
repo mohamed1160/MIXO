@@ -173,6 +173,40 @@ export default function ShippingForm({ register, errors, watch, cart, setValue }
             {errors.shipping?.phone && <p className="text-red-500 dark:text-red-400 text-[11px] mt-1 font-bold">{errors.shipping.phone.message}</p>}
           </div>
 
+          {/* WhatsApp Number (Request 3) */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300">
+                {isRTL ? "رقم الواتساب (مهم جداً للتواصل) *" : "WhatsApp Number *"}
+              </label>
+              <button
+                type="button"
+                onClick={() => {
+                  const currentPhone = watch ? watch("shipping.phone") : "";
+                  if (currentPhone && setValue) {
+                    setValue("shipping.whatsapp", currentPhone, { shouldValidate: true });
+                  }
+                }}
+                className="text-[10px] font-bold text-[#FF1F3D] hover:underline cursor-pointer"
+              >
+                {isRTL ? "⚡ نفس رقم الهاتف" : "⚡ Same as phone"}
+              </button>
+            </div>
+            <div className="relative">
+              <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-green-500" size={16} />
+              <input 
+                {...register("shipping.whatsapp")}
+                type="text" 
+                dir="ltr"
+                placeholder="01012345678 (WhatsApp)" 
+                className={`${inputClass} border-gray-300 dark:border-gray-700/70 focus:border-green-500`} 
+              />
+            </div>
+            <span className="text-[10px] text-gray-400 block mt-0.5">
+              {isRTL ? "سيتم التواصل معك عبر الواتساب لإخبارك بمصاريف الشحن وتأكيد الطلب." : "We will message you on WhatsApp with shipping details."}
+            </span>
+          </div>
+
           {/* Governorate Select */}
           <div>
             <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">

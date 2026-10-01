@@ -176,12 +176,12 @@ export default function OrderSummary({ cart, control, register, watch, selectedM
         </div>
 
         <div className="flex justify-between text-gray-600 dark:text-gray-400">
-          <span>{isRTL ? "مصاريف الشحن:" : "Shipping Fee:"}</span>
-          <span className="font-bold text-gray-900 dark:text-white">
+          <span>{isRTL ? "مصاريف الشحن والتوصيل:" : "Shipping Fee:"}</span>
+          <span className="font-bold text-amber-600 dark:text-amber-400 text-[11px]">
             {isFree ? (
-              <span className="text-green-600 dark:text-green-400">{isRTL ? "مجـاناً" : "FREE"}</span>
+              <span className="text-green-600 dark:text-green-400 font-bold">{isRTL ? "مجـاناً (6000+)" : "FREE (6000+)"}</span>
             ) : (
-              `${shippingCost} ${isRTL ? "ج.م" : "EGP"}`
+              isRTL ? "سيتم التواصل معكم للتحديد" : "Will contact you with details"
             )}
           </span>
         </div>
@@ -194,11 +194,24 @@ export default function OrderSummary({ cart, control, register, watch, selectedM
         )}
 
         <div className="pt-3 border-t border-gray-200 dark:border-gray-800 flex justify-between items-center">
-          <span className="font-bold text-gray-900 dark:text-white text-sm">{isRTL ? "المبلغ الإجمالي النهائي:" : "Total Amount:"}</span>
+          <span className="font-bold text-gray-900 dark:text-white text-sm">{isRTL ? "إجمالي المنتجات بالطلب:" : "Items Total Amount:"}</span>
           <span className="text-xl font-extrabold text-[#FF1F3D]">
             {total.toLocaleString()} {isRTL ? "ج.م" : "EGP"}
           </span>
         </div>
+      </div>
+
+      {/* Shipping Disclaimer Box requested by User */}
+      <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-[11px] text-amber-700 dark:text-amber-300 font-bold leading-relaxed space-y-1">
+        <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
+          <Truck size={14} className="shrink-0" />
+          <span>{isRTL ? "ملاحظة هامة بشأن مصاريف الشحن:" : "Important Shipping Notice:"}</span>
+        </div>
+        <p>
+          {isRTL
+            ? "سيتم التواصل معكم لإخباركم بتفاصيل مصاريف الشحن، والمصاريف المكتوبة في الطلب هي مصاريف الطلب فقط غير شاملة لمصاريف الشحن."
+            : "We will contact you to inform you of the shipping fee details. The amount written in the order is for items only and excludes shipping fees."}
+        </p>
       </div>
 
       <div className="p-3 bg-gray-50 dark:bg-[#1A2332] rounded-xl border border-gray-200 dark:border-gray-800 text-[11px] text-gray-600 dark:text-gray-400 flex items-center gap-2">

@@ -3,6 +3,7 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { useAdminStore } from '../../../store/useAdminStore';
 import { useTheme } from '../../../providers/ThemeContext';
+import { useLanguage } from '../../../providers/LanguageContext';
 import { getAdminData } from '../../../services/adminMockData';
 import { setupForegroundNotifications } from '../../../notifications';
 import Sidebar from './Sidebar';
@@ -13,6 +14,7 @@ export default function AdminLayout() {
   const navigate = useNavigate();
   const { sidebarCollapsed } = useAdminStore();
   const { isDark } = useTheme();
+  const { isRTL } = useLanguage();
   const { stats } = getAdminData();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -64,7 +66,7 @@ export default function AdminLayout() {
     : 260;
 
   return (
-    <div className={`admin-root admin-layout ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+    <div className={`admin-root admin-layout ${sidebarCollapsed ? 'sidebar-collapsed' : ''} ${isRTL ? 'dir-rtl' : 'dir-ltr'}`}>
       {/* ── Sidebar ── */}
       <Sidebar
         stats={stats}
@@ -76,7 +78,7 @@ export default function AdminLayout() {
       {/* ── Mobile overlay backdrop ── */}
       {isMobile && mobileSidebarOpen && (
         <div
-          className="fixed inset-0 z-30 bg-black/40 backdrop-blur-sm"
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity"
           style={{ top: 0 }}
           onClick={() => setMobileSidebarOpen(false)}
         />
@@ -84,9 +86,10 @@ export default function AdminLayout() {
 
       {/* ── Main content ── */}
       <div
-        className="admin-main"
+        className="admin-main transition-all duration-200"
         style={{
-          marginLeft: effectiveSidebarWidth,
+          marginLeft: isRTL ? 0 : effectiveSidebarWidth,
+          marginRight: isRTL ? effectiveSidebarWidth : 0,
           marginTop: 0,
         }}
       >
@@ -99,20 +102,6 @@ export default function AdminLayout() {
           <Outlet />
         </main>
       </div>
-
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          style: {
-            background: 'var(--admin-bg-secondary)',
-            color: 'var(--admin-text)',
-            border: '1px solid var(--admin-border)',
-            borderRadius: 'var(--admin-radius-sm)',
-            fontSize: '0.85rem',
-            fontFamily: 'var(--admin-font)',
-          },
-        }}
-      />
     </div>
   );
 }

@@ -24,7 +24,7 @@ const DEFAULT_SETTINGS = {
   shippingCairo: 50,
   shippingDelta: 70,
   shippingUpperEgypt: 90,
-  freeShippingLimit: 1000,
+  freeShippingLimit: 6000,
   storeStatus: 'open',
   instagramUrl: 'https://instagram.com',
   facebookUrl: 'https://facebook.com',

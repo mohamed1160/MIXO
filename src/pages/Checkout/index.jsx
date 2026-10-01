@@ -82,6 +82,7 @@ export default function Checkout() {
       customer: {
         name: `${data.shipping?.fullName || (isRTL ? 'عميل المتجر' : 'Store Customer')}`.trim(),
         phone: data.shipping?.phone || '01012345678',
+        whatsapp: data.shipping?.whatsapp || data.shipping?.phone || '01012345678',
         email: data.contact?.email || 'customer@mixo3d.com',
         governorate: data.shipping?.governorate || 'Cairo',
         address: `${data.shipping?.streetAddress || ''}, ${data.shipping?.city || ''}, ${data.shipping?.governorate || 'Cairo'}`.trim(),

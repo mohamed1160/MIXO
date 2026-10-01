@@ -1,4 +1,4 @@
-export const FREE_SHIPPING_LIMIT = 2000;
+export const FREE_SHIPPING_LIMIT = 6000;
 
 export const GOVERNORATE_RATES = {
   "Cairo": { nameEn: "Cairo", nameAr: "القاهرة", rate: 60 },
@@ -32,35 +32,30 @@ export const GOVERNORATE_RATES = {
 };
 
 export const getGovernorateRate = (governorateName) => {
-  if (!governorateName) return 60; // Default rate if none selected
+  if (!governorateName) return 60;
   const gov = GOVERNORATE_RATES[governorateName];
   return gov ? gov.rate : 60;
 };
 
+// Shipping disclaimer sentence requested by user
+export const SHIPPING_NOTICE_AR = "سيتم التواصل معكم لإخباركم بتفاصيل مصاريف الشحن، والمصاريف المكتوبة في الطلب هي مصاريف الطلب فقط غير شاملة لمصاريف الشحن.";
+export const SHIPPING_NOTICE_EN = "We will contact you to inform you of the shipping fee details. The amount written in the order is for items only and excludes shipping fees.";
+
 export const calculateShippingFee = (governorateName, subtotal = 0, shippingMethod = "standard") => {
   const baseRate = getGovernorateRate(governorateName);
-  const premiumExtra = shippingMethod === "premium" ? 100 : 0;
-  const totalBaseRate = baseRate + premiumExtra;
+  const isFree = subtotal >= FREE_SHIPPING_LIMIT;
 
-  if (subtotal >= FREE_SHIPPING_LIMIT) {
-    return {
-      fee: premiumExtra,
-      originalFee: totalBaseRate,
-      baseRate,
-      premiumExtra,
-      isFree: true,
-      remainingForFree: 0,
-      limit: FREE_SHIPPING_LIMIT,
-    };
-  }
-
+  // As requested: Shipping fee is removed from order total for now (set fee to 0)
+  // Admin will contact customer to inform them of actual shipping fees.
   return {
-    fee: totalBaseRate,
-    originalFee: totalBaseRate,
+    fee: 0,
+    originalFee: baseRate,
     baseRate,
-    premiumExtra,
-    isFree: false,
-    remainingForFree: FREE_SHIPPING_LIMIT - subtotal,
+    isFree,
+    remainingForFree: Math.max(0, FREE_SHIPPING_LIMIT - subtotal),
     limit: FREE_SHIPPING_LIMIT,
+    isPendingContact: true,
+    noticeAr: SHIPPING_NOTICE_AR,
+    noticeEn: SHIPPING_NOTICE_EN,
   };
 };

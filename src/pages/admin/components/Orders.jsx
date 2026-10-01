@@ -451,7 +451,7 @@ export default function Orders() {
                   </div>
 
                   {/* Customer Info Card Box */}
-                  <div className="bg-gray-50/80 dark:bg-[#17202C] p-3 rounded-2xl border border-gray-100 dark:border-gray-800/60 space-y-1.5 text-xs">
+                  <div className="bg-gray-50/80 dark:bg-[#17202C] p-3 rounded-2xl border border-gray-100 dark:border-gray-800/60 space-y-2 text-xs">
                     <div className="flex items-center justify-between">
                       <span className="font-extrabold text-gray-900 dark:text-white flex items-center gap-1.5">
                         <User className="w-3.5 h-3.5 text-[#FF1F3D]" />
@@ -469,6 +469,22 @@ export default function Orders() {
                         </a>
                       )}
                     </div>
+
+                    {/* WhatsApp Quick Contact Button (Request 3) */}
+                    {(order.customer?.whatsapp || order.customer?.phone) && (
+                      <div className="flex items-center justify-between pt-1 border-t border-gray-200/50 dark:border-gray-700/50">
+                        <span className="text-[11px] text-gray-500 font-semibold">{isRTL ? "واتساب:" : "WhatsApp:"}</span>
+                        <a
+                          href={`https://wa.me/${String(order.customer?.whatsapp || order.customer?.phone).replace(/[^0-9]/g, '').replace(/^0/, '20')}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="font-mono text-emerald-600 dark:text-emerald-400 font-bold hover:underline flex items-center gap-1 bg-emerald-500/10 dark:bg-emerald-500/20 px-2 py-0.5 rounded-lg text-[11px]"
+                          dir="ltr"
+                        >
+                          <span>💬 {order.customer?.whatsapp || order.customer?.phone}</span>
+                        </a>
+                      </div>
+                    )}
 
                     {order.customer?.address && (
                       <div className="text-[11px] text-gray-500 dark:text-gray-400 truncate flex items-center gap-1 pt-0.5">
@@ -801,6 +817,7 @@ export default function Orders() {
                   <span className="text-gray-500 dark:text-gray-400">{isRTL ? "الاسم: " : "Name: "}</span>
                   <span className="font-bold text-gray-900 dark:text-white">{selectedOrder.customer?.name || (isRTL ? 'غير محدد' : 'N/A')}</span>
                 </div>
+
                 <div>
                   <span className="text-gray-500 dark:text-gray-400">{isRTL ? "رقم الهاتف: " : "Phone: "}</span>
                   {selectedOrder.customer?.phone ? (
@@ -811,14 +828,46 @@ export default function Orders() {
                     <span className="font-mono text-gray-900 dark:text-white">{isRTL ? 'غير مسجل' : 'N/A'}</span>
                   )}
                 </div>
+
+                {/* WhatsApp Contact Field (Request 3) */}
+                <div className="md:col-span-2 flex items-center gap-2">
+                  <span className="text-gray-500 dark:text-gray-400">{isRTL ? "رقم الواتساب للتواصل: " : "WhatsApp Number: "}</span>
+                  {(selectedOrder.customer?.whatsapp || selectedOrder.customer?.phone) ? (
+                    <a
+                      href={`https://wa.me/${String(selectedOrder.customer?.whatsapp || selectedOrder.customer?.phone).replace(/[^0-9]/g, '').replace(/^0/, '20')}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="font-mono text-emerald-600 dark:text-emerald-400 font-bold hover:underline inline-flex items-center gap-1 bg-emerald-500/10 px-2.5 py-1 rounded-lg"
+                    >
+                      <span>💬 {selectedOrder.customer?.whatsapp || selectedOrder.customer?.phone} ({isRTL ? "مراسلة مباشرة على الواتس" : "Direct WhatsApp Chat"})</span>
+                    </a>
+                  ) : (
+                    <span className="font-mono text-gray-900 dark:text-white">{isRTL ? 'غير مسجل' : 'N/A'}</span>
+                  )}
+                </div>
+
                 <div className="md:col-span-2">
                   <span className="text-gray-500 dark:text-gray-400">{isRTL ? "عنوان التسليم: " : "Delivery Address: "}</span>
                   <span className="text-gray-800 dark:text-white">{selectedOrder.customer?.address || (isRTL ? 'غير مدخل' : 'N/A')}</span>
                 </div>
+
                 <div>
                   <span className="text-gray-500 dark:text-gray-400">{isRTL ? "طريقة الدفع: " : "Payment Method: "}</span>
                   <span className="text-amber-600 dark:text-yellow-400 font-bold">{selectedOrder.paymentMethod}</span>
                 </div>
+              </div>
+
+              {/* Shipping Notice Box for Order (Request 4) */}
+              <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-[11px] text-amber-700 dark:text-amber-300 font-bold leading-relaxed space-y-0.5">
+                <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
+                  <Truck size={14} className="shrink-0" />
+                  <span>{isRTL ? "تنبيه مصاريف الشحن:" : "Shipping Fee Notice:"}</span>
+                </div>
+                <p>
+                  {isRTL
+                    ? "سيتم التواصل مع العميل لإبلاغه بتفاصيل مصاريف الشحن، والمبلغ المكتوب في الطلب يمثل تكلفة المنتجات فقط غير شاملة لمصاريف الشحن."
+                    : "Customer will be contacted regarding shipping fee details. The written order total is for products only and excludes shipping fees."}
+                </p>
               </div>
 
               {selectedOrder.transferReceipt && (

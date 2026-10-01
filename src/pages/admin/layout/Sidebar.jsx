@@ -51,14 +51,22 @@ export default function Sidebar({ mobileSidebarOpen, setMobileSidebarOpen, isMob
     navigate("/");
   };
 
+  const transformValue = isVisible
+    ? "translateX(0)"
+    : isRTL
+    ? "translateX(100%)"
+    : "translateX(-100%)";
+
   return (
     <aside
-      className="fixed left-0 flex flex-col z-40 transition-all duration-200 bg-[#0B0F14] border-r border-[#1E2630] text-white"
+      className={`fixed flex flex-col z-50 transition-all duration-200 bg-[#0B0F14] text-white shadow-2xl ${
+        isRTL ? "right-0 border-l border-[#1E2630]" : "left-0 border-r border-[#1E2630]"
+      }`}
       style={{
         top: 0,
         height: "100vh",
         width,
-        transform: isVisible ? "translateX(0)" : "translateX(-100%)",
+        transform: transformValue,
       }}
     >
       {/* ── Brand Header ── */}
@@ -82,9 +90,9 @@ export default function Sidebar({ mobileSidebarOpen, setMobileSidebarOpen, isMob
           <button
             type="button"
             onClick={() => setMobileSidebarOpen(false)}
-            className="p-1 rounded-lg text-white hover:bg-white/10 transition-colors"
+            className="p-1.5 rounded-xl text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         )}
       </div>

@@ -15,7 +15,7 @@ export default function OrderSummary({ subtotal }) {
   const { isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
 
-  const shippingLimit = 1000;
+  const shippingLimit = 6000;
   const isFreeShipping = subtotal >= shippingLimit;
   const remainingForFree = Math.max(0, shippingLimit - subtotal);
   const progress = Math.min(100, (subtotal / shippingLimit) * 100);
@@ -78,20 +78,20 @@ export default function OrderSummary({ subtotal }) {
         <span>{isRTL ? "ملخص الطلب والإجمالي" : "Order Summary"}</span>
       </h2>
 
-      {/* Free Shipping Progress Indicator */}
+      {/* Free Shipping Progress Indicator (Threshold 6000 EGP) */}
       <div className="p-3.5 bg-gray-50 dark:bg-[#1A2332] rounded-2xl border border-gray-200 dark:border-gray-800 space-y-2">
         {isFreeShipping ? (
           <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-bold text-xs">
             <Truck size={16} />
-            <span>{isRTL ? "تهانينا! حققت الحد الأدنى للشحن المجاني 🚚" : "You qualify for Free Shipping! 🚚"}</span>
+            <span>{isRTL ? "تهانينا! حققت الحد الأدنى للشحن المجاني (6000 ج.م) 🚚" : "You qualify for Free Shipping (6000 EGP+)! 🚚"}</span>
           </div>
         ) : (
           <div>
             <div className="flex justify-between items-center text-[11px] font-bold text-gray-700 dark:text-gray-300 mb-1">
               <span>
                 {isRTL 
-                  ? `أضف بقيمة ${remainingForFree} ج.م للحصول على شحن مجاني` 
-                  : `Add ${remainingForFree} EGP more for Free Shipping`}
+                  ? `أضف بقيمة ${remainingForFree} ج.م للحصول على شحن مجاني (6000 ج.م)` 
+                  : `Add ${remainingForFree} EGP more for Free Shipping (6000 EGP)`}
               </span>
               <span className="text-[#FF1F3D]">{Math.round(progress)}%</span>
             </div>
@@ -103,6 +103,19 @@ export default function OrderSummary({ subtotal }) {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Shipping Notice Banner */}
+      <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-[11px] text-amber-700 dark:text-amber-300 font-bold leading-relaxed space-y-0.5">
+        <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
+          <Truck size={14} className="shrink-0" />
+          <span>{isRTL ? "ملاحظة هامة بشأن مصاريف الشحن:" : "Important Shipping Notice:"}</span>
+        </div>
+        <p>
+          {isRTL
+            ? "سيتم التواصل معكم لإخباركم بتفاصيل مصاريف الشحن، والمصاريف المكتوبة في الطلب هي مصاريف الطلب فقط غير شاملة لمصاريف الشحن."
+            : "We will contact you to inform you of the shipping fee details. The amount written in the order is for items only and excludes shipping fees."}
+        </p>
       </div>
 
       {/* Prices Breakdown */}
@@ -120,12 +133,12 @@ export default function OrderSummary({ subtotal }) {
         )}
 
         <div className="flex justify-between items-center">
-          <span>{isRTL ? "الشحن والتوصيل:" : "Shipping:"}</span>
-          <span className="font-bold text-gray-900 dark:text-white">
+          <span>{isRTL ? "مصاريف الشحن والتوصيل:" : "Shipping Fee:"}</span>
+          <span className="font-bold text-amber-600 dark:text-amber-400 text-[11px]">
             {isFreeShipping ? (
-              <span className="text-green-600 dark:text-green-400 font-bold">{isRTL ? "مجـاناً" : "FREE"}</span>
+              <span className="text-green-600 dark:text-green-400 font-bold">{isRTL ? "مجـاناً (6000+)" : "FREE (6000+)"}</span>
             ) : (
-              isRTL ? "يحسب عند الشحن" : "Calculated at checkout"
+              isRTL ? "سيتم التواصل معكم لتحديدها" : "Will contact you with details"
             )}
           </span>
         </div>
