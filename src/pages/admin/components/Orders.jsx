@@ -7,6 +7,7 @@ import {
   deleteSupabaseOrder,
   subscribeToRealtimeOrders
 } from '../../../services/db.service';
+import { supabase } from '../../../services/supabaseClient';
 import {
   Search,
   Eye,
@@ -80,18 +81,62 @@ export default function Orders() {
     return () => unsubscribe();
   }, []);
 
-  // Auto select order if orderId query parameter is present in URL
+  // Auto select order if orderId parameter is present in URL, with direct Supabase fetch fallback
   useEffect(() => {
-    if (!urlOrderId || orders.length === 0) return;
+    if (!urlOrderId) return;
 
-    const match = orders.find(
-      (o) => String(o.id).toLowerCase() === String(urlOrderId).toLowerCase()
-    );
+    let isMounted = true;
 
-    if (match) {
-      setSelectedOrder(match);
-      setQuotePriceInput(match.total ? String(match.total) : '');
-    }
+    const resolveOrder = async () => {
+      const match = orders.find(
+        (o) => String(o.id).toLowerCase() === String(urlOrderId).toLowerCase()
+      );
+
+      if (match) {
+        if (isMounted) {
+          setSelectedOrder(match);
+          setQuotePriceInput(match.total ? String(match.total) : '');
+        }
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('orders')
+          .select('*')
+          .eq('id', urlOrderId)
+          .maybeSingle();
+
+        if (data && !error && isMounted) {
+          const formatted = {
+            id: data.id,
+            user_id: data.user_id,
+            customer: data.customer,
+            items: data.items,
+            customData: data.custom_data,
+            status: data.status,
+            paymentStatus: data.customer?.paymentStatus || data.payment_status || 'Pending',
+            paymentMethod: data.payment_method || 'InstaPay / Vodafone Cash',
+            transferReceipt: data.transfer_receipt || null,
+            total: data.total,
+            date: data.date,
+            createdAt: data.created_at
+          };
+
+          setSelectedOrder(formatted);
+          setQuotePriceInput(formatted.total ? String(formatted.total) : '');
+          setOrders((prev) => [formatted, ...prev.filter((o) => o.id !== formatted.id)]);
+        }
+      } catch (err) {
+        console.warn('Direct order fetch error:', err);
+      }
+    };
+
+    resolveOrder();
+
+    return () => {
+      isMounted = false;
+    };
   }, [urlOrderId, orders]);
 
   const handleStatusChange = async (orderId, newStatus) => {
