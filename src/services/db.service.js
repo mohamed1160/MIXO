@@ -53,7 +53,7 @@ export async function getSupabaseOrders() {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    if (data && data.length > 0) {
+    if (data) {
       const formatted = data.map(d => ({
         id: d.id,
         user_id: d.user_id,
@@ -61,9 +61,9 @@ export async function getSupabaseOrders() {
         items: d.items,
         customData: d.custom_data,
         status: d.status,
-        paymentStatus: d.customer?.paymentStatus || d.payment_status || d.paymentStatus || 'Pending',
-        paymentMethod: d.payment_method || d.paymentMethod || 'InstaPay / Vodafone Cash',
-        transferReceipt: d.transfer_receipt || d.transferReceipt || null,
+        paymentStatus: d.customer?.paymentStatus || d.payment_status || 'Pending',
+        paymentMethod: d.customer?.paymentMethod || d.payment_method || 'InstaPay / Vodafone Cash',
+        transferReceipt: d.customer?.transferReceipt || d.transfer_receipt || null,
         total: d.total,
         date: d.date,
         createdAt: d.created_at
@@ -82,7 +82,9 @@ export async function getSupabaseOrders() {
 export async function saveSupabaseOrder(newOrder) {
   const customerObj = {
     ...(newOrder.customer || {}),
-    paymentStatus: newOrder.paymentStatus || 'Pending',
+    paymentStatus: newOrder.paymentStatus || newOrder.customer?.paymentStatus || 'Pending',
+    paymentMethod: newOrder.paymentMethod || newOrder.customer?.paymentMethod || 'InstaPay / Vodafone Cash',
+    transferReceipt: newOrder.transferReceipt || newOrder.customer?.transferReceipt || null,
   };
 
   try {
@@ -92,11 +94,9 @@ export async function saveSupabaseOrder(newOrder) {
         id: newOrder.id,
         user_id: newOrder.user_id || null,
         customer: customerObj,
-        items: newOrder.items,
+        items: newOrder.items || [],
         custom_data: newOrder.customData || null,
         status: newOrder.status || 'Processing',
-        payment_method: newOrder.paymentMethod || null,
-        transfer_receipt: newOrder.transferReceipt || null,
         total: newOrder.total || null,
         date: newOrder.date || new Date().toISOString().split('T')[0]
       }]);
