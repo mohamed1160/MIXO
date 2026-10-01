@@ -202,12 +202,12 @@ export default function OrderSummary({ cart, control, register, watch, selectedM
       </div>
 
       {/* Shipping Disclaimer Box requested by User */}
-      <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-[11px] text-amber-700 dark:text-amber-300 font-bold leading-relaxed space-y-1">
-        <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
-          <Truck size={14} className="shrink-0" />
+      <div className="p-3.5 bg-white dark:bg-[#121923] border border-gray-200 dark:border-gray-800 rounded-2xl text-[11px] text-gray-900 dark:text-white font-bold leading-relaxed space-y-1 shadow-xs">
+        <div className="flex items-center gap-1.5 text-gray-900 dark:text-white font-extrabold">
+          <Truck size={15} className="shrink-0 text-[#FF1F3D]" />
           <span>{isRTL ? "ملاحظة هامة بشأن مصاريف الشحن:" : "Important Shipping Notice:"}</span>
         </div>
-        <p>
+        <p className="text-gray-800 dark:text-gray-200 font-semibold">
           {isRTL
             ? "سيتم التواصل معكم لإخباركم بتفاصيل مصاريف الشحن، والمصاريف المكتوبة في الطلب هي مصاريف الطلب فقط غير شاملة لمصاريف الشحن."
             : "We will contact you to inform you of the shipping fee details. The amount written in the order is for items only and excludes shipping fees."}

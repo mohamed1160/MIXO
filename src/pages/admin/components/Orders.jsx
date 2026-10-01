@@ -858,12 +858,12 @@ export default function Orders() {
               </div>
 
               {/* Shipping Notice Box for Order (Request 4) */}
-              <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-[11px] text-amber-700 dark:text-amber-300 font-bold leading-relaxed space-y-0.5">
-                <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
-                  <Truck size={14} className="shrink-0" />
+              <div className="p-3 bg-white dark:bg-[#121923] border border-gray-200 dark:border-gray-800 rounded-xl text-[11px] text-gray-900 dark:text-white font-bold leading-relaxed space-y-0.5 shadow-xs">
+                <div className="flex items-center gap-1.5 text-gray-900 dark:text-white font-extrabold">
+                  <Truck size={14} className="shrink-0 text-[#FF1F3D]" />
                   <span>{isRTL ? "تنبيه مصاريف الشحن:" : "Shipping Fee Notice:"}</span>
                 </div>
-                <p>
+                <p className="text-gray-800 dark:text-gray-200 font-semibold">
                   {isRTL
                     ? "سيتم التواصل مع العميل لإبلاغه بتفاصيل مصاريف الشحن، والمبلغ المكتوب في الطلب يمثل تكلفة المنتجات فقط غير شاملة لمصاريف الشحن."
                     : "Customer will be contacted regarding shipping fee details. The written order total is for products only and excludes shipping fees."}
