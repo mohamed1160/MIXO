@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { X, Sparkles, ShoppingBag, Check } from "lucide-react";
 import { useLanguage } from "../providers/LanguageContext";
 import { useShopStore } from "../store/useShopStore";
+import { COLOR_OPTIONS } from "../constants/colors";
+import { cn } from "../lib/utils";
 
 export default function MaskDimensionsModal({ isOpen, onClose, product, quantity = 1, onSuccess }) {
   const { isRTL } = useLanguage();
@@ -9,9 +11,19 @@ export default function MaskDimensionsModal({ isOpen, onClose, product, quantity
 
   const [maskHeight, setMaskHeight] = useState("");
   const [circularWidth, setCircularWidth] = useState("");
+  const [selectedColors, setSelectedColors] = useState([isRTL ? "أسود" : "Black"]);
   const [error, setError] = useState("");
 
   if (!isOpen || !product) return null;
+
+  const toggleColor = (colorName) => {
+    setError("");
+    setSelectedColors((prev) =>
+      prev.includes(colorName)
+        ? prev.filter((c) => c !== colorName)
+        : [...prev, colorName]
+    );
+  };
 
   const handleConfirm = (e) => {
     e.preventDefault();
@@ -36,13 +48,25 @@ export default function MaskDimensionsModal({ isOpen, onClose, product, quantity
       return;
     }
 
+    if (!selectedColors || selectedColors.length === 0) {
+      setError(
+        isRTL
+          ? "يرجى اختيار لون واحد على الأقل للماسك!"
+          : "Please select at least one color for the mask!"
+      );
+      return;
+    }
+
     setError("");
 
-    // Create mask product item with custom dimensions
+    const activeColorValue = selectedColors.join(" + ");
+
+    // Create mask product item with custom dimensions and color
     const maskProductItem = {
       ...product,
       maskHeight: h,
       circularWidth: w,
+      color: activeColorValue,
       size: `${h}×${w} cm (${isRTL ? 'محيط الوجه' : 'Circular'})`,
     };
 
@@ -140,6 +164,39 @@ export default function MaskDimensionsModal({ isOpen, onClose, product, quantity
               <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400 dark:text-[#7F8A96]">
                 cm
               </span>
+            </div>
+          </div>
+
+          {/* Mask Color Selection */}
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-gray-800 dark:text-[#F5F7FA] mb-1.5">
+              {isRTL ? "اختر لون الماسك *" : "Select Mask Color *"}
+            </label>
+            <div className="flex flex-wrap gap-1.5 p-2 bg-[#F3F4F6] dark:bg-[#151C24] rounded-xl border border-transparent dark:border-[#26313D]">
+              {COLOR_OPTIONS.map((c) => {
+                const colorName = isRTL ? c.nameAr : c.nameEn;
+                const isSelected = selectedColors.includes(colorName);
+
+                return (
+                  <button
+                    key={c.nameEn}
+                    type="button"
+                    onClick={() => toggleColor(colorName)}
+                    className={cn(
+                      "flex items-center gap-1 px-2.5 py-1 rounded-lg border text-[11px] font-bold transition-all cursor-pointer",
+                      isSelected
+                        ? "border-[#FF1F3D] bg-[#FF1F3D]/10 text-[#FF1F3D] dark:bg-[#FF1F3D]/20 shadow-xs"
+                        : "border-gray-200 dark:border-gray-700 bg-white dark:bg-[#0F151D] text-gray-700 dark:text-gray-300 hover:border-[#FF1F3D]"
+                    )}
+                  >
+                    <span
+                      className="w-3 h-3 rounded-full border border-gray-300 dark:border-gray-600 shrink-0"
+                      style={{ backgroundColor: c.colorCode }}
+                    />
+                    <span>{colorName}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 

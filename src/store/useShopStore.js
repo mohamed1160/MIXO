@@ -65,15 +65,19 @@ export const useShopStore = create()(
       cart: [],
       addToCart: (product, quantity = 1, size = "One Size", color = "Default") =>
         set((state) => {
+          const itemQty = product.quantity || quantity || 1;
+          const itemSize = product.size || size || "One Size";
+          const itemColor = product.color || product.selectedColor || color || "Default";
+
           const existingItemIndex = state.cart.findIndex(
-            (item) => item.id === product.id && item.size === size && item.color === color
+            (item) => item.id === product.id && item.size === itemSize && item.color === itemColor
           );
           if (existingItemIndex >= 0) {
             const updatedCart = [...state.cart];
-            updatedCart[existingItemIndex].quantity += quantity;
+            updatedCart[existingItemIndex].quantity += itemQty;
             return { cart: updatedCart };
           }
-          return { cart: [...state.cart, { ...product, quantity, size, color }] };
+          return { cart: [...state.cart, { ...product, quantity: itemQty, size: itemSize, color: itemColor }] };
         }),
       removeFromCart: (productId, size, color) =>
         set((state) => ({

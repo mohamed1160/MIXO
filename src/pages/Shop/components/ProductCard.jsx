@@ -5,6 +5,7 @@ import { useShopStore } from "../../../store/useShopStore";
 import { useLanguage } from "../../../providers/LanguageContext";
 import { cn } from "../../../lib/utils";
 import QuickViewModal from "./QuickViewModal";
+import MaskDimensionsModal from "../../../components/MaskDimensionsModal";
 
 export default function ProductCard({ product }) {
   const [isHovered, setIsHovered] = useState(false);
@@ -20,11 +21,21 @@ export default function ProductCard({ product }) {
   );
   const hasSecondaryImage = product.images?.length > 1;
 
+  const [isMaskModalOpen, setIsMaskModalOpen] = useState(false);
+
+  const category = product.category || "";
+  const isMask = product.isMask ||
+    String(category).toLowerCase().includes("mask") ||
+    String(category).includes("ماسكات") ||
+    String(category).includes("أقنعة");
+
   const handleAddToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (product.stock > 0) {
-      addToCart(product);
+    if (isMask) {
+      setIsMaskModalOpen(true);
+    } else if (product.stock !== 0) {
+      setQuickViewOpen(true);
     }
   };
 
@@ -203,6 +214,14 @@ export default function ProductCard({ product }) {
         <QuickViewModal
           product={product}
           onClose={() => setQuickViewOpen(false)}
+        />
+      )}
+
+      {isMaskModalOpen && (
+        <MaskDimensionsModal
+          isOpen={isMaskModalOpen}
+          onClose={() => setIsMaskModalOpen(false)}
+          product={product}
         />
       )}
     </>

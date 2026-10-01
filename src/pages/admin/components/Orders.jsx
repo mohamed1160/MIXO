@@ -684,23 +684,32 @@ export default function Orders() {
                           item.size ||
                           item.dimensions
                         );
+                        const itemColor = item.color || item.selectedColor;
 
                         return (
                           <tr key={idx}>
                             <td className="p-3 font-semibold text-gray-900 dark:text-white">
                               <div>{item.name}</div>
-                              {hasMaskDimensions && (
-                                <div className="mt-1 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-[11px] font-bold">
-                                  <span>🎭 مقاسات الماسك:</span>
-                                  <span>
-                                    {(item.maskHeight || item.faceHeight) ? `الارتفاع: ${item.maskHeight || item.faceHeight} سم` : ''}
-                                    {(item.maskHeight || item.faceHeight) && (item.circularWidth || item.faceWidth) ? ' | ' : ''}
-                                    {(item.circularWidth || item.faceWidth) ? `عرض/محيط الوجه: ${item.circularWidth || item.faceWidth} سم` : ''}
-                                    {item.size && !(item.maskHeight || item.faceHeight) ? item.size : ''}
-                                    {item.dimensions && !(item.maskHeight || item.faceHeight) ? item.dimensions : ''}
-                                  </span>
-                                </div>
-                              )}
+                              <div className="flex flex-wrap gap-1.5 mt-1">
+                                {itemColor && (
+                                  <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-red-500/10 dark:bg-red-500/20 border border-red-500/30 text-[#FF1F3D] dark:text-red-400 text-[11px] font-bold">
+                                    <span>🎨 اللون:</span>
+                                    <span>{itemColor}</span>
+                                  </div>
+                                )}
+                                {hasMaskDimensions && (
+                                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-[11px] font-bold">
+                                    <span>🎭 مقاسات الماسك:</span>
+                                    <span>
+                                      {(item.maskHeight || item.faceHeight) ? `الارتفاع: ${item.maskHeight || item.faceHeight} سم` : ''}
+                                      {(item.maskHeight || item.faceHeight) && (item.circularWidth || item.faceWidth) ? ' | ' : ''}
+                                      {(item.circularWidth || item.faceWidth) ? `عرض/محيط الوجه: ${item.circularWidth || item.faceWidth} سم` : ''}
+                                      {item.size && !(item.maskHeight || item.faceHeight) ? item.size : ''}
+                                      {item.dimensions && !(item.maskHeight || item.faceHeight) ? item.dimensions : ''}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
                             </td>
                             <td className="p-3 font-mono">{item.quantity || 1}</td>
                             <td className="p-3">{item.price} ج.م</td>

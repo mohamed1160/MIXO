@@ -4,12 +4,14 @@ import { Heart, Star, ShoppingCart, Check } from "lucide-react";
 import { useShopStore } from "../store/useShopStore";
 import { useLanguage } from "../providers/LanguageContext";
 import MaskDimensionsModal from "./MaskDimensionsModal";
+import QuickViewModal from "../pages/Shop/components/QuickViewModal";
 
 export default function ProductCard({ product }) {
   const navigate = useNavigate();
   const { t, isRTL } = useLanguage();
 
   const [isMaskModalOpen, setIsMaskModalOpen] = useState(false);
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
 
   const wishlist = useShopStore((state) => state.wishlist);
   const toggleWishlist = useShopStore((state) => state.toggleWishlist);
@@ -28,7 +30,7 @@ export default function ProductCard({ product }) {
   const rating = product.rating || null;
   const reviewCount = product.reviewCount || product.reviewsCount || 0;
   const category = product.category || "3D Print";
-  const isMask = product.isMask || category.toLowerCase().includes("mask");
+  const isMask = product.isMask || category.toLowerCase().includes("mask") || category.includes("ماسكات") || category.includes("أقنعة");
 
   const isFavorite = wishlist?.some(
     (item) => (typeof item === "object" ? item.id : item) === id
@@ -51,7 +53,8 @@ export default function ProductCard({ product }) {
       // Open mask dimensions modal for mask items
       setIsMaskModalOpen(true);
     } else {
-      addToCart(product, 1);
+      // Open quick view modal to select color
+      setIsQuickViewOpen(true);
     }
   };
 
@@ -157,6 +160,14 @@ export default function ProductCard({ product }) {
           isOpen={isMaskModalOpen}
           onClose={() => setIsMaskModalOpen(false)}
           product={product}
+        />
+      )}
+
+      {/* Quick View Modal for Color Selection */}
+      {isQuickViewOpen && (
+        <QuickViewModal
+          product={product}
+          onClose={() => setIsQuickViewOpen(false)}
         />
       )}
     </>

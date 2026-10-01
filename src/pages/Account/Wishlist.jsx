@@ -5,6 +5,7 @@ import { useShopStore } from "../../store/useShopStore";
 import { useLanguage } from "../../providers/LanguageContext";
 import { MOCK_3D_PRODUCTS } from "../../services/products";
 import MaskDimensionsModal from "../../components/MaskDimensionsModal";
+import QuickViewModal from "../Shop/components/QuickViewModal";
 
 export default function AccountWishlist() {
   const { isRTL } = useLanguage();
@@ -15,6 +16,7 @@ export default function AccountWishlist() {
 
   const [toastMessage, setToastMessage] = useState(null);
   const [activeMaskProduct, setActiveMaskProduct] = useState(null);
+  const [activeQuickViewProduct, setActiveQuickViewProduct] = useState(null);
 
   // Normalize wishlist items against catalog if only IDs were passed
   const items = wishlist.map((rawItem) => {
@@ -80,12 +82,7 @@ export default function AccountWishlist() {
     if (item.isMask) {
       setActiveMaskProduct(item);
     } else {
-      addToCart(item, 1);
-      triggerToast(
-        isRTL
-          ? `تم إضافة "${item.title}" إلى سلة الشراء! 🛍️`
-          : `Added "${item.title}" to cart! 🛍️`
-      );
+      setActiveQuickViewProduct(item);
     }
   };
 
@@ -244,6 +241,14 @@ export default function AccountWishlist() {
           isOpen={!!activeMaskProduct}
           onClose={() => setActiveMaskProduct(null)}
           product={activeMaskProduct}
+        />
+      )}
+
+      {/* Quick View Modal for Color Selection */}
+      {activeQuickViewProduct && (
+        <QuickViewModal
+          product={activeQuickViewProduct}
+          onClose={() => setActiveQuickViewProduct(null)}
         />
       )}
 

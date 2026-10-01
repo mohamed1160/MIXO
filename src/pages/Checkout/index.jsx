@@ -93,6 +93,7 @@ export default function Checkout() {
         image: i.image || i.images?.[0],
         category: i.category || '3D Print',
         material: i.material || 'High-Quality Eco PLA Filament',
+        color: i.color || i.selectedColor || (Array.isArray(i.colors) ? i.colors.join(' + ') : null) || null,
         maskHeight: i.maskHeight || i.faceHeight || null,
         circularWidth: i.circularWidth || i.faceWidth || null,
         faceHeight: i.faceHeight || i.maskHeight || null,

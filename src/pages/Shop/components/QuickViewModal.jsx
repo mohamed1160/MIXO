@@ -1,18 +1,32 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Plus, Minus, ShoppingBag } from "lucide-react";
+import { toast } from "react-hot-toast";
 import { useShopStore } from "../../../store/useShopStore";
 import { useLanguage } from "../../../providers/LanguageContext";
 import { useState } from "react";
 import { cn } from "../../../lib/utils";
+import { COLOR_OPTIONS } from "../../../constants/colors";
 
 export default function QuickViewModal({ product, onClose }) {
   const { isRTL } = useLanguage();
   const [selectedSize, setSelectedSize] = useState(product?.sizes?.[0] || null);
-  const [selectedColor, setSelectedColor] = useState(product?.colors?.[0] || null);
+  const [selectedColors, setSelectedColors] = useState(
+    product?.colors?.length ? [product.colors[0]] : []
+  );
+  const [colorError, setColorError] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
 
   const addToCart = useShopStore((state) => state.addToCart);
+
+  const toggleColor = (colorName) => {
+    setColorError(false);
+    setSelectedColors((prev) =>
+      prev.includes(colorName)
+        ? prev.filter((c) => c !== colorName)
+        : [...prev, colorName]
+    );
+  };
 
   const displayTitle = isRTL 
     ? (product.nameAr || product.titleAr || product.name || product.title)
@@ -25,13 +39,29 @@ export default function QuickViewModal({ product, onClose }) {
   const currencyText = isRTL ? "ج.م" : "EGP";
 
   const handleAddToCart = () => {
-    if (product.stock > 0) {
+    if (!selectedColors || selectedColors.length === 0) {
+      setColorError(true);
+      toast.error(
+        isRTL
+          ? "⚠️ يرجى اختيار لون واحد على الأقل للمجسم!"
+          : "⚠️ Please select at least one color!"
+      );
+      return;
+    }
+
+    if (product.stock !== 0) {
+      const activeColorValue = selectedColors.join(" + ");
       addToCart({
         ...product,
         quantity,
         size: selectedSize,
-        color: selectedColor,
+        color: activeColorValue,
       });
+      toast.success(
+        isRTL
+          ? `تمت إضافة (${displayTitle}) بلون (${activeColorValue}) إلى السلة 🚀`
+          : `Added ${displayTitle} (${activeColorValue}) to cart 🚀`
+      );
       onClose();
     }
   };
@@ -132,30 +162,56 @@ export default function QuickViewModal({ product, onClose }) {
                 : "High quality 3D printed product crafted with precision and ultra-durable materials ideal for decor and everyday use.")}
             </p>
 
-            {/* Colors */}
-            {product.colors?.length > 0 && (
-              <div className="mb-5">
-                <span className="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 block mb-2">
-                  {isRTL ? "اللون" : "Color"}
+            {/* Mandatory Color Selection */}
+            <div className="mb-5">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+                  {isRTL ? "اختر لون المجسم *" : "Select Color *"}
                 </span>
-                <div className="flex flex-wrap gap-2">
-                  {product.colors.map((color) => (
-                    <button
-                      key={color}
-                      onClick={() => setSelectedColor(color)}
-                      className={cn(
-                        "px-3 py-1.5 border rounded-lg text-xs font-bold transition-all",
-                        selectedColor === color
-                          ? "border-[#FF1F3D] text-[#FF1F3D] bg-[#FF1F3D]/10 dark:bg-[#FF1F3D]/20"
-                          : "border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-[#FF1F3D]"
-                      )}
-                    >
-                      {color}
-                    </button>
-                  ))}
-                </div>
+                {selectedColors.length > 0 && (
+                  <span className="text-xs font-bold text-[#FF1F3D]">
+                    {selectedColors.join(" + ")}
+                  </span>
+                )}
               </div>
-            )}
+
+              <div className={cn(
+                "p-3 rounded-xl border transition-all",
+                colorError ? "border-red-500 bg-red-500/5 dark:bg-red-500/10 animate-shake" : "border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-[#171F2A]/50"
+              )}>
+                <div className="flex flex-wrap gap-2">
+                  {COLOR_OPTIONS.map((c) => {
+                    const colorName = isRTL ? c.nameAr : c.nameEn;
+                    const isSelected = selectedColors.includes(colorName);
+
+                    return (
+                      <button
+                        key={c.nameEn}
+                        type="button"
+                        onClick={() => toggleColor(colorName)}
+                        className={cn(
+                          "flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all cursor-pointer",
+                          isSelected
+                            ? "border-[#FF1F3D] bg-[#FF1F3D]/10 text-[#FF1F3D] dark:bg-[#FF1F3D]/20 shadow-xs"
+                            : "border-gray-200 dark:border-gray-700 bg-white dark:bg-[#121923] text-gray-700 dark:text-gray-300 hover:border-[#FF1F3D]"
+                        )}
+                      >
+                        <span
+                          className="w-3.5 h-3.5 rounded-full border border-gray-300 dark:border-gray-600 shrink-0"
+                          style={{ backgroundColor: c.colorCode }}
+                        />
+                        <span>{colorName}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+                {colorError && (
+                  <p className="text-xs text-red-500 font-bold mt-2">
+                    {isRTL ? "⚠️ يرجى اختيار لون واحد على الأقل للمجسم!" : "⚠️ Please select at least one color!"}
+                  </p>
+                )}
+              </div>
+            </div>
 
             {/* Sizes */}
             {product.sizes?.length > 0 && (
