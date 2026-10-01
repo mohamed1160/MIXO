@@ -92,7 +92,13 @@ export default function Checkout() {
         price: i.price || 0,
         image: i.image || i.images?.[0],
         category: i.category || '3D Print',
-        material: 'High-Quality Eco PLA Filament',
+        material: i.material || 'High-Quality Eco PLA Filament',
+        maskHeight: i.maskHeight || i.faceHeight || null,
+        circularWidth: i.circularWidth || i.faceWidth || null,
+        faceHeight: i.faceHeight || i.maskHeight || null,
+        faceWidth: i.faceWidth || i.circularWidth || null,
+        size: i.size || null,
+        dimensions: i.dimensions || null,
       })),
     };
 

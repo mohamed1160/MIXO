@@ -675,16 +675,41 @@ export default function Orders() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200 dark:divide-gray-800 text-gray-800 dark:text-gray-300">
-                      {selectedOrder.items.map((item, idx) => (
-                        <tr key={idx}>
-                          <td className="p-3 font-semibold text-gray-900 dark:text-white">{item.name}</td>
-                          <td className="p-3 font-mono">{item.quantity || 1}</td>
-                          <td className="p-3">{item.price} ج.م</td>
-                          <td className="p-3 font-bold text-[#FF1F3D]">
-                            {(item.price * (item.quantity || 1)).toLocaleString()} ج.م
-                          </td>
-                        </tr>
-                      ))}
+                      {selectedOrder.items.map((item, idx) => {
+                        const hasMaskDimensions = (
+                          item.maskHeight ||
+                          item.circularWidth ||
+                          item.faceHeight ||
+                          item.faceWidth ||
+                          item.size ||
+                          item.dimensions
+                        );
+
+                        return (
+                          <tr key={idx}>
+                            <td className="p-3 font-semibold text-gray-900 dark:text-white">
+                              <div>{item.name}</div>
+                              {hasMaskDimensions && (
+                                <div className="mt-1 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-[11px] font-bold">
+                                  <span>🎭 مقاسات الماسك:</span>
+                                  <span>
+                                    {(item.maskHeight || item.faceHeight) ? `الارتفاع: ${item.maskHeight || item.faceHeight} سم` : ''}
+                                    {(item.maskHeight || item.faceHeight) && (item.circularWidth || item.faceWidth) ? ' | ' : ''}
+                                    {(item.circularWidth || item.faceWidth) ? `عرض/محيط الوجه: ${item.circularWidth || item.faceWidth} سم` : ''}
+                                    {item.size && !(item.maskHeight || item.faceHeight) ? item.size : ''}
+                                    {item.dimensions && !(item.maskHeight || item.faceHeight) ? item.dimensions : ''}
+                                  </span>
+                                </div>
+                              )}
+                            </td>
+                            <td className="p-3 font-mono">{item.quantity || 1}</td>
+                            <td className="p-3">{item.price} ج.م</td>
+                            <td className="p-3 font-bold text-[#FF1F3D]">
+                              {(item.price * (item.quantity || 1)).toLocaleString()} ج.م
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
