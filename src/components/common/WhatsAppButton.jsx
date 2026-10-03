@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { MessageCircle, X } from 'lucide-react';
 import { useLanguage } from '../../providers/LanguageContext';
 
 export default function WhatsAppButton() {
   const { isRTL } = useLanguage();
+  const location = useLocation();
   const [whatsappNumber, setWhatsappNumber] = useState('201000000000');
   const [showTooltip, setShowTooltip] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     const loadPhone = () => {
@@ -34,6 +37,27 @@ export default function WhatsAppButton() {
     };
   }, []);
 
+  useEffect(() => {
+    const checkScrollVisibility = () => {
+      if (location.pathname === '/') {
+        // On Home page, hide during Section 1 (Hero) and show starting at Section 2 (scrollY >= 70% innerHeight)
+        const threshold = window.innerHeight * 0.7;
+        setIsVisible(window.scrollY >= threshold);
+      } else {
+        setIsVisible(true);
+      }
+    };
+
+    checkScrollVisibility();
+    window.addEventListener('scroll', checkScrollVisibility, { passive: true });
+    window.addEventListener('resize', checkScrollVisibility);
+
+    return () => {
+      window.removeEventListener('scroll', checkScrollVisibility);
+      window.removeEventListener('resize', checkScrollVisibility);
+    };
+  }, [location.pathname]);
+
   const defaultMsg = isRTL 
     ? 'مرحباً متجر MIXO 3D، أود الاستفسار عن طباعة مجسم أو طلب خدمة.' 
     : 'Hello MIXO 3D Store, I would like to inquire about 3D printing services.';
@@ -41,7 +65,9 @@ export default function WhatsAppButton() {
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(defaultMsg)}`;
 
   return (
-    <div className={`fixed bottom-5 z-40 flex items-center gap-2 ${isRTL ? 'left-5 flex-row' : 'right-5 flex-row-reverse'}`}>
+    <div className={`fixed bottom-5 z-40 flex items-center gap-2 transition-all duration-500 ${
+      isVisible ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-10 pointer-events-none'
+    } ${isRTL ? 'left-5 flex-row' : 'right-5 flex-row-reverse'}`}>
       
       {/* Floating Action Button */}
       <a

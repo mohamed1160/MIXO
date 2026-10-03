@@ -86,7 +86,6 @@ export default function AppRouter() {
 
   return (
     <>
-      {!isAdminRoute && <AnnouncementBar />}
       {!isAdminRoute && <Navbar />}
 
       {/* Top Animated Gold Route Loading Indicator Bar */}

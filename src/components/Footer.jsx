@@ -205,7 +205,14 @@ export default function Footer() {
 
         {/* Bottom copyright & legal */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500 dark:text-[#7F8A96]">
-          <p>© 2026 Mixo 3D. {isRTL ? "جميع الحقوق محفوظة." : "All rights reserved."}</p>
+          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
+            <p>© 2026 Mixo 3D. {isRTL ? "جميع الحقوق محفوظة." : "All rights reserved."}</p>
+            <span className="hidden sm:inline">•</span>
+            <p className="font-semibold text-gray-700 dark:text-gray-300">
+              {isRTL ? "تم بواسطة" : "Developed by"}{" "}
+              <span className="text-[#FF1F3D] font-extrabold tracking-wide">WebHub</span>
+            </p>
+          </div>
           <div className="flex items-center gap-4">
             <Link to="/privacy-policy" className="hover:text-[#FF1F3D] transition-colors">
               {t.footer.privacy}

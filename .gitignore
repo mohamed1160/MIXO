@@ -26,3 +26,5 @@ test-fcm.mjs
 *.njsproj
 *.sln
 *.sw?
+.agents
+

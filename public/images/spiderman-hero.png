@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1100" width="100%" height="100%">
+  <defs>
+    <linearGradient id="spideyRed" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e61c38"/>
+      <stop offset="50%" stop-color="#c8102e"/>
+      <stop offset="100%" stop-color="#8a081d"/>
+    </linearGradient>
+    <linearGradient id="spideyBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a365d"/>
+      <stop offset="100%" stop-color="#0b1f3a"/>
+    </linearGradient>
+  </defs>
+  <g filter="drop-shadow(0 20px 30px rgba(0,0,0,0.8))">
+    <path d="M 180,480 Q 400,420 620,480 L 680,820 Q 400,880 120,820 Z" fill="url(#spideyRed)" stroke="#000" stroke-width="3"/>
+    <path d="M 180,480 Q 270,500 290,780 Q 200,820 120,820 Z" fill="url(#spideyBlue)"/>
+    <path d="M 620,480 Q 530,500 510,780 Q 600,820 680,820 Z" fill="url(#spideyBlue)"/>
+    <path d="M 400,420 L 400,820 M 320,450 L 480,750 M 480,450 L 320,750" stroke="rgba(0,0,0,0.4)" stroke-width="3"/>
+    <circle cx="400" cy="580" r="60" fill="none" stroke="rgba(0,0,0,0.4)" stroke-width="2"/>
+    <circle cx="400" cy="580" r="110" fill="none" stroke="rgba(0,0,0,0.4)" stroke-width="2"/>
+    <path d="M 400,560 C 390,540 410,540 400,560 C 395,575 405,575 400,590 M 400,565 L 360,530 M 400,565 L 440,530 M 400,575 L 350,560 M 400,575 L 450,560 M 400,580 L 360,610 M 400,580 L 440,610" stroke="#000" stroke-width="5" fill="none"/>
+    <path d="M 340,360 Q 400,380 460,360 L 470,450 Q 400,470 330,450 Z" fill="url(#spideyRed)" stroke="#000" stroke-width="2"/>
+    <path d="M 290,260 C 290,130 340,110 400,110 C 460,110 510,130 510,260 C 510,360 460,400 400,400 C 340,400 290,360 290,260 Z" fill="url(#spideyRed)" stroke="#000" stroke-width="4"/>
+    <path d="M 400,110 L 400,400 M 290,260 L 510,260 M 320,160 L 480,340 M 480,160 L 320,340" stroke="rgba(0,0,0,0.35)" stroke-width="2"/>
+    <path d="M 380,210 C 310,215 295,270 335,325 C 375,340 385,290 380,210 Z" fill="#ffffff" stroke="#000" stroke-width="10"/>
+    <path d="M 420,210 C 490,215 505,270 465,325 C 425,340 415,290 420,210 Z" fill="#ffffff" stroke="#000" stroke-width="10"/>
+  </g>
+</svg>

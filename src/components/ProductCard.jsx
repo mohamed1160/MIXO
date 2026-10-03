@@ -105,15 +105,15 @@ export default function ProductCard({ product }) {
           </h3>
 
           {/* Rating & Reviews */}
-          {(reviewCount > 0 || rating > 0) && (
+          {rating > 0 && (
             <div className="flex items-center gap-1 mt-1 text-[10px] sm:text-xs text-gray-500 dark:text-[#7F8A96]">
               <div className="flex items-center text-amber-400">
                 <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-current" />
               </div>
               <span className="font-semibold text-gray-800 dark:text-[#F5F7FA]">
-                {rating || 5.0}
+                {Number(rating).toFixed(1)}
               </span>
-              <span>({reviewCount})</span>
+              {reviewCount > 0 && <span>({reviewCount})</span>}
             </div>
           )}
 

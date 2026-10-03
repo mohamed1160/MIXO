@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1100" width="100%" height="100%">
+  <defs>
+    <!-- Suit Gradients & Filters -->
+    <linearGradient id="redSuit" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e61c38" />
+      <stop offset="50%" stop-color="#c8102e" />
+      <stop offset="100%" stop-color="#8a081d" />
+    </linearGradient>
+    <linearGradient id="darkArmor" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2a2a2a" />
+      <stop offset="100%" stop-color="#111111" />
+    </linearGradient>
+    <linearGradient id="bladeMetal" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#e0e0e0" />
+      <stop offset="50%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#999999" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="15" stdDeviation="12" flood-color="#000000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#shadow)">
+    <!-- KATANAS BEHIND BACK -->
+    <!-- Left Katana Handle & Blade Tip -->
+    <g transform="rotate(-32 300 250)">
+      <rect x="285" y="100" width="30" height="220" rx="4" fill="url(#darkArmor)" stroke="#000" stroke-width="3"/>
+      <!-- Handle Wrap Pattern -->
+      <path d="M 285,120 L 315,140 M 285,150 L 315,170 M 285,180 L 315,200 M 285,210 L 315,230" stroke="#c8102e" stroke-width="4"/>
+      <!-- Tsuba (Guard) -->
+      <rect x="270" y="320" width="60" height="16" rx="3" fill="#111" stroke="#333" stroke-width="2"/>
+    </g>
+    <!-- Right Katana Handle & Blade Tip -->
+    <g transform="rotate(32 500 250)">
+      <rect x="485" y="100" width="30" height="220" rx="4" fill="url(#darkArmor)" stroke="#000" stroke-width="3"/>
+      <!-- Handle Wrap Pattern -->
+      <path d="M 485,140 L 515,120 M 485,170 L 515,150 M 485,200 L 515,180 M 485,230 L 515,210" stroke="#c8102e" stroke-width="4"/>
+      <!-- Tsuba (Guard) -->
+      <rect x="470" y="320" width="60" height="16" rx="3" fill="#111" stroke="#333" stroke-width="2"/>
+    </g>
+
+    <!-- SHOULDERS & TORSO BASE -->
+    <path d="M 200,480 Q 400,430 600,480 L 680,800 Q 400,850 120,800 Z" fill="url(#redSuit)" stroke="#0a0a0a" stroke-width="4"/>
+
+    <!-- BLACK SUIT ACCENTS (CHEST & SIDES) -->
+    <!-- Left Side Black Armor Panel -->
+    <path d="M 200,480 Q 280,500 300,680 Q 220,750 150,780 Z" fill="url(#darkArmor)" />
+    <!-- Right Side Black Armor Panel -->
+    <path d="M 600,480 Q 520,500 500,680 Q 580,750 650,780 Z" fill="url(#darkArmor)" />
+    <!-- Center Chest Harness Straps -->
+    <path d="M 250,470 L 360,650 L 320,670 L 220,480 Z" fill="#151515" stroke="#000" stroke-width="2"/>
+    <path d="M 550,470 L 440,650 L 480,670 L 580,480 Z" fill="#151515" stroke="#000" stroke-width="2"/>
+    <!-- Center Tactical Buckle -->
+    <circle cx="400" cy="620" r="28" fill="#111" stroke="#c8102e" stroke-width="5" />
+    <path d="M 390,620 L 410,620 M 400,610 L 400,630" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+
+    <!-- HEAD & NECK -->
+    <!-- Neck -->
+    <path d="M 340,360 Q 400,380 460,360 L 470,450 Q 400,470 330,450 Z" fill="url(#redSuit)" stroke="#0a0a0a" stroke-width="3"/>
+    <path d="M 380,370 L 380,450 M 420,370 L 420,450" stroke="#8a081d" stroke-width="4" stroke-dasharray="6,6"/>
+
+    <!-- Head Oval Contour -->
+    <path d="M 290,260 C 290,130 340,110 400,110 C 460,110 510,130 510,260 C 510,360 460,400 400,400 C 340,400 290,360 290,260 Z" fill="url(#redSuit)" stroke="#0a0a0a" stroke-width="5"/>
+    
+    <!-- Center Mask Stitch Line -->
+    <path d="M 400,110 L 400,400" stroke="#0a0a0a" stroke-width="4" stroke-dasharray="8,6"/>
+
+    <!-- Left Eye Patch (Black) -->
+    <path d="M 388,190 C 320,195 305,250 330,320 C 360,360 388,330 388,330 Z" fill="#0a0a0a" />
+    <!-- Right Eye Patch (Black) -->
+    <path d="M 412,190 C 480,195 495,250 470,320 C 440,360 412,330 412,330 Z" fill="#0a0a0a" />
+
+    <!-- Left Expressive White Eye (Aggressive Slant) -->
+    <path d="M 382,240 L 325,275 C 340,295 375,290 382,280 Z" fill="#ffffff" stroke="#ddd" stroke-width="2"/>
+    <!-- Right Expressive White Eye -->
+    <path d="M 418,240 L 475,275 C 460,295 425,290 418,280 Z" fill="#ffffff" stroke="#ddd" stroke-width="2"/>
+
+    <!-- CROSSED ARMS & GLOVES -->
+    <!-- Left Forearm (Crossed over Right) -->
+    <path d="M 170,540 C 220,530 380,600 520,640 C 550,650 560,700 500,720 C 380,720 240,640 160,600 Z" fill="url(#redSuit)" stroke="#0a0a0a" stroke-width="4"/>
+    <path d="M 460,625 C 500,635 550,660 520,710 C 480,720 440,680 430,650 Z" fill="url(#darkArmor)"/> <!-- Left Glove -->
+
+    <!-- Right Forearm (Crossed under/over) -->
+    <path d="M 630,540 C 580,530 420,600 280,640 C 250,650 240,700 300,720 C 420,720 560,640 640,600 Z" fill="url(#redSuit)" stroke="#0a0a0a" stroke-width="4"/>
+    <path d="M 340,625 C 300,635 250,660 280,710 C 320,720 360,680 370,650 Z" fill="url(#darkArmor)"/> <!-- Right Glove -->
+
+    <!-- Belt & Lower Waist -->
+    <rect x="250" y="750" width="300" height="45" fill="#151515" rx="5" stroke="#000" stroke-width="3"/>
+    <!-- Belt Pouches -->
+    <rect x="270" y="740" width="40" height="60" rx="4" fill="#222" stroke="#000" stroke-width="2"/>
+    <rect x="325" y="740" width="40" height="60" rx="4" fill="#222" stroke="#000" stroke-width="2"/>
+    <rect x="435" y="740" width="40" height="60" rx="4" fill="#222" stroke="#000" stroke-width="2"/>
+    <rect x="490" y="740" width="40" height="60" rx="4" fill="#222" stroke="#000" stroke-width="2"/>
+    <!-- Deadpool Belt Buckle -->
+    <circle cx="400" cy="772" r="26" fill="#c8102e" stroke="#111" stroke-width="4"/>
+    <rect x="397" y="748" width="6" height="48" fill="#111"/>
+    <path d="M 380,760 L 393,772 L 380,784 M 420,760 L 407,772 L 420,784" stroke="#fff" stroke-width="3" fill="none"/>
+
+    <!-- Lower Body / Legs Silhouette -->
+    <path d="M 260,795 L 240,1050 L 370,1050 L 390,795 Z" fill="url(#redSuit)" stroke="#0a0a0a" stroke-width="4"/>
+    <path d="M 540,795 L 560,1050 L 430,1050 L 410,795 Z" fill="url(#redSuit)" stroke="#0a0a0a" stroke-width="4"/>
+    <path d="M 240,820 L 370,840 L 365,980 L 245,950 Z" fill="url(#darkArmor)"/>
+    <path d="M 560,820 L 430,840 L 435,980 L 555,950 Z" fill="url(#darkArmor)"/>
+  </g>
+</svg>

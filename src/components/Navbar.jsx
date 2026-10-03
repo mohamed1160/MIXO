@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Menu,
@@ -61,9 +61,9 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white dark:bg-[#0B0F14] border-b border-gray-100 dark:border-[#1E2630] transition-colors duration-200">
+    <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/75 dark:bg-[#0a0a0a]/80 backdrop-blur-lg border-b border-gray-200/30 dark:border-white/10 shadow-md translate-y-0 opacity-100">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-14 sm:h-20 gap-2 sm:gap-4">
+        <div className="flex items-center justify-between h-12 sm:h-15 gap-2 sm:gap-4">
           
           {/* Left: Hamburger menu & Logo */}
           <div className="flex items-center gap-2 sm:gap-6">
