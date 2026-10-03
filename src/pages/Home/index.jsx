@@ -171,6 +171,7 @@ export default function Home() {
     }
 
     const handleMouseMove = (e) => {
+      if (window.innerWidth < 768) return;
       if (xDot) {
         xDot(e.clientX);
         yDot(e.clientY);
@@ -211,20 +212,22 @@ export default function Home() {
 
     // ── SECTION 1: HERO SCROLL SCRUB (60FPS GPU ACCELERATED) ──
     if (heroSectionRef.current) {
+      const isMobile = window.innerWidth < 768;
       gsap.timeline({
         scrollTrigger: {
           trigger: heroSectionRef.current,
           start: "top top",
-          end: "bottom top",
-          scrub: 1,
+          end: isMobile ? "+=65%" : "bottom top",
+          scrub: isMobile ? 0.3 : 1,
           pin: true,
           pinSpacing: true,
         },
       })
-      .to(heroTitleBoxRef.current, { scale: 2.2, y: -20, force3D: true, transformOrigin: "center center", ease: "power1.inOut" }, 0)
-      .set(heroTitleBoxRef.current, { zIndex: 20 }, 0.12)
-      .to(deadpoolHeroImgRef.current, { y: 50, scale: 1.05, opacity: 0.9, force3D: true, ease: "power1.inOut" }, 0)
-      .to(heroCircleRef.current, { scale: 1.3, opacity: 0.7, ease: "none" }, 0)
+      .set(heroTitleBoxRef.current, { zIndex: 2 }, 0)
+      .to(heroTitleBoxRef.current, { scale: isMobile ? 4.0 : 2.2, y: isMobile ? -35 : -20, force3D: true, transformOrigin: "center center", ease: "power2.out" }, 0)
+      .set(heroTitleBoxRef.current, { zIndex: 20 }, 0.1)
+      .to(deadpoolHeroImgRef.current, { y: isMobile ? 80 : 50, scale: isMobile ? 1.15 : 1.05, opacity: 0.9, force3D: true, ease: "power1.inOut" }, 0)
+      .to(heroCircleRef.current, { scale: isMobile ? 1.8 : 1.3, opacity: 0.7, ease: "none" }, 0)
       .to(stitchBeltRef.current, { x: "-25%", opacity: 0.2, ease: "none" }, 0);
     }
 
@@ -398,9 +401,9 @@ export default function Home() {
       <JsonLd data={websiteSchema} />
       <JsonLd data={faqSchema} />
 
-      {/* Custom Cursor */}
-      <div id="cursor-dot" ref={cursorDotRef} className="fixed top-0 left-0 w-2 h-2 bg-[#c8102e] rounded-full pointer-events-none z-[10000] -translate-x-1/2 -translate-y-1/2 transition-all duration-100" />
-      <div id="cursor-ring" ref={cursorRingRef} className="fixed top-0 left-0 w-10 h-10 border border-[#c8102e]/60 rounded-full pointer-events-none z-[9999] -translate-x-1/2 -translate-y-1/2 transition-all duration-200" />
+      {/* Custom Cursor (Hidden on Mobile) */}
+      <div id="cursor-dot" ref={cursorDotRef} className="hidden md:block fixed top-0 left-0 w-2 h-2 bg-[#c8102e] rounded-full pointer-events-none z-[10000] -translate-x-1/2 -translate-y-1/2 transition-all duration-100" />
+      <div id="cursor-ring" ref={cursorRingRef} className="hidden md:block fixed top-0 left-0 w-10 h-10 border border-[#c8102e]/60 rounded-full pointer-events-none z-[9999] -translate-x-1/2 -translate-y-1/2 transition-all duration-200" />
 
       {/* Decorative Grid Overlay */}
       <div className="fixed inset-0 pointer-events-none z-[2]">
@@ -440,9 +443,14 @@ export default function Home() {
           <div ref={heroCircleRef} className="absolute w-[min(460px,42vw)] h-[min(460px,42vw)] bg-[#c8102e] rounded-full z-1 scale-0 shadow-[0_0_80px_rgba(200,16,46,0.4)]" />
 
           {/* Giant Title Box - MIXO ONLY (GPU Accelerated Smooth Zoom) */}
-          <div ref={heroTitleBoxRef} className="relative z-2 text-center w-full select-none pointer-events-none will-change-transform transform-gpu">
-            <div className="font-display text-[clamp(1.5rem,3vw,2.8rem)] tracking-[0.5em] text-[#c8102e] -mb-3 font-extrabold [text-shadow:_0_4px_12px_rgba(0,0,0,0.9)]">SPECIAL SPIDER-MAN EDITION</div>
-            <h1 className="font-display text-[clamp(7rem,25vw,30rem)] leading-[0.82] tracking-[-0.01em] text-white uppercase whitespace-nowrap flex justify-center overflow-hidden w-[110%] -ml-[5%] [text-shadow:_0_15px_40px_rgba(0,0,0,0.95)]">
+          <div className="relative text-center w-full select-none pointer-events-none flex flex-col items-center justify-center">
+            <div className="font-display text-[clamp(1.5rem,3vw,2.8rem)] tracking-[0.5em] text-[#c8102e] -mb-3 font-extrabold [text-shadow:_0_4px_12px_rgba(0,0,0,0.9)] relative z-2">
+              SPECIAL SPIDER-MAN EDITION
+            </div>
+            <h1
+              ref={heroTitleBoxRef}
+              className="font-display text-[clamp(7rem,25vw,30rem)] leading-[0.82] tracking-[-0.01em] text-white uppercase whitespace-nowrap flex justify-center overflow-hidden w-[110%] -ml-[5%] [text-shadow:_0_15px_40px_rgba(0,0,0,0.95)] relative z-2 will-change-transform transform-gpu"
+            >
               {"MIXO".split("").map((char, i) => (
                 <span key={i} className="inline-block overflow-hidden">
                   <span className="char-inner inline-block translate-y-[105%]">{char}</span>
