@@ -451,12 +451,12 @@ export default function Home() {
             </h1>
           </div>
 
-          {/* Spider-Man Cutout Overlay - Shifted Left to Center Character Axis */}
+          {/* Spider-Man Cutout Overlay - Centered on Mobile, Offset on Desktop */}
           <img
             ref={deadpoolHeroImgRef}
             src={spidermanHero}
             alt="Spider-Man 3D Mask Edition"
-            className="absolute -bottom-[14%] left-1/2 -translate-x-[54.5%] translate-y-[200px] h-[82vh] max-h-[850px] z-4 pointer-events-none filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.8)] object-contain"
+            className="absolute -bottom-[14%] left-1/2 -translate-x-1/2 sm:-translate-x-[54.5%] translate-y-[200px] h-[82vh] max-h-[850px] z-4 pointer-events-none filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.8)] object-contain"
           />
 
           {/* Diagonal Stitch Belt */}
