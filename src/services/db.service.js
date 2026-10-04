@@ -361,25 +361,14 @@ export async function getSupabaseProducts(forceRefresh = false) {
         inStock: true
       }));
 
-      // Merge items from LocalStorage that might be saved locally so they are preserved
-      let localItems = [];
-      try {
-        const saved = localStorage.getItem('MIXO_products');
-        if (saved) localItems = JSON.parse(saved);
-      } catch (e) {}
-
-      const supaIds = new Set(formatted.map(p => String(p.id)));
-      const missingLocals = localItems.filter(p => p && p.id && !supaIds.has(String(p.id)));
-      const combined = [...formatted, ...missingLocals];
-
-      productsCache = combined;
+      productsCache = formatted;
       productsCacheTime = now;
       try {
-        localStorage.setItem('MIXO_products', JSON.stringify(combined));
+        localStorage.setItem('MIXO_products', JSON.stringify(formatted));
       } catch (e) {
         console.warn('LocalStorage quota exceeded for products cache:', e);
       }
-      return combined;
+      return formatted;
     }
   } catch (err) {
     console.warn('Supabase products fetch fallback to LocalStorage:', err);

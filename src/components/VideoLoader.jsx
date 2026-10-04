@@ -105,7 +105,6 @@ export default function VideoLoader({ onComplete }) {
               autoPlay
               loop
               muted
-              defaultMuted
               playsInline
               preload="auto"
               webkit-playsinline="true"
