@@ -398,22 +398,29 @@ export async function saveSupabaseProduct(product) {
   let supaSuccess = false;
   let supaError = null;
 
-  try {
-    const payload = {
-      id: String(product.id || Date.now()),
-      name: product.name || product.title,
-      title: product.title || product.name,
-      category: product.category || 'Figures & Collectibles',
-      price: Number(product.price),
-      original_price: product.originalPrice ? Number(product.originalPrice) : null,
-      image: product.image,
-      images: Array.isArray(product.images) && product.images.length > 0 ? product.images : [product.image],
-      rating: product.rating || 0,
-      review_count: product.reviewCount || 0,
-      is_bestseller: product.isBestSeller || false,
-      description: product.description || ''
-    };
+  let cleanId = product.id;
+  if (!cleanId) {
+    cleanId = String(Date.now());
+  } else {
+    cleanId = String(cleanId);
+  }
 
+  const payload = {
+    id: cleanId,
+    name: product.name || product.title || 'منتج 3D',
+    title: product.title || product.name || 'منتج 3D',
+    category: product.category || 'Figures & Collectibles',
+    price: Number(product.price) || 0,
+    original_price: product.originalPrice ? Number(product.originalPrice) : null,
+    image: product.image || 'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=600&auto=format&fit=crop&q=80',
+    images: Array.isArray(product.images) && product.images.length > 0 ? product.images : [product.image || 'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=600&auto=format&fit=crop&q=80'],
+    rating: Number(product.rating) || 5,
+    review_count: Number(product.reviewCount || product.review_count) || 0,
+    is_bestseller: Boolean(product.isBestSeller || product.is_bestseller),
+    description: product.description || ''
+  };
+
+  try {
     const { error } = await supabase
       .from('products')
       .upsert([payload]);
@@ -988,28 +995,30 @@ export async function saveSupabaseNotification(userIdentifier, notificationObj) 
 // 10. STORAGE SERVICE (3D Files & Images Bucket)
 // ==========================================
 export async function upload3DFileToSupabase(file) {
-  try {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
-    const filePath = `custom-uploads/${fileName}`;
+  const fileExt = (file.name || 'jpg').split('.').pop();
+  const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
+  const filePath = `product-uploads/${fileName}`;
 
-    const { data, error } = await supabase.storage
-      .from('3d-files')
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: false
-      });
+  const buckets = ['3d-files', 'products', 'images'];
+  for (const bucket of buckets) {
+    try {
+      const { data, error } = await supabase.storage
+        .from(bucket)
+        .upload(filePath, file, { cacheControl: '3600', upsert: true });
 
-    if (error) throw error;
+      if (!error && data) {
+        const { data: publicUrlData } = supabase.storage
+          .from(bucket)
+          .getPublicUrl(filePath);
 
-    const { data: publicUrlData } = supabase.storage
-      .from('3d-files')
-      .getPublicUrl(filePath);
-
-    return publicUrlData?.publicUrl || null;
-  } catch (err) {
-    console.warn('Supabase storage upload fallback:', err);
-    return null;
+        if (publicUrlData?.publicUrl) {
+          return publicUrlData.publicUrl;
+        }
+      }
+    } catch (e) {
+      console.warn(`Supabase Storage upload to bucket "${bucket}" failed:`, e);
+    }
   }
+  return null;
 }
 
