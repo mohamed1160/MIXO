@@ -8,18 +8,34 @@ export default function VideoLoader({ onComplete }) {
   const [isVisible, setIsVisible] = useState(true);
   const videoRef = useRef(null);
 
-  useEffect(() => {
-    // Force video play on mobile devices (iOS Safari / Android Chrome)
+  const attemptPlay = () => {
     if (videoRef.current) {
       videoRef.current.muted = true;
-      videoRef.current.playsInline = true;
+      videoRef.current.defaultMuted = true;
+      videoRef.current.setAttribute("muted", "");
+      videoRef.current.setAttribute("playsinline", "");
+      videoRef.current.setAttribute("webkit-playsinline", "");
+
       const playPromise = videoRef.current.play();
       if (playPromise !== undefined) {
         playPromise.catch((error) => {
-          console.warn("Mobile video autoplay prevented:", error);
+          console.warn("Mobile video autoplay retry on user interaction / load:", error);
         });
       }
     }
+  };
+
+  useEffect(() => {
+    attemptPlay();
+
+    const handleTouchOrClick = () => {
+      attemptPlay();
+      window.removeEventListener("touchstart", handleTouchOrClick);
+      window.removeEventListener("click", handleTouchOrClick);
+    };
+
+    window.addEventListener("touchstart", handleTouchOrClick);
+    window.addEventListener("click", handleTouchOrClick);
 
     const DURATION = 4000; // 4 seconds total
     const startTime = performance.now();
@@ -43,7 +59,11 @@ export default function VideoLoader({ onComplete }) {
 
     const animationFrame = requestAnimationFrame(updateProgress);
 
-    return () => cancelAnimationFrame(animationFrame);
+    return () => {
+      cancelAnimationFrame(animationFrame);
+      window.removeEventListener("touchstart", handleTouchOrClick);
+      window.removeEventListener("click", handleTouchOrClick);
+    };
   }, [onComplete]);
 
   return (
@@ -63,19 +83,25 @@ export default function VideoLoader({ onComplete }) {
             </span>
           </div>
 
-          {/* Video Container (Borderless, Muted & Autoplay for Mobile) */}
+          {/* Video Container (Borderless, Bulletproof Mobile Autoplay) */}
           <div className="relative w-64 sm:w-80 aspect-square rounded-3xl overflow-hidden bg-black mb-8 z-10 flex items-center justify-center group">
             <video
               ref={videoRef}
-              src={loaderVideo || "/loader_video.mp4"}
               autoPlay
               loop
               muted
+              defaultMuted
               playsInline
+              preload="auto"
               webkit-playsinline="true"
               x5-playsinline="true"
+              onCanPlay={attemptPlay}
+              onLoadedData={attemptPlay}
               className="w-full h-full object-cover object-center transform scale-105 pointer-events-none"
-            />
+            >
+              <source src={loaderVideo} type="video/mp4" />
+              <source src="/loader_video.mp4" type="video/mp4" />
+            </video>
           </div>
 
           {/* Progress Bar & Counter Container */}
@@ -90,7 +116,7 @@ export default function VideoLoader({ onComplete }) {
               </span>
             </div>
 
-            {/* Progress Bar (Clean Solid Bar, No Red Glow) */}
+            {/* Progress Bar */}
             <div className="w-full h-3 bg-[#151C24] rounded-full p-0.5 border border-[#26313D] overflow-hidden relative">
               <div
                 className="h-full bg-gradient-to-r from-[#FF1F3D] to-[#FF6B00] rounded-full transition-all duration-75 ease-out relative"
