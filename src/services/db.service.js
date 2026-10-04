@@ -382,6 +382,8 @@ export async function getSupabaseProducts(forceRefresh = false) {
 }
 
 export async function saveSupabaseProduct(product) {
+  productsCache = null;
+  productsCacheTime = 0;
   let supaSuccess = false;
   try {
     const payload = {
@@ -413,10 +415,15 @@ export async function saveSupabaseProduct(product) {
   }
 
   // Update LocalStorage & notify app components
-  const saved = localStorage.getItem('MIXO_products');
-  const existingList = saved ? JSON.parse(saved) : [];
-  const updated = [product, ...existingList.filter(p => String(p.id) !== String(product.id))];
-  localStorage.setItem('MIXO_products', JSON.stringify(updated));
+  try {
+    const saved = localStorage.getItem('MIXO_products');
+    const existingList = saved ? JSON.parse(saved) : [];
+    const updated = [product, ...existingList.filter(p => String(p.id) !== String(product.id))];
+    localStorage.setItem('MIXO_products', JSON.stringify(updated));
+  } catch (e) {
+    console.warn('LocalStorage save product error:', e);
+  }
+
   window.dispatchEvent(new Event('storage'));
   window.dispatchEvent(new CustomEvent('mixo_products_updated'));
 
@@ -424,6 +431,8 @@ export async function saveSupabaseProduct(product) {
 }
 
 export async function deleteSupabaseProduct(productId) {
+  productsCache = null;
+  productsCacheTime = 0;
   try {
     const { error } = await supabase
       .from('products')
@@ -435,14 +444,19 @@ export async function deleteSupabaseProduct(productId) {
     console.error('Failed to delete product in Supabase:', err);
   }
 
-  const saved = localStorage.getItem('MIXO_products');
-  if (saved) {
-    const existingList = JSON.parse(saved);
-    const updated = existingList.filter(p => String(p.id) !== String(productId));
-    localStorage.setItem('MIXO_products', JSON.stringify(updated));
-    window.dispatchEvent(new Event('storage'));
-    window.dispatchEvent(new CustomEvent('mixo_products_updated'));
+  try {
+    const saved = localStorage.getItem('MIXO_products');
+    if (saved) {
+      const existingList = JSON.parse(saved);
+      const updated = existingList.filter(p => String(p.id) !== String(productId));
+      localStorage.setItem('MIXO_products', JSON.stringify(updated));
+    }
+  } catch (e) {
+    console.warn('LocalStorage delete product error:', e);
   }
+
+  window.dispatchEvent(new Event('storage'));
+  window.dispatchEvent(new CustomEvent('mixo_products_updated'));
 }
 
 export function subscribeToRealtimeProducts(onUpdate) {

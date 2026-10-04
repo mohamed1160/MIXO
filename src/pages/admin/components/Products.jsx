@@ -63,7 +63,7 @@ export default function Products() {
 
   const loadProducts = async () => {
     try {
-      const supaData = await getSupabaseProducts();
+      const supaData = await getSupabaseProducts(true);
       if (supaData && supaData.length > 0) {
         setProducts(supaData);
       } else {
