@@ -331,16 +331,10 @@ export async function getSupabaseProducts(forceRefresh = false) {
   }
 
   try {
-    const fetchPromise = supabase
+    const { data, error } = await supabase
       .from('products')
       .select('id, name, title, category, price, original_price, image, images, rating, review_count, is_bestseller, description')
       .order('created_at', { ascending: false });
-
-    const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Supabase fetch timeout')), 8000)
-    );
-
-    const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
 
     if (error) throw error;
     if (Array.isArray(data)) {
