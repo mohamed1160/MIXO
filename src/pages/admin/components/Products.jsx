@@ -175,31 +175,54 @@ export default function Products() {
   };
 
   const handleProductImageUpload = async (e) => {
-    const files = Array.from(e.target.files || []);
+    const inputEl = e.target;
+    const files = Array.from(inputEl.files || []);
     if (files.length === 0) return;
 
+    const toastId = toast.loading('جاري رفع ومعالجة الصور...');
     const uploadedUrls = [];
-    for (const file of files) {
-      if (!file.type.startsWith("image/")) continue;
-      try {
-        const supaUrl = await upload3DFileToSupabase(file);
-        const imgUrl = supaUrl || (await compressImage(file));
-        if (imgUrl) uploadedUrls.push(imgUrl);
-      } catch (err) {
-        console.error(err);
-      }
-    }
 
-    if (uploadedUrls.length > 0) {
-      setFormData((prev) => {
-        const updatedImages = [...(prev.images || []), ...uploadedUrls];
-        return {
-          ...prev,
-          images: updatedImages,
-          image: updatedImages[0] || prev.image
-        };
-      });
-      toast.success(`تم إضافة ${uploadedUrls.length} صور للمنتج بنجاح! 📷`);
+    try {
+      for (const file of files) {
+        if (!file.type.startsWith("image/")) continue;
+        let imgUrl = null;
+
+        try {
+          // Timeout race for Supabase upload (max 2.5 seconds)
+          const uploadPromise = upload3DFileToSupabase(file);
+          const timeoutPromise = new Promise((res) => setTimeout(() => res(null), 2500));
+          imgUrl = await Promise.race([uploadPromise, timeoutPromise]);
+        } catch (err) {
+          console.warn('Supabase image upload failed, falling back to local compression:', err);
+        }
+
+        if (!imgUrl) {
+          imgUrl = await compressImage(file);
+        }
+
+        if (imgUrl) {
+          uploadedUrls.push(imgUrl);
+        }
+      }
+
+      if (uploadedUrls.length > 0) {
+        setFormData((prev) => {
+          const updatedImages = [...(prev.images || []), ...uploadedUrls];
+          return {
+            ...prev,
+            images: updatedImages,
+            image: updatedImages[0] || prev.image
+          };
+        });
+        toast.success(`تم إضافة ${uploadedUrls.length} صور للمنتج بنجاح! 📷`, { id: toastId });
+      } else {
+        toast.error('لم يتم تحديد صور صالحة للرفع', { id: toastId });
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('حدث خطأ أثناء رفع الصور', { id: toastId });
+    } finally {
+      if (inputEl) inputEl.value = '';
     }
   };
 
