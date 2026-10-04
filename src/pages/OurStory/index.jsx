@@ -18,10 +18,10 @@ import {
 } from "lucide-react";
 import { useLanguage } from "../../providers/LanguageContext";
 import mixoLogoImg from "../../assets/images/logo/mixo_red_logo.png";
-import heroDragonImg from "../../assets/images/3dprint/hero_dragon.jpg";
-import customVaseImg from "../../assets/images/3dprint/custom_vase.jpg";
-import filamentImg from "../../assets/images/3dprint/filament_spools.jpg";
-import oniMaskImg from "../../assets/images/3dprint/oni_mask.jpg";
+import maskMilesImg from "../../assets/images/3dprint/mask_miles_morales.jpg";
+import maskSpidermanImg from "../../assets/images/3dprint/mask_spiderman.jpg";
+import maskDeadpoolImg from "../../assets/images/3dprint/mask_deadpool.jpg";
+import maskBatmanImg from "../../assets/images/3dprint/mask_batman.jpg";
 import CustomDesignModal from "../../components/CustomDesignModal";
 import { useSEO } from "../../hooks/useSEO";
 
@@ -55,7 +55,10 @@ export default function OurStory() {
               className="h-16 sm:h-20 w-auto object-contain my-2"
             />
 
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">
+            <h1
+              id="story-headline"
+              className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight"
+            >
               {isRTL ? (
                 <>
                   نحول الأفكار والرموز إلى <span className="text-[#FF1F3D]">واقع ملموس</span>
@@ -96,7 +99,7 @@ export default function OurStory() {
       </section>
 
       {/* 2. STATS BAR */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20">
+      <div id="story-stats-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20">
         <div className="bg-white dark:bg-[#0F151D] rounded-3xl p-6 sm:p-8 border border-gray-100 dark:border-[#1E2630] shadow-xl grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           <div>
             <div className="text-2xl sm:text-4xl font-extrabold text-[#FF1F3D]">1,200+</div>
@@ -134,15 +137,15 @@ export default function OurStory() {
             <div className="space-y-4">
               <div className="aspect-[4/5] rounded-3xl overflow-hidden shadow-lg border border-gray-100 dark:border-[#1E2630]">
                 <img
-                  src={heroDragonImg}
-                  alt="3D Printed Dragon"
+                  src={maskMilesImg}
+                  alt="Miles Morales 3D Mask"
                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                 />
               </div>
               <div className="aspect-square rounded-3xl overflow-hidden shadow-lg border border-gray-100 dark:border-[#1E2630]">
                 <img
-                  src={oniMaskImg}
-                  alt="3D Printed Oni Mask"
+                  src={maskBatmanImg}
+                  alt="Batman 3D Helmet"
                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                 />
               </div>
@@ -151,15 +154,15 @@ export default function OurStory() {
             <div className="space-y-4 pt-8">
               <div className="aspect-[4/5] rounded-3xl overflow-hidden shadow-lg border border-gray-100 dark:border-[#1E2630]">
                 <img
-                  src={customVaseImg}
-                  alt="Spiral Vase 3D Print"
+                  src={maskSpidermanImg}
+                  alt="Spider-Man 3D Mask"
                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                 />
               </div>
               <div className="aspect-square rounded-3xl overflow-hidden shadow-lg border border-gray-100 dark:border-[#1E2630]">
                 <img
-                  src={filamentImg}
-                  alt="Filament Spools"
+                  src={maskDeadpoolImg}
+                  alt="Deadpool 3D Mask"
                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                 />
               </div>

@@ -117,6 +117,9 @@ export default function AppRouter() {
 
             {/* ── Brand Pages ── */}
             <Route path="/our-story"          element={<PageTransition><OurStory /></PageTransition>} />
+            <Route path="/about"              element={<PageTransition><OurStory /></PageTransition>} />
+            <Route path="/about-us"           element={<PageTransition><OurStory /></PageTransition>} />
+            <Route path="/aboutus"            element={<PageTransition><OurStory /></PageTransition>} />
             <Route path="/journal"            element={<PageTransition><Journal /></PageTransition>} />
             <Route path="/journal/:slug"      element={<PageTransition><Journal /></PageTransition>} />
             <Route path="/contact"            element={<PageTransition><Contact /></PageTransition>} />

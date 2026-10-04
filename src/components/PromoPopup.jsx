@@ -83,7 +83,7 @@ export default function PromoPopup({ forceShow = false, onClosePreview }) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.88, y: 15 }}
             transition={{ type: "spring", damping: 25, stiffness: 350 }}
-            className="relative w-full max-w-md bg-[#0F141C] border border-[#2A3441] rounded-3xl shadow-2xl overflow-hidden text-white p-6 sm:p-8 text-center"
+            className="relative w-full max-w-md bg-[#0F141C]/75 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden text-white p-6 sm:p-8 text-center"
           >
             {/* Red Glow Accent Bar Top */}
             <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#FF1F3D] via-[#FF6B00] to-[#FF1F3D] animate-pulse" />
@@ -108,7 +108,7 @@ export default function PromoPopup({ forceShow = false, onClosePreview }) {
                   <Sparkles size={12} />
                 </div>
               </div>
-              <img src={mixoLogoImg} alt="Mixo Logo" className="h-6 w-auto object-contain opacity-80 pt-1" />
+              <img src={mixoLogoImg} alt="Mixo Logo" className="h-12 w-auto object-contain opacity-100 pt-3" />
             </div>
 
             {/* Sentence Message */}
