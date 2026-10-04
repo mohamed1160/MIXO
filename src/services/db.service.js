@@ -337,7 +337,7 @@ export async function getSupabaseProducts(forceRefresh = false) {
       .order('created_at', { ascending: false });
 
     const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Supabase fetch timeout')), 1200)
+      setTimeout(() => reject(new Error('Supabase fetch timeout')), 8000)
     );
 
     const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);

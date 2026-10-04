@@ -147,7 +147,7 @@ export default function Products() {
     setIsModalOpen(true);
   };
 
-  const compressImage = (file, maxWidth = 800, quality = 0.7) => {
+  const compressImage = (file, maxDim = 600, quality = 0.55) => {
     return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -156,9 +156,14 @@ export default function Products() {
           const canvas = document.createElement('canvas');
           let width = img.width;
           let height = img.height;
-          if (width > maxWidth) {
-            height = Math.round((height * maxWidth) / width);
-            width = maxWidth;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
           }
           canvas.width = width;
           canvas.height = height;
@@ -179,7 +184,7 @@ export default function Products() {
     const files = Array.from(inputEl.files || []);
     if (files.length === 0) return;
 
-    const toastId = toast.loading('جاري رفع ومعالجة الصور...');
+    const toastId = toast.loading('جاري معالجة وتجهيز الصور لـ Supabase...');
     const uploadedUrls = [];
 
     try {
@@ -188,16 +193,15 @@ export default function Products() {
         let imgUrl = null;
 
         try {
-          // Timeout race for Supabase upload (max 2.5 seconds)
           const uploadPromise = upload3DFileToSupabase(file);
-          const timeoutPromise = new Promise((res) => setTimeout(() => res(null), 2500));
+          const timeoutPromise = new Promise((res) => setTimeout(() => res(null), 2000));
           imgUrl = await Promise.race([uploadPromise, timeoutPromise]);
         } catch (err) {
-          console.warn('Supabase image upload failed, falling back to local compression:', err);
+          console.warn('Supabase storage fallback:', err);
         }
 
         if (!imgUrl) {
-          imgUrl = await compressImage(file);
+          imgUrl = await compressImage(file, 600, 0.55);
         }
 
         if (imgUrl) {
