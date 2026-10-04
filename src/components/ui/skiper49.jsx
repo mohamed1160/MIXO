@@ -55,15 +55,15 @@ export function Skiper49({
   const css = `
   .Skiper49_Swiper {
     width: 100%;
-    padding-top: 20px !important;
-    padding-bottom: 50px !important;
+    padding-top: 25px !important;
+    padding-bottom: 55px !important;
     mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
     -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
   }
   
   .Skiper49_Swiper .swiper-wrapper {
     display: flex;
-    align-items: stretch;
+    align-items: center;
   }
 
   .Skiper49_Swiper .swiper-slide {
@@ -71,9 +71,13 @@ export function Skiper49({
     height: auto !important;
     display: flex;
     flex-direction: column;
-    transform: none !important;
-    scale: 1 !important;
-    transition: opacity 0.3s ease;
+    opacity: 0.72;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  .Skiper49_Swiper .swiper-slide-active {
+    opacity: 1 !important;
+    z-index: 20 !important;
   }
 
   @media (min-width: 640px) {
@@ -133,9 +137,9 @@ export function Skiper49({
         coverflowEffect={{
           rotate: 0,
           stretch: 0,
-          depth: 0,
+          depth: 70,
           modifier: 1,
-          scale: 1,
+          scale: 0.90,
           slideShadows: false,
         }}
         pagination={
