@@ -190,20 +190,7 @@ export default function Products() {
     try {
       for (const file of files) {
         if (!file.type.startsWith("image/")) continue;
-        let imgUrl = null;
-
-        try {
-          const uploadPromise = upload3DFileToSupabase(file);
-          const timeoutPromise = new Promise((res) => setTimeout(() => res(null), 2000));
-          imgUrl = await Promise.race([uploadPromise, timeoutPromise]);
-        } catch (err) {
-          console.warn('Supabase storage fallback:', err);
-        }
-
-        if (!imgUrl) {
-          imgUrl = await compressImage(file, 600, 0.55);
-        }
-
+        const imgUrl = await compressImage(file, 600, 0.55);
         if (imgUrl) {
           uploadedUrls.push(imgUrl);
         }
