@@ -61,16 +61,30 @@ export function Skiper49({
     -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
   }
   
+  .Skiper49_Swiper .swiper-wrapper {
+    display: flex;
+    align-items: stretch;
+  }
+
   .Skiper49_Swiper .swiper-slide {
-    width: 270px;
-    height: auto;
-    transition: all 0.3s ease;
+    width: 275px;
+    height: auto !important;
+    display: flex;
+    flex-direction: column;
+    transform: none !important;
+    scale: 1 !important;
+    transition: opacity 0.3s ease;
   }
 
   @media (min-width: 640px) {
     .Skiper49_Swiper .swiper-slide {
       width: 310px;
     }
+  }
+
+  .Skiper49_Swiper .swiper-slide-shadow-left,
+  .Skiper49_Swiper .swiper-slide-shadow-right {
+    display: none !important;
   }
 
   .Skiper49_Swiper .swiper-pagination-bullet {
@@ -117,11 +131,12 @@ export function Skiper49({
             : false
         }
         coverflowEffect={{
-          rotate: 35,
+          rotate: 0,
           stretch: 0,
-          depth: 120,
+          depth: 0,
           modifier: 1,
-          slideShadows: true,
+          scale: 1,
+          slideShadows: false,
         }}
         pagination={
           showPagination
@@ -170,7 +185,7 @@ export function Skiper49({
                   maskComposite: 'intersect',
                   WebkitMaskComposite: 'destination-in',
                 }}
-                className="group relative w-full bg-[#0f1219]/95 hover:bg-[#141824] border border-white/20 hover:border-white/50 rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-[0_18px_45px_rgba(0,0,0,0.85)] text-white transition-all duration-300 transform overflow-hidden cursor-pointer min-h-[490px] sm:min-h-[530px]"
+                className="group relative w-full h-[500px] sm:h-[530px] shrink-0 bg-[#0f1219]/95 hover:bg-[#141824] border border-white/20 hover:border-white/50 rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-[0_18px_45px_rgba(0,0,0,0.85)] text-white transition-colors duration-300 overflow-hidden cursor-pointer"
               >
                 {/* Top-Left Spiderweb Corner Accent */}
                 <div className="absolute top-0 left-0 z-20 pointer-events-none p-0.5">
@@ -197,7 +212,7 @@ export function Skiper49({
                 </div>
 
                 {/* 1. TOP TICKET BOX (Larger Image Frame with Dashed Border & Corner Stars) */}
-                <div className="relative flex-1 w-full min-h-[270px] sm:min-h-[300px] rounded-xl bg-[#080a0f] border-2 border-dashed border-white/20 group-hover:border-white/40 p-1 flex items-center justify-center overflow-hidden">
+                <div className="relative w-full h-[270px] sm:h-[295px] shrink-0 rounded-xl bg-[#080a0f] border-2 border-dashed border-white/20 group-hover:border-white/40 p-1 flex items-center justify-center overflow-hidden">
                   {/* Corner Stars */}
                   <span className="absolute top-2 left-2 text-[10px] text-white/40 z-10 pointer-events-none select-none">★</span>
                   <span className="absolute top-2 right-2 text-[10px] text-white/40 z-10 pointer-events-none select-none">★</span>
