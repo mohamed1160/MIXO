@@ -40,9 +40,39 @@ export default function Home() {
   useSEO();
 
   // ── State ──
-  const [allProducts, setAllProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState(() => {
+    try {
+      const saved = localStorage.getItem("MIXO_products");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map((p) => ({
+            id: p.id || `prod-${Math.random()}`,
+            title: p.name || p.title,
+            name: p.name || p.title,
+            image: p.image || p.images?.[0] || "",
+            images: p.images?.length ? p.images : [p.image || ""],
+            price: Number(p.price) || 0,
+            originalPrice: p.originalPrice ? Number(p.originalPrice) : null,
+            rating: p.rating || 0,
+            reviewCount: p.reviewCount || p.reviewsCount || 0,
+            reviewsCount: p.reviewsCount || p.reviewCount || 0,
+            category: p.category || "Figures & Collectibles",
+            categoryId: p.categoryId || mapCategoryToId(p.category),
+            description: p.description || "",
+            material: p.material || "PLA Plus",
+            isPopular: false,
+            isBestSeller: p.isBestSeller || false,
+            stock: p.inStock !== false ? 10 : 0,
+            inStock: p.inStock !== false,
+          }));
+        }
+      }
+    } catch (e) {}
+    return [];
+  });
   const [activePopularFilter, setActivePopularFilter] = useState("masks");
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(() => allProducts.length === 0);
   const [activeFaq, setActiveFaq] = useState(null);
 
   // ── Refs for GSAP ──
@@ -71,10 +101,12 @@ export default function Home() {
 
   // ── Load Products Data ──
   const loadData = async () => {
-    setIsLoading(true);
+    if (allProducts.length === 0) setIsLoading(true);
     try {
       const allData = await getProducts({ sort: "popular", limit: 30 });
-      setAllProducts(allData || []);
+      if (allData && allData.length > 0) {
+        setAllProducts(allData);
+      }
     } catch (err) {
       console.error("Failed to load products:", err);
     } finally {
@@ -185,7 +217,7 @@ export default function Home() {
 
     // ── SECTION 1: HERO LOAD ANIMATIONS ──
     if (deadpoolHeroImgRef.current) {
-      gsap.set(deadpoolHeroImgRef.current, { xPercent: -50 });
+      gsap.set(deadpoolHeroImgRef.current, { xPercent: -50, yPercent: -50 });
     }
 
     const chars = heroTitleBoxRef.current?.querySelectorAll(".char-inner");
@@ -206,6 +238,7 @@ export default function Home() {
         .to(deadpoolHeroImgRef.current, {
           y: 0,
           xPercent: -50,
+          yPercent: -50,
           duration: 1.5,
           ease: "back.out(1.2)",
         }, 0.6)
@@ -233,7 +266,7 @@ export default function Home() {
       .set(heroTitleBoxRef.current, { zIndex: 2 }, 0)
       .to(heroTitleBoxRef.current, { scale: isMobile ? 4.0 : 2.2, y: isMobile ? -35 : -20, force3D: true, transformOrigin: "center center", ease: "power2.out" }, 0)
       .set(heroTitleBoxRef.current, { zIndex: 20 }, 0.1)
-      .to(deadpoolHeroImgRef.current, { y: isMobile ? 80 : 50, xPercent: -50, scale: isMobile ? 1.15 : 1.05, opacity: 0.9, force3D: true, ease: "power1.inOut" }, 0)
+      .to(deadpoolHeroImgRef.current, { y: isMobile ? 30 : 50, xPercent: -50, yPercent: -50, scale: isMobile ? 1.05 : 1.05, opacity: 0.9, force3D: true, ease: "power1.inOut" }, 0)
       .to(heroCircleRef.current, { scale: isMobile ? 1.8 : 1.3, opacity: 0.7, ease: "none" }, 0)
       .to(stitchBeltRef.current, { x: "-25%", opacity: 0.2, ease: "none" }, 0);
     }
@@ -310,36 +343,60 @@ export default function Home() {
       });
     }
 
-    // ── SECTION 4: 100% SMOOTH CONTINUOUS NATURAL SCROLL (NO PINNING JUMP) ──
+    // ── SECTION 4: INSTANT REVEAL ON SCROLL ENTER ──
     if (theatersSectionRef.current) {
-      const theatersTL = gsap.timeline({
-        scrollTrigger: {
-          trigger: theatersSectionRef.current,
-          start: "top 85%",
-          end: "bottom 30%",
-          scrub: 1,
-        },
-      });
+      gsap.fromTo(
+        theatersContentRef.current,
+        { opacity: 0, y: 20 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.5,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: theatersSectionRef.current,
+            start: "top 95%",
+            toggleActions: "play none none none",
+          },
+        }
+      );
 
-      theatersTL
-        .fromTo(
-          theatersContentRef.current,
-          { opacity: 0, y: 60 },
-          { opacity: 1, y: 0, ease: "power2.out", duration: 0.5 },
-          0
-        )
-        .fromTo(
+      if (deadpoolHeartImgRef.current) {
+        gsap.fromTo(
           deadpoolHeartImgRef.current,
-          { y: 240 },
-          { y: 0, ease: "power2.out", duration: 1 },
-          0.2
-        )
-        .fromTo(
-          crosshairBgRef.current,
-          { scale: 0.6, rotation: 0 },
-          { scale: 1.15, rotation: 180, ease: "power2.out", duration: 1 },
-          0.2
+          { opacity: 0, y: 30, scale: 0.95 },
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 0.6,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: theatersSectionRef.current,
+              start: "top 90%",
+              toggleActions: "play none none none",
+            },
+          }
         );
+      }
+
+      if (crosshairBgRef.current) {
+        gsap.fromTo(
+          crosshairBgRef.current,
+          { scale: 0.8, opacity: 0.3 },
+          {
+            scale: 1,
+            opacity: 1,
+            duration: 0.8,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: theatersSectionRef.current,
+              start: "top 90%",
+              toggleActions: "play none none none",
+            },
+          }
+        );
+      }
     }
 
     return () => {
@@ -466,12 +523,12 @@ export default function Home() {
             </h1>
           </div>
 
-          {/* Spider-Man Cutout Overlay - Always Centered */}
+          {/* Spider-Man Cutout Overlay - Always Centered on Mobile & Desktop */}
           <img
             ref={deadpoolHeroImgRef}
             src={spidermanHero}
             alt="Spider-Man 3D Mask Edition"
-            className="absolute -bottom-[14%] left-1/2 -translate-x-1/2 translate-y-[200px] h-[82vh] max-h-[850px] z-4 pointer-events-none filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.8)] object-contain"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[68vh] md:h-[82vh] max-h-[850px] z-4 pointer-events-none filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.8)] object-contain"
           />
 
           {/* Diagonal Stitch Belt */}

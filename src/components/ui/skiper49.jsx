@@ -210,6 +210,7 @@ export function Skiper49({
                     alt={title}
                     className="w-full h-full object-cover object-center rounded-lg group-hover:scale-105 transition-transform duration-500 ease-out pointer-events-none"
                     loading="lazy"
+                    decoding="async"
                   />
 
                   {/* Secondary Hover Image (if product has multiple images) */}
@@ -219,6 +220,7 @@ export function Skiper49({
                       alt={`${title} - view 2`}
                       className="absolute inset-0 w-full h-full object-cover object-center rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out pointer-events-none"
                       loading="lazy"
+                      decoding="async"
                     />
                   )}
 

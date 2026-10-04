@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import loaderVideo from "../assets/images/loader/WhatsApp Video 2026-10-04 at 10.14.20 PM.mp4";
 import mixoLogoImg from "../assets/images/logo/mixo_red_logo.png";
@@ -6,8 +6,21 @@ import mixoLogoImg from "../assets/images/logo/mixo_red_logo.png";
 export default function VideoLoader({ onComplete }) {
   const [progress, setProgress] = useState(1);
   const [isVisible, setIsVisible] = useState(true);
+  const videoRef = useRef(null);
 
   useEffect(() => {
+    // Force video play on mobile devices (iOS Safari / Android Chrome)
+    if (videoRef.current) {
+      videoRef.current.muted = true;
+      videoRef.current.playsInline = true;
+      const playPromise = videoRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((error) => {
+          console.warn("Mobile video autoplay prevented:", error);
+        });
+      }
+    }
+
     const DURATION = 4000; // 4 seconds total
     const startTime = performance.now();
 
@@ -50,15 +63,18 @@ export default function VideoLoader({ onComplete }) {
             </span>
           </div>
 
-          {/* Video Container (Borderless & Clean) */}
+          {/* Video Container (Borderless, Muted & Autoplay for Mobile) */}
           <div className="relative w-64 sm:w-80 aspect-square rounded-3xl overflow-hidden bg-black mb-8 z-10 flex items-center justify-center group">
             <video
+              ref={videoRef}
               src={loaderVideo || "/loader_video.mp4"}
               autoPlay
               loop
               muted
               playsInline
-              className="w-full h-full object-cover object-center transform scale-105"
+              webkit-playsinline="true"
+              x5-playsinline="true"
+              className="w-full h-full object-cover object-center transform scale-105 pointer-events-none"
             />
           </div>
 
