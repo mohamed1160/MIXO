@@ -29,28 +29,33 @@ export const shopService = {
       }
     }
 
-    const normalizedProducts = allProducts.map((item) => ({
-      id: item.id,
-      title: item.title || item.name,
-      name: item.name || item.title,
-      price: Number(item.price) || 0,
-      oldPrice: item.oldPrice || item.originalPrice || null,
-      originalPrice: item.originalPrice || item.oldPrice || null,
-      description: item.description || '',
-      category: item.category || 'Figures & Collectibles',
-      categoryId: item.categoryId || mapCategoryToId(item.category),
-      stock: item.inStock !== false ? 10 : 0,
-      inStock: item.inStock !== false,
-      ratings: item.rating || item.ratings || 0,
-      numReviews: item.reviewCount || item.numReviews || 0,
-      colors: item.colors || [],
-      sizes: item.sizes || [],
-      image: item.image || item.images?.[0] || '',
-      images: item.images?.length ? item.images : [item.image || ''],
-      material: item.material || 'PLA Plus',
-      isNewArrival: item.isNewArrival ?? false,
-      isBestSeller: item.isBestSeller ?? false,
-    }));
+    const normalizedProducts = allProducts.map((item) => {
+      const primaryImg = item.image || (Array.isArray(item.images) && item.images[0]) || 'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=600&auto=format&fit=crop&q=80';
+      const imgList = Array.isArray(item.images) && item.images.length > 0 ? item.images : [primaryImg];
+
+      return {
+        id: item.id,
+        title: item.title || item.name,
+        name: item.name || item.title,
+        price: Number(item.price) || 0,
+        oldPrice: item.oldPrice || item.originalPrice || null,
+        originalPrice: item.originalPrice || item.oldPrice || null,
+        description: item.description || '',
+        category: item.category || 'Figures & Collectibles',
+        categoryId: item.categoryId || mapCategoryToId(item.category),
+        stock: item.stock ?? (item.inStock !== false ? 10 : 0),
+        inStock: item.inStock !== false,
+        ratings: item.rating || item.ratings || 0,
+        numReviews: item.reviewCount || item.numReviews || 0,
+        colors: item.colors || [],
+        sizes: item.sizes || [],
+        image: primaryImg,
+        images: imgList,
+        material: item.material || 'PLA Plus',
+        isNewArrival: item.isNewArrival ?? false,
+        isBestSeller: item.isBestSeller ?? false,
+      };
+    });
 
     // 1. Filter
     const filtered = applyFilters(normalizedProducts, filters);

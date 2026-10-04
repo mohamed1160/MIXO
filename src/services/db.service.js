@@ -338,22 +338,28 @@ export async function getSupabaseProducts(forceRefresh = false) {
 
     if (error) throw error;
     if (Array.isArray(data)) {
-      const formatted = data.map(p => ({
-        id: p.id,
-        name: p.name,
-        title: p.title || p.name,
-        category: p.category,
-        price: Number(p.price),
-        originalPrice: p.original_price ? Number(p.original_price) : null,
-        image: p.image,
-        images: p.images || [p.image],
-        rating: p.rating || 0,
-        reviewCount: p.review_count || 0,
-        isBestSeller: p.is_bestseller || false,
-        description: p.description || '',
-        material: p.material || 'PLA Plus',
-        inStock: true
-      }));
+      const formatted = data.map(p => {
+        const primaryImg = p.image || (Array.isArray(p.images) && p.images[0]) || 'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=600&auto=format&fit=crop&q=80';
+        const imgList = Array.isArray(p.images) && p.images.length > 0 ? p.images : [primaryImg];
+
+        return {
+          id: p.id,
+          name: p.name,
+          title: p.title || p.name,
+          category: p.category,
+          price: Number(p.price),
+          originalPrice: p.original_price ? Number(p.original_price) : null,
+          image: primaryImg,
+          images: imgList,
+          rating: p.rating || 0,
+          reviewCount: p.review_count || 0,
+          isBestSeller: p.is_bestseller || false,
+          description: p.description || '',
+          material: p.material || 'PLA Plus',
+          inStock: true,
+          stock: 10
+        };
+      });
 
       productsCache = formatted;
       productsCacheTime = now;
