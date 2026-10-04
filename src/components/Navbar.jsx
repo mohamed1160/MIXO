@@ -109,7 +109,7 @@ export default function Navbar() {
                   >
                     {link.label}
                     {isActive(link.path) && (
-                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#FF1F3D] rounded-full" />
+                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-black dark:bg-white rounded-full" />
                     )}
                   </Link>
                 ))}
@@ -144,7 +144,7 @@ export default function Navbar() {
               {isAdmin && (
                 <Link
                   to="/admin"
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-[#FF1F3D] hover:bg-[#E01833] rounded-xl shadow-md transition-all shrink-0"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white dark:text-black bg-black dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-200 rounded-xl shadow-md transition-all shrink-0"
                   title={isRTL ? "لوحة التحكم" : "Admin Dashboard"}
                 >
                   <ShieldCheck className="w-4 h-4" />
@@ -168,7 +168,7 @@ export default function Navbar() {
                 aria-label="Wishlist"
               >
                 <Heart className="w-4.5 h-4.5 sm:w-5 sm:h-5 stroke-[1.8]" />
-                <span className="absolute -top-1 -right-1 bg-[#FF1F3D] text-white text-[9px] font-bold w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full flex items-center justify-center shadow-sm">
+                <span className="absolute -top-1 -right-1 bg-black dark:bg-white text-white dark:text-black text-[9px] font-bold w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full flex items-center justify-center shadow-sm">
                   {wishlistCount}
                 </span>
               </Link>
@@ -180,7 +180,7 @@ export default function Navbar() {
                 aria-label="Cart"
               >
                 <ShoppingBag className="w-4.5 h-4.5 sm:w-5 sm:h-5 stroke-[1.8]" />
-                <span className="absolute -top-1 -right-1 bg-[#FF1F3D] text-white text-[9px] font-bold w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full flex items-center justify-center shadow-sm">
+                <span className="absolute -top-1 -right-1 bg-black dark:bg-white text-white dark:text-black text-[9px] font-bold w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full flex items-center justify-center shadow-sm">
                   {cartCount}
                 </span>
               </Link>
@@ -284,10 +284,10 @@ export default function Navbar() {
                 <Link
                   to="/admin"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center justify-between py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold bg-red-500/10 text-[#FF1F3D] border border-[#FF1F3D]/20 mb-2"
+                  className="flex items-center justify-between py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold bg-black/5 dark:bg-white/10 text-black dark:text-white border border-black/20 dark:border-white/20 mb-2"
                 >
                   <div className="flex items-center gap-2">
-                    <ShieldCheck className="w-4 h-4 text-[#FF1F3D]" />
+                    <ShieldCheck className="w-4 h-4 text-black dark:text-white" />
                     <span>{isRTL ? "لوحة التحكم" : "Admin Dashboard"}</span>
                   </div>
                   <ChevronRight className="w-4 h-4 opacity-70" />
