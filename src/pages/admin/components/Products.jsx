@@ -283,7 +283,7 @@ export default function Products() {
     if (res?.supaSuccess) {
       toast.success(editingProduct ? 'تم تعديل المنتج بنجاح وحفظه في السحابة لجميع الأجهزة 🎉' : 'تم إضافة المنتج الجديد وحفظه في السحابة لجميع الأجهزة 🎉');
     } else {
-      toast.success(editingProduct ? 'تم تعديل المنتج بنجاح 🎉' : 'تم إضافة المنتج الجديد بنجاح 🎉');
+      toast.error(`تم الحفظ محلياً على هذا الجهاز. لم يتم الرفع للسحابة (Supabase): ${res?.supaError || 'خطأ بالاتصال/الصلاحيات'}`);
     }
 
     setIsModalOpen(false);

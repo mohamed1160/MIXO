@@ -361,14 +361,25 @@ export async function getSupabaseProducts(forceRefresh = false) {
         inStock: true
       }));
 
-      productsCache = formatted;
+      // Merge items from LocalStorage that might be saved locally so they are preserved
+      let localItems = [];
+      try {
+        const saved = localStorage.getItem('MIXO_products');
+        if (saved) localItems = JSON.parse(saved);
+      } catch (e) {}
+
+      const supaIds = new Set(formatted.map(p => String(p.id)));
+      const missingLocals = localItems.filter(p => p && p.id && !supaIds.has(String(p.id)));
+      const combined = [...formatted, ...missingLocals];
+
+      productsCache = combined;
       productsCacheTime = now;
       try {
-        localStorage.setItem('MIXO_products', JSON.stringify(formatted));
+        localStorage.setItem('MIXO_products', JSON.stringify(combined));
       } catch (e) {
         console.warn('LocalStorage quota exceeded for products cache:', e);
       }
-      return formatted;
+      return combined;
     }
   } catch (err) {
     console.warn('Supabase products fetch fallback to LocalStorage:', err);
@@ -385,6 +396,8 @@ export async function saveSupabaseProduct(product) {
   productsCache = null;
   productsCacheTime = 0;
   let supaSuccess = false;
+  let supaError = null;
+
   try {
     const payload = {
       id: String(product.id || Date.now()),
@@ -394,7 +407,7 @@ export async function saveSupabaseProduct(product) {
       price: Number(product.price),
       original_price: product.originalPrice ? Number(product.originalPrice) : null,
       image: product.image,
-      images: product.images || [product.image],
+      images: Array.isArray(product.images) && product.images.length > 0 ? product.images : [product.image],
       rating: product.rating || 0,
       review_count: product.reviewCount || 0,
       is_bestseller: product.isBestSeller || false,
@@ -407,11 +420,13 @@ export async function saveSupabaseProduct(product) {
 
     if (error) {
       console.error('Supabase save product error:', error);
+      supaError = error.message;
     } else {
       supaSuccess = true;
     }
   } catch (err) {
     console.error('Failed to save product in Supabase API:', err);
+    supaError = err.message;
   }
 
   // Update LocalStorage & notify app components
@@ -427,7 +442,7 @@ export async function saveSupabaseProduct(product) {
   window.dispatchEvent(new Event('storage'));
   window.dispatchEvent(new CustomEvent('mixo_products_updated'));
 
-  return { product, supaSuccess };
+  return { product, supaSuccess, supaError };
 }
 
 export async function deleteSupabaseProduct(productId) {
