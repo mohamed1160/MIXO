@@ -274,15 +274,15 @@ export default function ProductDetails() {
             </div>
 
             {/* Thumbnail list */}
-            {product.images && product.images.length > 1 && (
+            {((product.images && product.images.length > 1) || (Array.isArray(product.images) && product.images.length > 0)) && (
               <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none">
-                {product.images.map((img, idx) => (
+                {(product.images && product.images.length > 0 ? product.images : [product.image]).map((img, idx) => (
                   <button
                     key={idx}
                     onClick={() => setSelectedImage(img)}
-                    className={`w-20 h-20 rounded-2xl border-2 overflow-hidden shrink-0 transition-all ${
+                    className={`w-20 h-20 rounded-2xl border-2 overflow-hidden shrink-0 transition-all cursor-pointer ${
                       selectedImage === img
-                        ? 'border-[#FF1F3D] scale-105 shadow-md shadow-red-600/20'
+                        ? 'border-[#FF1F3D] scale-105 shadow-md shadow-red-600/20 ring-2 ring-[#FF1F3D]/30'
                         : 'border-gray-200 dark:border-[#1E2630] opacity-70 hover:opacity-100'
                     }`}
                   >

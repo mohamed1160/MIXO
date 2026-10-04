@@ -9,6 +9,7 @@ import Footer from '../components/Footer'
 import ProtectedRoute from '../components/ProtectedRoute'
 import WhatsAppButton from '../components/common/WhatsAppButton'
 import AnnouncementBar from '../components/AnnouncementBar'
+import PromoPopup from '../components/PromoPopup'
 import { setupForegroundNotifications } from '../notifications'
 
 /* ── Lazy Loaded Main Pages ── */
@@ -62,6 +63,7 @@ const Settings = lazy(() => import('../pages/admin/components/Settings'))
 const AdminSecurity = lazy(() => import('../pages/admin/components/AdminSecurity'))
 const Messages = lazy(() => import('../pages/admin/components/Messages'))
 const AdminFAQs = lazy(() => import('../pages/admin/components/FAQs'))
+const PromoPopupSettings = lazy(() => import('../pages/admin/components/PromoPopupSettings'))
 
 const RouteFallback = () => (
   <div className="min-h-[50vh] flex flex-col items-center justify-center space-y-3 py-16">
@@ -165,6 +167,7 @@ export default function AppRouter() {
               <Route path="payments"      element={<Payments />} />
               <Route path="products"      element={<Products />} />
               <Route path="promo-codes"   element={<PromoCodes />} />
+              <Route path="promo-popup"   element={<PromoPopupSettings />} />
               <Route path="categories"    element={<Categories />} />
               <Route path="reports"       element={<Reports />} />
               <Route path="reviews"       element={<AdminReviews />} />
@@ -178,6 +181,7 @@ export default function AppRouter() {
         </Suspense>
       </AnimatePresence>
 
+      {!isAdminRoute && <PromoPopup />}
       {!isAdminRoute && <WhatsAppButton />}
       {!isAdminRoute && <Footer />}
     </>

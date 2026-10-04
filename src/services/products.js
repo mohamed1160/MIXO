@@ -4,59 +4,24 @@ import filamentImg from "../assets/images/3dprint/filament_spools.jpg";
 import { getSupabaseProducts } from './db.service';
 
 export const CATEGORIES = [
-  { id: "figures", nameKey: "figures", icon: "🐉", defaultName: "Figures & Collectibles", arName: "مجسمات ومقتنيات" },
-  { id: "masks", nameKey: "masks", icon: "🎭", defaultName: "Masks & Wearables", arName: "ماسكات وأقنعة" },
-  { id: "decor", nameKey: "homeDecor", icon: "🪴", defaultName: "Home Decor", arName: "ديكور المنزل" },
-  { id: "stands", nameKey: "phoneStands", icon: "📱", defaultName: "Phone Stands", arName: "حوامل الهواتف" },
-  { id: "tools", nameKey: "tools", icon: "⚙️", defaultName: "Tools & Functional", arName: "أدوات ومستلزمات" },
-  { id: "vases", nameKey: "vases", icon: "🏺", defaultName: "Vases & Art", arName: "فازات وتحف فنية" },
-  { id: "gaming", nameKey: "gaming", icon: "🎮", defaultName: "Gaming & Cosplay", arName: "ألعاب وإكسسوارات" },
-  { id: "keychains", nameKey: "keychains", icon: "🔑", defaultName: "Keychains & Tags", arName: "ميداليات وإكسسوارات" },
+  { id: "masks", nameKey: "masks", icon: "🎭", defaultName: "Masks", arName: "ماسكات وأقنعة" },
+  { id: "figures", nameKey: "figures", icon: "🐉", defaultName: "Figures", arName: "مجسمات ومقتنيات" },
+  { id: "gaming", nameKey: "gaming", icon: "🎮", defaultName: "Gaming", arName: "ألعاب وإكسسوارات" },
   { id: "3d-models", nameKey: "3dModels", icon: "🧊", defaultName: "3D Models", arName: "موديلات 3D" },
+  { id: "keychains", nameKey: "keychains", icon: "🔑", defaultName: "Keychains", arName: "ميداليات" },
+  { id: "vases", nameKey: "vases", icon: "🏺", defaultName: "Vases", arName: "فازات وتحف" },
+  { id: "decor", nameKey: "homeDecor", icon: "🪴", defaultName: "Home Decor", arName: "ديكور المنزل" },
 ];
 
 export function getAllCategories() {
-  const saved = localStorage.getItem('MIXO_custom_categories');
-  let custom = [];
-  if (saved) {
-    try {
-      custom = JSON.parse(saved);
-    } catch (e) {}
-  }
-
-  const list = [...CATEGORIES];
-  custom.forEach((cat) => {
-    if (!list.some((c) => c.id === cat.id || c.defaultName.toLowerCase() === cat.defaultName.toLowerCase())) {
-      list.push(cat);
-    }
-  });
-  return list;
+  return [...CATEGORIES];
 }
 
 export function saveCustomCategory(newCategoryName, icon = "📦") {
   if (!newCategoryName || !newCategoryName.trim()) return null;
   const cleanName = newCategoryName.trim();
-  const id = cleanName.toLowerCase().replace(/[^a-z0-9\u0600-\u06FF]+/gi, '-').replace(/(^-|-$)/g, '') || `cat-${Date.now()}`;
-
-  const existingCustom = localStorage.getItem('MIXO_custom_categories');
-  let custom = existingCustom ? JSON.parse(existingCustom) : [];
-
-  const newCatObj = {
-    id,
-    nameKey: id,
-    icon: icon || "📦",
-    defaultName: cleanName,
-    arName: cleanName,
-    custom: true
-  };
-
-  if (!custom.some((c) => c.id === id || c.defaultName.toLowerCase() === cleanName.toLowerCase())) {
-    custom.push(newCatObj);
-    localStorage.setItem('MIXO_custom_categories', JSON.stringify(custom));
-    window.dispatchEvent(new Event('storage'));
-    window.dispatchEvent(new CustomEvent('mixo_categories_updated'));
-  }
-  return newCatObj;
+  const id = mapCategoryToId(cleanName);
+  return CATEGORIES.find(c => c.id === id) || CATEGORIES[3];
 }
 
 export const MOCK_3D_PRODUCTS = [];
@@ -65,21 +30,15 @@ export function mapCategoryToId(catName = "") {
   if (!catName) return "figures";
   const str = String(catName).toLowerCase().trim();
 
-  if (str.includes("figure") || str.includes("مجسمات") || str.includes("مقتنيات")) return "figures";
   if (str.includes("mask") || str.includes("ماسكات") || str.includes("أقنعة")) return "masks";
-  if (str.includes("decor") || str.includes("ديكور")) return "decor";
-  if (str.includes("stand") || str.includes("phone") || str.includes("حوامل") || str.includes("هواتف")) return "stands";
-  if (str.includes("tool") || str.includes("functional") || str.includes("أدوات") || str.includes("مستلزمات")) return "tools";
-  if (str.includes("vase") || str.includes("art") || str.includes("فازات") || str.includes("تحف")) return "vases";
+  if (str.includes("figure") || str.includes("مجسمات") || str.includes("مقتنيات")) return "figures";
   if (str.includes("game") || str.includes("gaming") || str.includes("cosplay") || str.includes("ألعاب") || str.includes("إكسسوارات")) return "gaming";
+  if (str.includes("stand") || str.includes("phone") || str.includes("حوامل") || str.includes("هواتف") || str.includes("tool") || str.includes("functional") || str.includes("أدوات") || str.includes("مستلزمات") || str.includes("3d") || str.includes("model") || str.includes("موديل")) return "3d-models";
   if (str.includes("keychain") || str.includes("tag") || str.includes("ميداليات")) return "keychains";
-  if (str.includes("3d") || str.includes("model") || str.includes("موديل")) return "3d-models";
+  if (str.includes("vase") || str.includes("art") || str.includes("فازات") || str.includes("تحف")) return "vases";
+  if (str.includes("decor") || str.includes("ديكور")) return "decor";
 
-  const allCats = getAllCategories();
-  const found = allCats.find((c) => c.id === str || c.defaultName.toLowerCase() === str || c.arName.toLowerCase() === str);
-  if (found) return found.id;
-
-  return str;
+  return "3d-models";
 }
 
 export function getCategoryCounts(products = []) {

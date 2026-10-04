@@ -1,8 +1,9 @@
 import React from "react";
-import { SlidersHorizontal, Sparkles, LayoutGrid, List } from "lucide-react";
+import { SlidersHorizontal } from "lucide-react";
 import { useShopStore } from "../../../store/useShopStore";
 import { useLanguage } from "../../../providers/LanguageContext";
 import CustomDesignButton from "../../../components/CustomDesignButton";
+import { CATEGORIES } from "../../../services/products";
 
 export default function ProductToolbar({
   totalProducts,
@@ -14,9 +15,37 @@ export default function ProductToolbar({
   const setDrawerOpen = useShopStore((state) => state.setDrawerOpen);
   const sort = useShopStore((state) => state.sort);
   const setSort = useShopStore((state) => state.setSort);
+  const filters = useShopStore((state) => state.filters);
+  const setFilter = useShopStore((state) => state.setFilter);
 
   const start = totalProducts === 0 ? 0 : (currentPage - 1) * limit + 1;
   const end = Math.min(currentPage * limit, totalProducts);
+
+  const selectedCategories =
+    Array.isArray(filters.categories) && filters.categories.length > 0
+      ? filters.categories
+      : filters.category && filters.category !== "All"
+      ? [filters.category]
+      : [];
+
+  const handleCategoryClick = (catId) => {
+    if (catId === "All") {
+      setFilter("categories", []);
+      setFilter("category", "All");
+      return;
+    }
+
+    let updated;
+    if (selectedCategories.includes(catId)) {
+      updated = selectedCategories.filter((id) => id !== catId);
+    } else {
+      updated = [...selectedCategories, catId];
+    }
+    setFilter("categories", updated);
+    setFilter("category", updated.length === 1 ? updated[0] : "All");
+  };
+
+  const isAllSelected = selectedCategories.length === 0;
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-2">
@@ -63,9 +92,51 @@ export default function ProductToolbar({
             <option value="Newest">{isRTL ? "الأحدث" : "Newest"}</option>
             <option value="PriceLowHigh">{isRTL ? "السعر: من الأقل للأعلى" : "Price: Low to High"}</option>
             <option value="PriceHighLow">{isRTL ? "السعر: من الأعلى للأقل" : "Price: High to Low"}</option>
-            <option value="Rating">{isRTL ? "الأعلى تقييماً" : "Highest Rated"}</option>
           </select>
 
+        </div>
+      </div>
+
+      {/* Categories Horizontal Tag Pills Bar Above Products (Centered) */}
+      <div className="w-full overflow-x-auto pt-4 pb-2 no-scrollbar">
+        <div className="flex items-center justify-center gap-2 flex-wrap">
+          {/* "All" Tag Pill */}
+          <button
+            type="button"
+            onClick={() => handleCategoryClick("All")}
+            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer border select-none ${
+              isAllSelected
+                ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900 border-gray-900 dark:border-white shadow-sm font-bold"
+                : "bg-gray-100/80 dark:bg-[#151C24] text-gray-700 dark:text-[#AAB4C0] hover:bg-gray-200/80 dark:hover:bg-[#1E2630] border-transparent"
+            }`}
+          >
+            <span>{isRTL ? "الكل" : "All"}</span>
+          </button>
+
+          {/* 7 Category Tag Pills */}
+          {CATEGORIES.map((cat) => {
+            const isSelected = selectedCategories.includes(cat.id);
+
+            return (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => handleCategoryClick(cat.id)}
+                className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer border select-none ${
+                  isSelected
+                    ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900 border-gray-900 dark:border-white shadow-sm font-bold"
+                    : "bg-gray-100/80 dark:bg-[#151C24] text-gray-700 dark:text-[#AAB4C0] hover:bg-gray-200/80 dark:hover:bg-[#1E2630] border-transparent"
+                }`}
+              >
+                <span>{isRTL ? cat.arName : cat.defaultName}</span>
+                {isSelected && (
+                  <span className="flex items-center justify-center w-3.5 h-3.5 rounded-full bg-white/20 dark:bg-black/20 text-current ml-0.5">
+                    ✕
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>

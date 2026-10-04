@@ -137,7 +137,7 @@ export default function CategoriesPage() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#070B10] text-gray-900 dark:text-[#F5F7FA] font-sans pb-24 transition-colors duration-200">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#070B10] text-gray-900 dark:text-[#F5F7FA] font-sans pt-16 sm:pt-20 pb-24 transition-colors duration-200">
       
       {/* 1. HERO BANNER */}
       <section className="relative overflow-hidden bg-gradient-to-b from-[#111823] via-[#0D131C] to-[#070B10] text-white py-12 sm:py-20 border-b border-[#1E2630]">

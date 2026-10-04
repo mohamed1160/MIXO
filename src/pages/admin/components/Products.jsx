@@ -31,6 +31,7 @@ export default function Products() {
   const [availableCategories, setAvailableCategories] = useState(() => getAllCategories());
   const [showAddCategoryInput, setShowAddCategoryInput] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
+  const [imageUrlInput, setImageUrlInput] = useState('');
 
   const handleAddNewCategory = () => {
     if (!newCategoryName.trim()) {
@@ -55,6 +56,7 @@ export default function Products() {
     category: 'Figures & Collectibles',
     material: 'PLA Plus',
     image: '',
+    images: [],
     description: '',
     inStock: true
   });
@@ -107,6 +109,7 @@ export default function Products() {
     setEditingProduct(null);
     setShowAddCategoryInput(false);
     setNewCategoryName('');
+    setImageUrlInput('');
     setFormData({
       name: '',
       price: '',
@@ -114,6 +117,7 @@ export default function Products() {
       category: availableCategories[0]?.defaultName || 'Figures & Collectibles',
       material: 'PLA Plus',
       image: '',
+      images: [],
       description: '',
       inStock: true
     });
@@ -124,13 +128,19 @@ export default function Products() {
     setEditingProduct(product);
     setShowAddCategoryInput(false);
     setNewCategoryName('');
+    setImageUrlInput('');
+    const existingImages = Array.isArray(product.images) && product.images.length > 0
+      ? product.images
+      : (product.image ? [product.image] : []);
+
     setFormData({
       name: product.name,
       price: product.price,
       originalPrice: product.originalPrice || '',
       category: product.category || 'Figures & Collectibles',
       material: product.material || 'PLA Plus',
-      image: product.image || '',
+      image: product.image || existingImages[0] || '',
+      images: existingImages,
       description: product.description || '',
       inStock: product.inStock !== false
     });
@@ -165,29 +175,57 @@ export default function Products() {
   };
 
   const handleProductImageUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
-    if (!file.type.startsWith("image/")) {
-      toast.error("برجاء اختيار صورة صحيحة (JPG, PNG, WEBP)");
-      return;
-    }
-
-    try {
-      const supaUrl = await upload3DFileToSupabase(file);
-      if (supaUrl) {
-        setFormData((prev) => ({ ...prev, image: supaUrl }));
-        toast.success("تم رفع صورة المنتج بنجاح إلى السحابة! 📷");
-      } else {
-        const compressed = await compressImage(file);
-        if (compressed) {
-          setFormData((prev) => ({ ...prev, image: compressed }));
-          toast.success("تم اختيار الصورة بنجاح! 📷");
-        }
+    const uploadedUrls = [];
+    for (const file of files) {
+      if (!file.type.startsWith("image/")) continue;
+      try {
+        const supaUrl = await upload3DFileToSupabase(file);
+        const imgUrl = supaUrl || (await compressImage(file));
+        if (imgUrl) uploadedUrls.push(imgUrl);
+      } catch (err) {
+        console.error(err);
       }
-    } catch (err) {
-      console.error(err);
     }
+
+    if (uploadedUrls.length > 0) {
+      setFormData((prev) => {
+        const updatedImages = [...(prev.images || []), ...uploadedUrls];
+        return {
+          ...prev,
+          images: updatedImages,
+          image: updatedImages[0] || prev.image
+        };
+      });
+      toast.success(`تم إضافة ${uploadedUrls.length} صور للمنتج بنجاح! 📷`);
+    }
+  };
+
+  const handleAddImageUrl = () => {
+    if (!imageUrlInput.trim()) return;
+    setFormData((prev) => {
+      const updatedImages = [...(prev.images || []), imageUrlInput.trim()];
+      return {
+        ...prev,
+        images: updatedImages,
+        image: updatedImages[0] || prev.image
+      };
+    });
+    setImageUrlInput('');
+    toast.success('تم إضافة رابط الصورة بنجاح! 📷');
+  };
+
+  const handleRemoveImage = (indexToRemove) => {
+    setFormData((prev) => {
+      const updatedImages = (prev.images || []).filter((_, idx) => idx !== indexToRemove);
+      return {
+        ...prev,
+        images: updatedImages,
+        image: updatedImages[0] || ''
+      };
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -198,6 +236,10 @@ export default function Products() {
     }
 
     const defaultImg = 'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=600&auto=format&fit=crop&q=80';
+    const finalImages = formData.images && formData.images.length > 0
+      ? formData.images
+      : [formData.image || defaultImg];
+
     const prodObj = {
       id: editingProduct ? editingProduct.id : `prod-${Date.now()}`,
       name: formData.name,
@@ -206,8 +248,8 @@ export default function Products() {
       originalPrice: formData.originalPrice ? parseFloat(formData.originalPrice) : null,
       category: formData.category || 'Figures & Collectibles',
       material: formData.material || 'PLA Plus',
-      image: formData.image || defaultImg,
-      images: [formData.image || defaultImg],
+      image: finalImages[0],
+      images: finalImages,
       description: formData.description || '',
       inStock: formData.inStock !== false,
       stock: formData.inStock !== false ? 10 : 0
@@ -510,63 +552,77 @@ export default function Products() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
-                  صورة المنتج (رفع صورة من جهازك) *
+                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5 flex items-center justify-between">
+                  <span>صور المنتج (يمكنك إضافة أكثر من صورة) *</span>
+                  <span className="text-[10px] text-gray-400">({formData.images?.length || 0} صور مضافة)</span>
                 </label>
                 
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-3">
+                  {/* File Upload Zone (Multiple Files) */}
                   <label className="border-2 border-dashed border-[#FF1F3D]/40 hover:border-[#FF1F3D] bg-gray-50 dark:bg-[#1A2332] rounded-2xl p-4 flex flex-col items-center justify-center cursor-pointer transition-all text-center group">
                     <input
                       type="file"
                       accept="image/*"
+                      multiple
                       onChange={handleProductImageUpload}
                       className="hidden"
                     />
                     <UploadCloud className="w-8 h-8 text-[#FF1F3D] mb-1 group-hover:scale-110 transition-transform" />
                     <span className="text-xs font-bold text-gray-900 dark:text-white">
-                      اضغط هنا لرفع صورة من جهازك 📷
+                      اضغط هنا لرفع صور متعددة من جهازك 📷
                     </span>
                     <span className="text-[10px] text-gray-400 mt-0.5">
-                      (PNG, JPG, WEBP - رفع مباشر لـ Supabase)
+                      (تحديد صور متعددة معاً - PNG, JPG, WEBP)
                     </span>
                   </label>
 
-                  {formData.image && (
-                    <div className="flex items-center gap-3 bg-gray-100 dark:bg-[#151C24] p-2.5 rounded-xl border border-gray-200 dark:border-gray-800">
-                      <img
-                        src={formData.image}
-                        alt="Preview"
-                        className="w-12 h-12 rounded-lg object-cover border border-gray-300 dark:border-gray-700"
-                      />
-                      <div className="flex-1 truncate">
-                        <span className="text-xs font-bold text-gray-800 dark:text-gray-200 block truncate">
-                          {formData.image.startsWith("data:") ? "صورة مرفوعة من الجهاز" : formData.image}
-                        </span>
-                        <span className="text-[10px] text-emerald-500 font-bold">جاهزة للعرض في المتجر ✓</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setFormData({ ...formData, image: "" })}
-                        className="p-1.5 text-gray-400 hover:text-red-500 rounded-lg transition-colors"
-                        title="حذف الصورة"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  )}
-
-                  <div className="pt-1">
-                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">
-                      أو ادخل رابط صورة مباشر (URL):
-                    </span>
+                  {/* Add URL Row */}
+                  <div className="flex items-center gap-2">
                     <input
                       type="url"
-                      placeholder="https://images.unsplash.com/..."
-                      value={formData.image}
-                      onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                      className="w-full bg-gray-50 dark:bg-[#1A2332] border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-1.5 text-xs text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-[#FF1F3D]"
+                      placeholder="أو ادخل رابط صورة مباشر (https://...)..."
+                      value={imageUrlInput}
+                      onChange={(e) => setImageUrlInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddImageUrl();
+                        }
+                      }}
+                      className="flex-1 bg-gray-50 dark:bg-[#1A2332] border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-2 text-xs text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-[#FF1F3D]"
                     />
+                    <button
+                      type="button"
+                      onClick={handleAddImageUrl}
+                      className="px-3.5 py-2 bg-gray-900 dark:bg-white text-white dark:text-black font-bold text-xs rounded-xl hover:opacity-90 transition-all shrink-0 cursor-pointer"
+                    >
+                      + إضافة
+                    </button>
                   </div>
+
+                  {/* Thumbnails Gallery Grid */}
+                  {formData.images && formData.images.length > 0 && (
+                    <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 bg-gray-100 dark:bg-[#151C24] p-3 rounded-2xl border border-gray-200 dark:border-gray-800 max-h-48 overflow-y-auto">
+                      {formData.images.map((imgUrl, idx) => (
+                        <div key={idx} className="relative aspect-square rounded-xl overflow-hidden border border-gray-300 dark:border-gray-700 group shadow-xs">
+                          <img src={imgUrl} alt={`Thumb ${idx + 1}`} className="w-full h-full object-cover" />
+                          {idx === 0 && (
+                            <span className="absolute top-1 right-1 bg-[#FF1F3D] text-white text-[8px] font-black px-1.5 py-0.5 rounded shadow-xs">
+                              الرئيسية
+                            </span>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveImage(idx)}
+                            className="absolute inset-0 bg-black/60 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer"
+                            title="حذف الصورة"
+                          >
+                            <Trash2 size={16} className="text-red-400 hover:text-red-500" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 

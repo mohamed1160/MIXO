@@ -105,7 +105,7 @@ export default function Shop() {
   }, [filters, sort, page]);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#070B10] text-gray-900 dark:text-[#F5F7FA] font-sans pb-16 transition-colors duration-200">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#070B10] text-gray-900 dark:text-[#F5F7FA] font-sans pt-16 sm:pt-20 pb-16 transition-colors duration-200">
       
       {/* 1. Shop Hero */}
       <ShopHero />
@@ -121,15 +121,12 @@ export default function Shop() {
       {/* 3. Mobile Filter Drawer */}
       <FilterDrawer />
 
-      {/* 4. Main Content Area (Desktop Sidebar + Product Grid) */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-        <div className="flex gap-8 items-start">
+      {/* 4. Main Content Area (Product Grid Full Width) */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2">
+        <div className="w-full">
           
-          {/* Desktop Filter Sidebar */}
-          <FilterSidebar />
-
           {/* Product Grid */}
-          <div className="flex-1 w-full">
+          <div className="w-full">
             <ProductGrid products={products} isLoading={isLoading} />
             <Pagination totalPages={totalPages} />
           </div>

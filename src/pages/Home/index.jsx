@@ -17,6 +17,8 @@ import { useTheme } from "../../providers/ThemeContext";
 import { getProducts, mapCategoryToId } from "../../services/products";
 import ProductCard from "../../components/ProductCard";
 import ArtifactCard from "../../components/ArtifactCard";
+import ThreeDPhotoCarousel from "../../components/ui/3d-carousel";
+import Skiper49 from "../../components/ui/skiper49";
 import { useSEO } from "../../hooks/useSEO";
 import JsonLd, { buildWebSiteSchema, buildFAQSchema } from "../../components/seo/JsonLd";
 import { SITE_URL, SITE_NAME } from "../../config/seo";
@@ -182,6 +184,10 @@ export default function Home() {
     window.addEventListener("mousemove", handleMouseMove);
 
     // ── SECTION 1: HERO LOAD ANIMATIONS ──
+    if (deadpoolHeroImgRef.current) {
+      gsap.set(deadpoolHeroImgRef.current, { xPercent: -50 });
+    }
+
     const chars = heroTitleBoxRef.current?.querySelectorAll(".char-inner");
     if (chars && chars.length > 0) {
       const heroTL = gsap.timeline({ defaults: { ease: "power4.out" } });
@@ -199,6 +205,7 @@ export default function Home() {
         }, 0.4)
         .to(deadpoolHeroImgRef.current, {
           y: 0,
+          xPercent: -50,
           duration: 1.5,
           ease: "back.out(1.2)",
         }, 0.6)
@@ -226,7 +233,7 @@ export default function Home() {
       .set(heroTitleBoxRef.current, { zIndex: 2 }, 0)
       .to(heroTitleBoxRef.current, { scale: isMobile ? 4.0 : 2.2, y: isMobile ? -35 : -20, force3D: true, transformOrigin: "center center", ease: "power2.out" }, 0)
       .set(heroTitleBoxRef.current, { zIndex: 20 }, 0.1)
-      .to(deadpoolHeroImgRef.current, { y: isMobile ? 80 : 50, scale: isMobile ? 1.15 : 1.05, opacity: 0.9, force3D: true, ease: "power1.inOut" }, 0)
+      .to(deadpoolHeroImgRef.current, { y: isMobile ? 80 : 50, xPercent: -50, scale: isMobile ? 1.15 : 1.05, opacity: 0.9, force3D: true, ease: "power1.inOut" }, 0)
       .to(heroCircleRef.current, { scale: isMobile ? 1.8 : 1.3, opacity: 0.7, ease: "none" }, 0)
       .to(stitchBeltRef.current, { x: "-25%", opacity: 0.2, ease: "none" }, 0);
     }
@@ -459,12 +466,12 @@ export default function Home() {
             </h1>
           </div>
 
-          {/* Spider-Man Cutout Overlay - Centered on Mobile, Offset on Desktop */}
+          {/* Spider-Man Cutout Overlay - Always Centered */}
           <img
             ref={deadpoolHeroImgRef}
             src={spidermanHero}
             alt="Spider-Man 3D Mask Edition"
-            className="absolute -bottom-[14%] left-1/2 -translate-x-1/2 md:-translate-x-[54.5%] translate-y-[200px] h-[82vh] max-h-[850px] z-4 pointer-events-none filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.8)] object-contain"
+            className="absolute -bottom-[14%] left-1/2 -translate-x-1/2 translate-y-[200px] h-[82vh] max-h-[850px] z-4 pointer-events-none filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.8)] object-contain"
           />
 
           {/* Diagonal Stitch Belt */}
@@ -606,14 +613,14 @@ export default function Home() {
             </p>
           </div>
 
-          {/* Category Filter Pills */}
-          <div className="flex items-center justify-center gap-2 sm:gap-3 flex-wrap -mb-5 relative z-20 px-4">
+          {/* Category Filter Pills (Monochrome Black & White) */}
+          <div className="flex items-center justify-center gap-2 sm:gap-3 flex-wrap mb-4 relative z-10 px-4">
             <button
               onClick={() => setActivePopularFilter("masks")}
               className={`px-4 sm:px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
                 activePopularFilter === "masks"
-                  ? "text-white bg-[#ff1f3d] border-2 border-[#ff3352] shadow-[0_0_20px_rgba(255,31,61,0.6)] scale-105"
-                  : "text-gray-400 hover:text-white bg-[#0f1219] border border-white/15 hover:border-[#ff1f3d]/50 backdrop-blur-md"
+                  ? "text-black bg-white border-2 border-white shadow-xl shadow-white/10 scale-105"
+                  : "text-gray-400 hover:text-white bg-[#0f1219] border border-white/20 hover:border-white/50 backdrop-blur-md"
               }`}
             >
               {isRTL ? "أقنعة" : "MASKS"}
@@ -622,8 +629,8 @@ export default function Home() {
               onClick={() => setActivePopularFilter("gaming")}
               className={`px-4 sm:px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
                 activePopularFilter === "gaming"
-                  ? "text-white bg-[#ff1f3d] border-2 border-[#ff3352] shadow-[0_0_20px_rgba(255,31,61,0.6)] scale-105"
-                  : "text-gray-400 hover:text-white bg-[#0f1219] border border-white/15 hover:border-[#ff1f3d]/50 backdrop-blur-md"
+                  ? "text-black bg-white border-2 border-white shadow-xl shadow-white/10 scale-105"
+                  : "text-gray-400 hover:text-white bg-[#0f1219] border border-white/20 hover:border-white/50 backdrop-blur-md"
               }`}
             >
               {isRTL ? "ألعاب وجيمينج" : "GAMING"}
@@ -632,8 +639,8 @@ export default function Home() {
               onClick={() => setActivePopularFilter("keychains")}
               className={`px-4 sm:px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
                 activePopularFilter === "keychains"
-                  ? "text-white bg-[#ff1f3d] border-2 border-[#ff3352] shadow-[0_0_20px_rgba(255,31,61,0.6)] scale-105"
-                  : "text-gray-400 hover:text-white bg-[#0f1219] border border-white/15 hover:border-[#ff1f3d]/50 backdrop-blur-md"
+                  ? "text-black bg-white border-2 border-white shadow-xl shadow-white/10 scale-105"
+                  : "text-gray-400 hover:text-white bg-[#0f1219] border border-white/20 hover:border-white/50 backdrop-blur-md"
               }`}
             >
               {isRTL ? "ميداليات" : "KEYCHAINS"}
@@ -642,16 +649,16 @@ export default function Home() {
               onClick={() => setActivePopularFilter("others")}
               className={`px-4 sm:px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
                 activePopularFilter === "others"
-                  ? "text-white bg-[#ff1f3d] border-2 border-[#ff3352] shadow-[0_0_20px_rgba(255,31,61,0.6)] scale-105"
-                  : "text-gray-400 hover:text-white bg-[#0f1219] border border-white/15 hover:border-[#ff1f3d]/50 backdrop-blur-md"
+                  ? "text-black bg-white border-2 border-white shadow-xl shadow-white/10 scale-105"
+                  : "text-gray-400 hover:text-white bg-[#0f1219] border border-white/20 hover:border-white/50 backdrop-blur-md"
               }`}
             >
               {isRTL ? "منتجات أخرى" : "OTHERS"}
             </button>
           </div>
 
-          {/* Outer Red Glowing Cyber Container */}
-          <div className="border border-[#ff1f3d]/40 rounded-3xl pt-8 pb-5 px-2.5 sm:px-6 shadow-[0_0_50px_rgba(255,31,61,0.2)] bg-[#07090c]/95 relative z-10 backdrop-blur-xl overflow-hidden">
+          {/* Open 3D Carousel Wrapper (No Dark Container Box) */}
+          <div className="relative z-10 w-full mt-4">
             {isLoading ? (
               <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
                 {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
@@ -659,11 +666,7 @@ export default function Home() {
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
-                {displayedProducts.map((product, idx) => (
-                  <ArtifactCard key={product.id} product={product} index={idx} />
-                ))}
-              </div>
+              <Skiper49 key={activePopularFilter} products={displayedProducts} />
             )}
           </div>
 

@@ -141,7 +141,7 @@ export default function ArtifactCard({ product }) {
             className={`w-full py-2 sm:py-2.5 rounded-xl text-[11px] sm:text-xs font-black tracking-wider uppercase flex items-center justify-center gap-1.5 transition-all duration-200 active:scale-95 shadow-md mt-2 ${
               isInCart
                 ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-900/30 border border-emerald-400/30"
-                : "bg-gradient-to-r from-[#ff1f3d] to-[#c8102e] hover:from-[#ff3352] hover:to-[#e01833] text-white shadow-[0_4px_18px_rgba(255,31,61,0.45)] border border-[#ff3352]/30"
+                : "bg-white text-black hover:bg-white/90 font-black shadow-lg border border-white"
             }`}
           >
             {isInCart ? (

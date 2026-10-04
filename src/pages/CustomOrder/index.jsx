@@ -153,7 +153,7 @@ export default function CustomOrderPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#070B10] text-gray-900 dark:text-[#F5F7FA] font-sans pb-20 pt-8 transition-colors duration-200">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#070B10] text-gray-900 dark:text-[#F5F7FA] font-sans pb-20 pt-20 sm:pt-24 transition-colors duration-200">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Breadcrumb / Title Header */}

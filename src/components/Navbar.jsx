@@ -144,11 +144,11 @@ export default function Navbar() {
               {isAdmin && (
                 <Link
                   to="/admin"
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white dark:text-black bg-black dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-200 rounded-xl shadow-md transition-all shrink-0"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-black dark:bg-[#151C24] hover:bg-gray-800 dark:hover:bg-[#1E2630] border border-white/20 rounded-xl shadow-md transition-all shrink-0"
                   title={isRTL ? "لوحة التحكم" : "Admin Dashboard"}
                 >
-                  <ShieldCheck className="w-4 h-4" />
-                  <span className="hidden sm:inline">{isRTL ? "لوحة التحكم" : "Admin Panel"}</span>
+                  <ShieldCheck className="w-4 h-4 text-white" />
+                  <span className="hidden sm:inline text-white">{isRTL ? "لوحة التحكم" : "Admin Panel"}</span>
                 </Link>
               )}
 
@@ -284,13 +284,13 @@ export default function Navbar() {
                 <Link
                   to="/admin"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center justify-between py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold bg-black/5 dark:bg-white/10 text-black dark:text-white border border-black/20 dark:border-white/20 mb-2"
+                  className="flex items-center justify-between py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold bg-black dark:bg-[#151C24] text-white border border-white/20 mb-2"
                 >
-                  <div className="flex items-center gap-2">
-                    <ShieldCheck className="w-4 h-4 text-black dark:text-white" />
-                    <span>{isRTL ? "لوحة التحكم" : "Admin Dashboard"}</span>
+                  <div className="flex items-center gap-2 text-white">
+                    <ShieldCheck className="w-4 h-4 text-white" />
+                    <span className="text-white">{isRTL ? "لوحة التحكم" : "Admin Dashboard"}</span>
                   </div>
-                  <ChevronRight className="w-4 h-4 opacity-70" />
+                  <ChevronRight className="w-4 h-4 opacity-70 text-white" />
                 </Link>
               )}
 

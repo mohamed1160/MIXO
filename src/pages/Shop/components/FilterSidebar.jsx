@@ -89,12 +89,12 @@ export default function FilterSidebar() {
         </button>
       </div>
 
-      {/* Categories */}
+      {/* Categories Tag Chips */}
       <div className="space-y-2.5">
         <h4 className="text-xs font-bold uppercase tracking-wider text-gray-800 dark:text-[#F5F7FA]">
-          {isRTL ? "الأقسام (اختر أكثر من قسم)" : "Categories (Multi-Select)"}
+          {isRTL ? "الأقسام" : "Categories"}
         </h4>
-        <div className="space-y-1 text-xs">
+        <div className="flex flex-wrap gap-2">
           {categoriesList.map((cat) => {
             const isSelected =
               selectedCategories.includes(cat.id) ||
@@ -102,31 +102,27 @@ export default function FilterSidebar() {
             const count = countsMap[cat.id] || 0;
 
             return (
-              <label
+              <button
                 key={cat.id}
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleCategoryChange(cat.id);
-                }}
-                className={`flex items-center justify-between py-1.5 px-2 rounded-lg cursor-pointer transition-colors ${
+                type="button"
+                onClick={() => handleCategoryChange(cat.id)}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer select-none border ${
                   isSelected
-                    ? "bg-red-500/10 text-[#FF1F3D] font-bold"
-                    : "text-gray-700 dark:text-[#AAB4C0] hover:bg-gray-50 dark:hover:bg-[#151C24]"
+                    ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900 border-gray-900 dark:border-white shadow-sm font-bold"
+                    : "bg-gray-100/80 dark:bg-[#151C24] text-gray-700 dark:text-[#AAB4C0] hover:bg-gray-200/80 dark:hover:bg-[#1E2630] border-transparent"
                 }`}
               >
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={isSelected}
-                    onChange={() => {}}
-                    className="rounded accent-[#FF1F3D]"
-                  />
-                  <span>{cat.defaultName}</span>
-                </div>
-                <span className="text-[10px] text-gray-400 dark:text-[#7F8A96] font-normal">
-                  {count}
-                </span>
-              </label>
+                <span>{isRTL ? cat.arName : cat.defaultName}</span>
+                {isSelected ? (
+                  <span className="flex items-center justify-center w-3.5 h-3.5 rounded-full bg-white/20 dark:bg-black/20 text-current ml-0.5">
+                    ✕
+                  </span>
+                ) : (
+                  <span className="text-[10px] text-gray-400 dark:text-gray-500 font-normal">
+                    ({count})
+                  </span>
+                )}
+              </button>
             );
           })}
         </div>
@@ -164,41 +160,6 @@ export default function FilterSidebar() {
               className="w-full px-2.5 py-1.5 bg-gray-50 dark:bg-[#151C24] border border-gray-200 dark:border-[#1E2630] rounded-xl text-xs font-semibold text-gray-900 dark:text-white focus:outline-none focus:border-[#FF1F3D] transition-colors"
             />
           </div>
-        </div>
-      </div>
-
-      {/* Rating */}
-      <div className="space-y-2 pt-3 border-t border-gray-100 dark:border-[#1E2630]">
-        <h4 className="text-xs font-bold uppercase tracking-wider text-gray-800 dark:text-[#F5F7FA]">
-          {isRTL ? "التقييم" : "Rating"}
-        </h4>
-        <div className="space-y-1 text-xs">
-          {[4, 3, 2, 1].map((stars) => (
-            <label
-              key={stars}
-              onClick={() => setFilter("minRating", stars)}
-              className="flex items-center gap-2 py-1 text-gray-700 dark:text-[#AAB4C0] cursor-pointer hover:text-black dark:hover:text-white"
-            >
-              <input
-                type="radio"
-                name="rating"
-                checked={filters.minRating === stars}
-                onChange={() => {}}
-                className="accent-[#FF1F3D]"
-              />
-              <div className="flex items-center text-amber-400">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`w-3 h-3 ${
-                      i < stars ? "fill-current" : "text-gray-300 dark:text-gray-700"
-                    }`}
-                  />
-                ))}
-              </div>
-              <span className="text-[11px] text-gray-500">& up</span>
-            </label>
-          ))}
         </div>
       </div>
 
