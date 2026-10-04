@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import loaderVideo from "../assets/images/loader/WhatsApp Video 2026-10-04 at 10.14.20 PM.mp4";
+import loaderVideo from "../assets/mixo_loader.mp4";
 import mixoLogoImg from "../assets/images/logo/mixo_red_logo.png";
 
 export default function VideoLoader({ onComplete }) {
@@ -8,35 +8,53 @@ export default function VideoLoader({ onComplete }) {
   const [isVisible, setIsVisible] = useState(true);
   const videoRef = useRef(null);
 
-  const attemptPlay = () => {
-    if (videoRef.current) {
-      videoRef.current.muted = true;
-      videoRef.current.defaultMuted = true;
-      videoRef.current.setAttribute("muted", "");
-      videoRef.current.setAttribute("playsinline", "");
-      videoRef.current.setAttribute("webkit-playsinline", "");
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video) {
+      video.muted = true;
+      video.defaultMuted = true;
+      video.playsInline = true;
+      video.setAttribute("muted", "");
+      video.setAttribute("playsinline", "");
+      video.setAttribute("webkit-playsinline", "");
 
-      const playPromise = videoRef.current.play();
-      if (playPromise !== undefined) {
-        playPromise.catch((error) => {
-          console.warn("Mobile video autoplay retry on user interaction / load:", error);
-        });
-      }
+      const startPlay = () => {
+        if (!video) return;
+        video.muted = true;
+        const playPromise = video.play();
+        if (playPromise !== undefined) {
+          playPromise.catch((err) => {
+            console.warn("Mobile WebKit video autoplay prevented:", err);
+          });
+        }
+      };
+
+      startPlay();
+
+      video.addEventListener("loadedmetadata", startPlay);
+      video.addEventListener("canplay", startPlay);
+      video.addEventListener("canplaythrough", startPlay);
+
+      const handleUserTouch = () => {
+        startPlay();
+        window.removeEventListener("touchstart", handleUserTouch);
+        window.removeEventListener("click", handleUserTouch);
+      };
+
+      window.addEventListener("touchstart", handleUserTouch);
+      window.addEventListener("click", handleUserTouch);
+
+      return () => {
+        video.removeEventListener("loadedmetadata", startPlay);
+        video.removeEventListener("canplay", startPlay);
+        video.removeEventListener("canplaythrough", startPlay);
+        window.removeEventListener("touchstart", handleUserTouch);
+        window.removeEventListener("click", handleUserTouch);
+      };
     }
-  };
+  }, []);
 
   useEffect(() => {
-    attemptPlay();
-
-    const handleTouchOrClick = () => {
-      attemptPlay();
-      window.removeEventListener("touchstart", handleTouchOrClick);
-      window.removeEventListener("click", handleTouchOrClick);
-    };
-
-    window.addEventListener("touchstart", handleTouchOrClick);
-    window.addEventListener("click", handleTouchOrClick);
-
     const DURATION = 4000; // 4 seconds total
     const startTime = performance.now();
 
@@ -59,11 +77,7 @@ export default function VideoLoader({ onComplete }) {
 
     const animationFrame = requestAnimationFrame(updateProgress);
 
-    return () => {
-      cancelAnimationFrame(animationFrame);
-      window.removeEventListener("touchstart", handleTouchOrClick);
-      window.removeEventListener("click", handleTouchOrClick);
-    };
+    return () => cancelAnimationFrame(animationFrame);
   }, [onComplete]);
 
   return (
@@ -83,10 +97,11 @@ export default function VideoLoader({ onComplete }) {
             </span>
           </div>
 
-          {/* Video Container (Borderless, Bulletproof Mobile Autoplay) */}
+          {/* Video Container (Guaranteed Mobile WebKit Autoplay with Clean Filename mixo_loader.mp4) */}
           <div className="relative w-64 sm:w-80 aspect-square rounded-3xl overflow-hidden bg-black mb-8 z-10 flex items-center justify-center group">
             <video
               ref={videoRef}
+              src={loaderVideo || "/mixo_loader.mp4"}
               autoPlay
               loop
               muted
@@ -95,13 +110,9 @@ export default function VideoLoader({ onComplete }) {
               preload="auto"
               webkit-playsinline="true"
               x5-playsinline="true"
-              onCanPlay={attemptPlay}
-              onLoadedData={attemptPlay}
+              aria-hidden="true"
               className="w-full h-full object-cover object-center transform scale-105 pointer-events-none"
-            >
-              <source src={loaderVideo} type="video/mp4" />
-              <source src="/loader_video.mp4" type="video/mp4" />
-            </video>
+            />
           </div>
 
           {/* Progress Bar & Counter Container */}
