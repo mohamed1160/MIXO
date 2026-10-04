@@ -5,6 +5,7 @@ import AppRouter from './router'
 import { useAuthStore } from './store/useAuthStore'
 import { LanguageProvider } from './providers/LanguageContext'
 import { ThemeProvider } from './providers/ThemeContext'
+import VideoLoader from './components/VideoLoader'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,6 +28,7 @@ export default function App() {
       <ThemeProvider>
         <LanguageProvider>
           <BrowserRouter>
+            <VideoLoader />
             <AppRouter />
           </BrowserRouter>
         </LanguageProvider>

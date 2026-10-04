@@ -357,7 +357,11 @@ export async function getSupabaseProducts(forceRefresh = false) {
 
       productsCache = formatted;
       productsCacheTime = now;
-      localStorage.setItem('MIXO_products', JSON.stringify(formatted));
+      try {
+        localStorage.setItem('MIXO_products', JSON.stringify(formatted));
+      } catch (e) {
+        console.warn('LocalStorage quota exceeded for products cache:', e);
+      }
       return formatted;
     }
   } catch (err) {

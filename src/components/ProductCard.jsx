@@ -106,7 +106,7 @@ export default function ProductCard({ product }) {
           <img
             src={image}
             alt={title}
-            className="w-full h-full object-cover object-center rounded-lg group-hover:scale-105 transition-transform duration-500 ease-out mix-blend-multiply"
+            className="w-full h-full object-cover object-center rounded-lg group-hover:scale-105 transition-transform duration-500 ease-out"
             loading="lazy"
           />
 
@@ -115,7 +115,7 @@ export default function ProductCard({ product }) {
             <img
               src={product.images[1]}
               alt={`${title} - view 2`}
-              className="absolute inset-0 w-full h-full object-cover object-center rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out mix-blend-multiply pointer-events-none"
+              className="absolute inset-0 w-full h-full object-cover object-center rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out pointer-events-none"
               loading="lazy"
             />
           )}
