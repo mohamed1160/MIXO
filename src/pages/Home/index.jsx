@@ -516,12 +516,24 @@ export default function Home() {
         </div>
 
         {/* Hero Bottom Bar */}
-        <div className="hero-bottom-bar flex justify-between items-end w-full z-20 relative">
-          <div className="flex flex-col gap-4">
+        <div className="hero-bottom-bar flex justify-between items-end w-full z-50 relative">
+          <div className="flex flex-col gap-3 sm:gap-4 relative z-50">
             <div className="font-sans font-black text-xs sm:text-sm tracking-[0.3em] text-white flex items-center gap-2">
               <span>MIXO</span>
               <span className="w-10 h-[1px] bg-[#c8102e]" />
             </div>
+
+            {/* Mobile Shop Now Button (White BG, Black Text, Navigates to /shop) */}
+            <div className="flex sm:hidden items-center gap-2 mt-1 relative z-50">
+              <Link to="/shop" className="relative z-50">
+                <button className="font-sans text-xs font-black tracking-[0.2em] uppercase px-6 py-3 bg-white text-black hover:bg-gray-100 border-none rounded-full cursor-pointer transition-all shadow-[0_8px_25px_rgba(255,255,255,0.35)] flex items-center gap-2 active:scale-95 relative z-50">
+                  <ShoppingBag className="w-4 h-4 text-black" />
+                  <span>{isRTL ? "تسوق الآن" : "SHOP NOW"}</span>
+                </button>
+              </Link>
+            </div>
+
+            {/* Desktop Buttons */}
             <div className="hidden sm:flex items-center gap-3">
               <Link to="/shop">
                 <button className="font-sans text-xs font-extrabold tracking-[0.25em] uppercase px-7 py-3.5 bg-[#c8102e] text-white border-none rounded-full cursor-pointer hover:bg-[#e61c38] hover:-translate-y-0.5 transition-all shadow-[0_8px_20px_rgba(200,16,46,0.4)] flex items-center gap-2">
