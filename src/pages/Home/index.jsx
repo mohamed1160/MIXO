@@ -107,11 +107,11 @@ export default function Home() {
       return filtered.slice(0, 8);
     }
 
-    if (activePopularFilter === "phone_stands") {
+    if (activePopularFilter === "keychains") {
       const filtered = allProducts.filter((p) => {
         const catId = getCatId(p);
         const catRaw = String(p.category || "").toLowerCase();
-        return catId === "stands" || catId === "phone-stands" || catId === "phonestands" || catRaw.includes("phone") || catRaw.includes("stand") || catRaw.includes("حامل") || catRaw.includes("هاتف");
+        return catId === "keychains" || catId === "keychain" || catRaw.includes("keychain") || catRaw.includes("ميدال") || catRaw.includes("تعليق") || catRaw.includes("مفتاح");
       });
       return filtered.slice(0, 8);
     }
@@ -122,8 +122,8 @@ export default function Home() {
         const catRaw = String(p.category || "").toLowerCase();
         const isMask = p.isMask || catId === "masks" || catRaw.includes("mask") || catRaw.includes("أقنعة") || catRaw.includes("ماسكات");
         const isGaming = catId === "gaming" || catRaw.includes("gaming") || catRaw.includes("ألعاب") || catRaw.includes("جيمينج");
-        const isPhone = catId === "stands" || catId === "phone-stands" || catId === "phonestands" || catRaw.includes("phone") || catRaw.includes("stand") || catRaw.includes("حامل") || catRaw.includes("هاتف");
-        return !isMask && !isGaming && !isPhone;
+        const isKeychain = catId === "keychains" || catId === "keychain" || catRaw.includes("keychain") || catRaw.includes("ميدال") || catRaw.includes("تعليق") || catRaw.includes("مفتاح");
+        return !isMask && !isGaming && !isKeychain;
       });
       return filtered.slice(0, 8);
     }
@@ -610,56 +610,56 @@ export default function Home() {
           <div className="flex items-center justify-center gap-2 sm:gap-3 flex-wrap -mb-5 relative z-20 px-4">
             <button
               onClick={() => setActivePopularFilter("masks")}
-              className={`px-4 sm:px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+              className={`px-4 sm:px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
                 activePopularFilter === "masks"
-                  ? "text-white bg-[#07090c] border-2 border-[#ff1f3d] shadow-[0_0_15px_rgba(255,31,61,0.5)]"
-                  : "text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white bg-gray-100 dark:bg-[#07090c] border border-gray-300 dark:border-white/20 hover:border-black/40 dark:hover:border-white/40"
+                  ? "text-white bg-[#ff1f3d] border-2 border-[#ff3352] shadow-[0_0_20px_rgba(255,31,61,0.6)] scale-105"
+                  : "text-gray-400 hover:text-white bg-[#0f1219] border border-white/15 hover:border-[#ff1f3d]/50 backdrop-blur-md"
               }`}
             >
               {isRTL ? "أقنعة" : "MASKS"}
             </button>
             <button
               onClick={() => setActivePopularFilter("gaming")}
-              className={`px-4 sm:px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+              className={`px-4 sm:px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
                 activePopularFilter === "gaming"
-                  ? "text-white bg-[#07090c] border-2 border-[#ff1f3d] shadow-[0_0_15px_rgba(255,31,61,0.5)]"
-                  : "text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white bg-gray-100 dark:bg-[#07090c] border border-gray-300 dark:border-white/20 hover:border-black/40 dark:hover:border-white/40"
+                  ? "text-white bg-[#ff1f3d] border-2 border-[#ff3352] shadow-[0_0_20px_rgba(255,31,61,0.6)] scale-105"
+                  : "text-gray-400 hover:text-white bg-[#0f1219] border border-white/15 hover:border-[#ff1f3d]/50 backdrop-blur-md"
               }`}
             >
               {isRTL ? "ألعاب وجيمينج" : "GAMING"}
             </button>
             <button
-              onClick={() => setActivePopularFilter("phone_stands")}
-              className={`px-4 sm:px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
-                activePopularFilter === "phone_stands"
-                  ? "text-white bg-[#07090c] border-2 border-[#ff1f3d] shadow-[0_0_15px_rgba(255,31,61,0.5)]"
-                  : "text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white bg-gray-100 dark:bg-[#07090c] border border-gray-300 dark:border-white/20 hover:border-black/40 dark:hover:border-white/40"
+              onClick={() => setActivePopularFilter("keychains")}
+              className={`px-4 sm:px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+                activePopularFilter === "keychains"
+                  ? "text-white bg-[#ff1f3d] border-2 border-[#ff3352] shadow-[0_0_20px_rgba(255,31,61,0.6)] scale-105"
+                  : "text-gray-400 hover:text-white bg-[#0f1219] border border-white/15 hover:border-[#ff1f3d]/50 backdrop-blur-md"
               }`}
             >
-              {isRTL ? "حوامل هواتف" : "PHONE STANDS"}
+              {isRTL ? "ميداليات" : "KEYCHAINS"}
             </button>
             <button
               onClick={() => setActivePopularFilter("others")}
-              className={`px-4 sm:px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+              className={`px-4 sm:px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
                 activePopularFilter === "others"
-                  ? "text-white bg-[#07090c] border-2 border-[#ff1f3d] shadow-[0_0_15px_rgba(255,31,61,0.5)]"
-                  : "text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white bg-gray-100 dark:bg-[#07090c] border border-gray-300 dark:border-white/20 hover:border-black/40 dark:hover:border-white/40"
+                  ? "text-white bg-[#ff1f3d] border-2 border-[#ff3352] shadow-[0_0_20px_rgba(255,31,61,0.6)] scale-105"
+                  : "text-gray-400 hover:text-white bg-[#0f1219] border border-white/15 hover:border-[#ff1f3d]/50 backdrop-blur-md"
               }`}
             >
               {isRTL ? "منتجات أخرى" : "OTHERS"}
             </button>
           </div>
 
-          {/* Outer Red Glowing Border Container */}
-          <div className="border-2 border-[#ff1f3d] rounded-3xl pt-8 pb-4 px-3 sm:px-6 shadow-[0_0_40px_rgba(255,31,61,0.25)] bg-[#07090c] relative z-10">
+          {/* Outer Red Glowing Cyber Container */}
+          <div className="border border-[#ff1f3d]/40 rounded-3xl pt-8 pb-5 px-2.5 sm:px-6 shadow-[0_0_50px_rgba(255,31,61,0.2)] bg-[#07090c]/95 relative z-10 backdrop-blur-xl overflow-hidden">
             {isLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
                 {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                  <div key={i} className="bg-[#12151c] rounded-2xl h-80 animate-pulse border border-white/10" />
+                  <div key={i} className="bg-[#0f1219] rounded-2xl h-80 animate-pulse border border-[#ff1f3d]/20" />
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
                 {displayedProducts.map((product, idx) => (
                   <ArtifactCard key={product.id} product={product} index={idx} />
                 ))}
