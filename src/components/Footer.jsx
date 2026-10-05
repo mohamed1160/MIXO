@@ -152,16 +152,6 @@ export default function Footer() {
             </h3>
             <ul className="flex flex-col gap-2 text-xs text-gray-600 dark:text-[#AAB4C0]">
               <li>
-                <Link to="/shipping-delivery" className="hover:text-[#FF1F3D] transition-colors">
-                  {isRTL ? "الشحن والتوصيل" : "Shipping"}
-                </Link>
-              </li>
-              <li>
-                <Link to="/returns-exchanges" className="hover:text-[#FF1F3D] transition-colors">
-                  {isRTL ? "الاسترجاع والاستبدال" : "Returns & Exchanges"}
-                </Link>
-              </li>
-              <li>
                 <Link to="/faqs" className="hover:text-[#FF1F3D] transition-colors">
                   {isRTL ? "الأسئلة الشائعة" : "FAQ"}
                 </Link>
@@ -209,8 +199,16 @@ export default function Footer() {
             <p>© 2026 Mixo 3D. {isRTL ? "جميع الحقوق محفوظة." : "All rights reserved."}</p>
             <span className="hidden sm:inline">•</span>
             <p className="font-semibold text-gray-700 dark:text-gray-300">
-              {isRTL ? "تم بواسطة" : "Developed by"}{" "}
-              <span className="text-[#FF1F3D] font-extrabold tracking-wide">WebHub</span>
+              {isRTL ? "تم التطوير بواسطة" : "Developed by"}{" "}
+              <a
+                href="https://www.instagram.com/web_hub.eg/"
+                target="_blank"
+                rel="noreferrer"
+                style={{ color: '#FF0000', fontWeight: '900' }}
+                className="tracking-wide hover:underline transition-all"
+              >
+                WebHub
+              </a>
             </p>
           </div>
           <div className="flex items-center gap-4">

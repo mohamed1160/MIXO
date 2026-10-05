@@ -1,0 +1,84 @@
+﻿<section className="relative w-full h-screen bg-[#0a0a0a] overflow-hidden flex flex-col justify-between p-[6rem_4vw_3rem_4vw] z-10" ref={heroSectionRef} id="hero">
+        
+        {/* Top MIXO Marquee */}
+        <div className="hero-marquee-wrap w-full overflow-hidden mt-4 relative z-20 [mask-image:linear-gradient(90deg,transparent,#000_15%,#000_85%,transparent)]">
+          <div className="flex whitespace-nowrap gap-12 font-sans text-xs font-bold tracking-[0.35em] uppercase text-white/80 animate-[marqueeScroll_25s_linear_infinite]">
+            <span>MIXO</span> <span className="w-1.5 h-1.5 bg-[#c8102e] rounded-full inline-block" />
+            <span>CUSTOM 3D MASKS</span> <span className="w-1.5 h-1.5 bg-[#c8102e] rounded-full inline-block" />
+            <span>SPECIAL SPIDER-MAN EDITION</span> <span className="w-1.5 h-1.5 bg-[#c8102e] rounded-full inline-block" />
+            <span>ANIMATION & FIGURES</span> <span className="w-1.5 h-1.5 bg-[#c8102e] rounded-full inline-block" />
+            <span>MIXO</span> <span className="w-1.5 h-1.5 bg-[#c8102e] rounded-full inline-block" />
+            <span>FAST EGYPT SHIPPING</span> <span className="w-1.5 h-1.5 bg-[#c8102e] rounded-full inline-block" />
+          </div>
+        </div>
+
+        {/* Right Label */}
+        <div className="hero-right-label hidden md:block absolute top-[35%] right-[3vw] font-sans text-xs font-extrabold tracking-[0.4em] uppercase rotate-90 origin-right text-white/40 z-20">
+          MIXO 2026
+        </div>
+
+        {/* Center Visual Assembly */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[1400px] h-[70vh] flex items-center justify-center z-5">
+          {/* Solid Red Circle */}
+          <div ref={heroCircleRef} className="absolute w-[min(460px,42vw)] h-[min(460px,42vw)] bg-[#c8102e] rounded-full z-1 scale-0 shadow-[0_0_80px_rgba(200,16,46,0.4)]" />
+
+          {/* Giant Title Box - MIXO ONLY (GPU Accelerated Smooth Zoom) */}
+          <div className="relative text-center w-full select-none pointer-events-none flex flex-col items-center justify-center">
+            <div className="font-display text-[clamp(1.5rem,3vw,2.8rem)] tracking-[0.5em] text-[#c8102e] -mb-3 font-extrabold [text-shadow:_0_4px_12px_rgba(0,0,0,0.9)] relative z-2">
+              SPECIAL SPIDER-MAN EDITION
+            </div>
+            <h1
+              ref={heroTitleBoxRef}
+              className="font-display text-[clamp(7rem,25vw,30rem)] leading-[0.82] tracking-[-0.01em] text-white uppercase whitespace-nowrap flex justify-center overflow-hidden w-[110%] -ml-[5%] [text-shadow:_0_15px_40px_rgba(0,0,0,0.95)] relative z-2 will-change-transform transform-gpu"
+            >
+              {"MIXO".split("").map((char, i) => (
+                <span key={i} className="inline-block overflow-hidden">
+                  <span className="char-inner inline-block translate-y-[105%]">{char}</span>
+                </span>
+              ))}
+            </h1>
+          </div>
+
+          {/* Spider-Man Cutout Overlay - Always Centered on Mobile & Desktop */}
+          <img
+            ref={deadpoolHeroImgRef}
+            src={spidermanHero}
+            alt="Spider-Man 3D Mask Edition"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[68vh] md:h-[82vh] max-h-[850px] z-4 pointer-events-none filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.8)] object-contain"
+          />
+
+          {/* Diagonal Stitch Belt */}
+          <div ref={stitchBeltRef} className="hidden sm:flex absolute top-[58%] -left-[20%] w-[140%] h-[48px] bg-[#141414]/90 border-y-2 border-dashed border-[#c8102e] -rotate-7 z-3 items-center gap-12 overflow-hidden pointer-events-none opacity-85 shadow-2xl">
+            {Array.from({ length: 8 }).map((_, idx) => (
+              <div key={idx} className="flex items-center gap-6 font-mono text-xs tracking-[0.2em] text-white whitespace-nowrap">
+                <img src={spidermanIcon} alt="Spider-Man Icon" className="w-6 h-6 rounded-full object-cover" />
+                <span>MIXO ┬╖ SPIDER-MAN EDITION ┬╖ CUSTOM STL PRINTING</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Hero Bottom Bar */}
+        <div className="hero-bottom-bar flex justify-between items-end w-full z-20 relative">
+          <div className="flex flex-col gap-4">
+            <div className="font-sans font-black text-xs sm:text-sm tracking-[0.3em] text-white flex items-center gap-2">
+              <span>MIXO</span>
+              <span className="w-10 h-[1px] bg-[#c8102e]" />
+            </div>
+            <div className="hidden sm:flex items-center gap-3">
+              <Link to="/shop">
+                <button className="font-sans text-xs font-extrabold tracking-[0.25em] uppercase px-7 py-3.5 bg-[#c8102e] text-white border-none rounded-full cursor-pointer hover:bg-[#e61c38] hover:-translate-y-0.5 transition-all shadow-[0_8px_20px_rgba(200,16,46,0.4)] flex items-center gap-2">
+                  <ShoppingBag className="w-4 h-4" />
+                  <span>{isRTL ? "╪¬╪│┘ê┘é MIXO" : "SHOP MIXO"}</span>
+                </button>
+              </Link>
+              <Link to="/custom-order">
+                <button className="font-sans text-xs font-extrabold tracking-[0.25em] uppercase px-6 py-3.5 bg-white/10 hover:bg-white/20 text-white border border-white/30 rounded-full cursor-pointer transition-all flex items-center gap-2 backdrop-blur-sm">
+                  <PenTool className="w-4 h-4 text-[#c8102e]" />
+                  <span>{isRTL ? "╪╖┘ä╪¿ ╪¬╪╡┘à┘è┘à ╪«╪º╪╡" : "CUSTOM PRINT"}</span>
+                </button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>

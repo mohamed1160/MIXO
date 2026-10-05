@@ -357,13 +357,13 @@ export function Skiper49({
       {showNavigation && (
         <>
           <button
-            className="skiper-btn-prev absolute top-1/2 -left-2 sm:left-0 -translate-y-1/2 z-20 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/10 hover:bg-white text-white hover:text-black border border-white/20 backdrop-blur-md flex items-center justify-center transition-all shadow-lg cursor-pointer"
+            className="skiper-btn-prev absolute top-1/2 -left-2 sm:left-0 -translate-y-1/2 z-20 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#c8102e] text-white border border-transparent flex items-center justify-center transition-all shadow-[0_0_15px_rgba(255,31,61,0.5)] cursor-pointer hover:scale-110"
             aria-label="Previous Slide"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           <button
-            className="skiper-btn-next absolute top-1/2 -right-2 sm:right-0 -translate-y-1/2 z-20 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/10 hover:bg-white text-white hover:text-black border border-white/20 backdrop-blur-md flex items-center justify-center transition-all shadow-lg cursor-pointer"
+            className="skiper-btn-next absolute top-1/2 -right-2 sm:right-0 -translate-y-1/2 z-20 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#c8102e] text-white border border-transparent flex items-center justify-center transition-all shadow-[0_0_15px_rgba(255,31,61,0.5)] cursor-pointer hover:scale-110"
             aria-label="Next Slide"
           >
             <ChevronRight className="w-5 h-5" />

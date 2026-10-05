@@ -108,10 +108,10 @@ export default function Register() {
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: "url('/images/register_miles_bg.jpg')" }}
       />
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
+      {/* Removed the heavy black global overlay so the background pops naturally */}
 
-      {/* ── Glassmorphism Card (Crystal Clear ~98% Transparency) ── */}
-      <div className="relative z-10 w-full max-w-xl bg-white/[0.04] backdrop-blur-[24px] border border-white/25 rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.8)] p-6 sm:p-10 text-white my-auto">
+      {/* ── Glassmorphism Card (Crystal Clear Background) ── */}
+      <div className="relative z-10 w-full max-w-xl bg-white/[0.02] backdrop-blur-[2px] border border-white/20 rounded-[2rem] shadow-[0_8px_32px_rgba(0,0,0,0.5)] p-6 sm:p-10 text-white my-auto">
         {/* Logo */}
         <div className="flex justify-center mb-4">
           <Link to="/">

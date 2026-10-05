@@ -343,59 +343,32 @@ export default function Home() {
       });
     }
 
-    // ── SECTION 4: INSTANT REVEAL ON SCROLL ENTER ──
+    // ── SECTION 4: SCROLL SCRUB (PARALLAX) ──
     if (theatersSectionRef.current) {
-      gsap.fromTo(
-        theatersContentRef.current,
-        { opacity: 0, y: 20 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.5,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: theatersSectionRef.current,
-            start: "top 95%",
-            toggleActions: "play none none none",
-          },
-        }
-      );
+      const isMobile = window.innerWidth < 768;
+
+      const theatersTL = gsap.timeline({
+        scrollTrigger: {
+          trigger: theatersSectionRef.current,
+          start: "top bottom",
+          end: "bottom top",
+          scrub: 1,
+        },
+      });
+
+      if (theatersContentRef.current) {
+        gsap.set(theatersContentRef.current, { opacity: 0.5 });
+        theatersTL.to(theatersContentRef.current, { opacity: 1, duration: 0.2 }, 0);
+      }
 
       if (deadpoolHeartImgRef.current) {
-        gsap.fromTo(
-          deadpoolHeartImgRef.current,
-          { opacity: 0, y: 30, scale: 0.95 },
-          {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            duration: 0.6,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: theatersSectionRef.current,
-              start: "top 90%",
-              toggleActions: "play none none none",
-            },
-          }
-        );
+        gsap.set(deadpoolHeartImgRef.current, { y: isMobile ? 80 : 150 });
+        theatersTL.to(deadpoolHeartImgRef.current, { y: isMobile ? -60 : -150, ease: "none", duration: 1 }, 0);
       }
 
       if (crosshairBgRef.current) {
-        gsap.fromTo(
-          crosshairBgRef.current,
-          { scale: 0.8, opacity: 0.3 },
-          {
-            scale: 1,
-            opacity: 1,
-            duration: 0.8,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: theatersSectionRef.current,
-              start: "top 90%",
-              toggleActions: "play none none none",
-            },
-          }
-        );
+        gsap.set(crosshairBgRef.current, { scale: 0.8, rotation: -45, opacity: 0.5 });
+        theatersTL.to(crosshairBgRef.current, { scale: 1.1, rotation: 45, opacity: 1, ease: "none", duration: 1 }, 0);
       }
     }
 
