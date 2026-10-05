@@ -623,6 +623,64 @@ export async function saveSupabaseSettings(settingsObj) {
   window.dispatchEvent(new Event('storage'));
 }
 
+export async function getPopularMasksOrder() {
+  try {
+    const { data, error } = await supabase
+      .from('settings')
+      .select('value')
+      .eq('key', 'popular_masks_order')
+      .maybeSingle();
+
+    if (error) {
+      console.warn('Supabase getPopularMasksOrder warning:', error.message);
+    }
+
+    if (data && data.value) {
+      let ids = data.value;
+      if (typeof ids === 'string') {
+        try { ids = JSON.parse(ids); } catch (e) {}
+      }
+      if (Array.isArray(ids) && ids.length > 0) {
+        localStorage.setItem('MIXO_popular_masks_order', JSON.stringify(ids));
+        return ids;
+      }
+    }
+  } catch (err) {
+    console.warn('Error fetching popular masks order from Supabase, using localStorage fallback:', err);
+  }
+
+  const saved = localStorage.getItem('MIXO_popular_masks_order');
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) return parsed;
+    } catch (e) {}
+  }
+  return null;
+}
+
+export async function savePopularMasksOrder(ids) {
+  const idsArray = Array.isArray(ids) ? ids : [];
+  localStorage.setItem('MIXO_popular_masks_order', JSON.stringify(idsArray));
+  window.dispatchEvent(new Event('mixo_products_updated'));
+  window.dispatchEvent(new Event('storage'));
+
+  try {
+    const { error } = await supabase
+      .from('settings')
+      .upsert([{ key: 'popular_masks_order', value: JSON.stringify(idsArray) }]);
+
+    if (error) {
+      console.error('Failed to save popular masks order to Supabase settings:', error);
+    } else {
+      console.log('Saved popular masks order to Supabase settings successfully.');
+    }
+  } catch (err) {
+    console.error('Error saving popular masks order to Supabase:', err);
+  }
+}
+
+
 // ==========================================
 // 5. USERS SERVICE (Supabase Authentication & Profiles)
 // ==========================================

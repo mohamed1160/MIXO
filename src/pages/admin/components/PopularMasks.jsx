@@ -13,7 +13,7 @@ import {
   GripVertical
 } from "lucide-react";
 import { useLanguage } from "../../../providers/LanguageContext";
-import { getSupabaseProducts } from "../../../services/db.service";
+import { getSupabaseProducts, getPopularMasksOrder, savePopularMasksOrder } from "../../../services/db.service";
 
 export default function PopularMasks() {
   const { isRTL } = useLanguage();
@@ -57,29 +57,27 @@ export default function PopularMasks() {
 
     setAllProducts(loadedProducts);
 
-    // Load saved custom popular masks order
-    const savedOrder = localStorage.getItem("MIXO_popular_masks_order");
-    if (savedOrder) {
-      try {
-        const ids = JSON.parse(savedOrder);
-        if (Array.isArray(ids)) {
-          setSelectedMaskIds(ids.map(String));
-        }
-      } catch (err) {
-        console.error("Error loading saved popular masks order:", err);
+    // Load saved custom popular masks order from Supabase / localStorage fallback
+    try {
+      const savedOrder = await getPopularMasksOrder();
+      if (savedOrder && Array.isArray(savedOrder) && savedOrder.length > 0) {
+        setSelectedMaskIds(savedOrder.map(String));
+      } else {
+        // Default: select all mask products
+        const isMask = (p) => {
+          const catRaw = String(p.category || "").toLowerCase();
+          return p.isMask || catRaw.includes("mask") || catRaw.includes("أقنعة") || catRaw.includes("ماسكات");
+        };
+        const defaultMaskIds = loadedProducts.filter(isMask).slice(0, 8).map((p) => String(p.id));
+        setSelectedMaskIds(defaultMaskIds);
       }
-    } else {
-      // Default: select all mask products
-      const isMask = (p) => {
-        const catRaw = String(p.category || "").toLowerCase();
-        return p.isMask || catRaw.includes("mask") || catRaw.includes("أقنعة") || catRaw.includes("ماسكات");
-      };
-      const defaultMaskIds = loadedProducts.filter(isMask).slice(0, 8).map((p) => String(p.id));
-      setSelectedMaskIds(defaultMaskIds);
+    } catch (err) {
+      console.error("Error loading saved popular masks order:", err);
     }
 
     setIsLoading(false);
   };
+
 
   // Helper to check if a product is a mask
   const isMaskProduct = (p) => {
@@ -174,13 +172,11 @@ export default function PopularMasks() {
   };
 
   // Save changes
-  const handleSave = () => {
-    localStorage.setItem("MIXO_popular_masks_order", JSON.stringify(selectedMaskIds));
-    window.dispatchEvent(new Event("mixo_products_updated"));
-    window.dispatchEvent(new Event("storage"));
+  const handleSave = async () => {
+    await savePopularMasksOrder(selectedMaskIds);
 
     setIsSaved(true);
-    setSaveMessage(isRTL ? "تم حفظ ترتيب الماسكات بنجاح وسيظهر فوراً في الهيرو!" : "Popular masks order saved successfully!");
+    setSaveMessage(isRTL ? "تم حفظ ترتيب الماسكات بالسيرفر (Supabase) وسيظهر على جميع الأجهزة!" : "Popular masks order saved to database successfully!");
 
     setTimeout(() => {
       setIsSaved(false);
@@ -189,13 +185,12 @@ export default function PopularMasks() {
   };
 
   // Reset to default
-  const handleReset = () => {
-    localStorage.removeItem("MIXO_popular_masks_order");
+  const handleReset = async () => {
     const defaultMaskIds = allProducts.filter(isMaskProduct).slice(0, 8).map((p) => String(p.id));
     setSelectedMaskIds(defaultMaskIds);
-    window.dispatchEvent(new Event("mixo_products_updated"));
-    window.dispatchEvent(new Event("storage"));
+    await savePopularMasksOrder(defaultMaskIds);
   };
+
 
   if (isLoading) {
     return (

@@ -15,6 +15,7 @@ import {
 import { useLanguage } from "../../providers/LanguageContext";
 import { useTheme } from "../../providers/ThemeContext";
 import { getProducts, mapCategoryToId } from "../../services/products";
+import { getPopularMasksOrder } from "../../services/db.service";
 import ProductCard from "../../components/ProductCard";
 import ArtifactCard from "../../components/ArtifactCard";
 import ThreeDPhotoCarousel from "../../components/ui/3d-carousel";
@@ -99,13 +100,28 @@ export default function Home() {
   const cursorDotRef = useRef(null);
   const cursorRingRef = useRef(null);
 
-  // ── Load Products Data ──
+  const [popularMasksOrder, setPopularMasksOrder] = useState(() => {
+    try {
+      const saved = localStorage.getItem("MIXO_popular_masks_order");
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      return null;
+    }
+  });
+
+  // ── Load Products Data & Popular Masks Order ──
   const loadData = async () => {
     if (allProducts.length === 0) setIsLoading(true);
     try {
-      const allData = await getProducts({ sort: "popular", limit: 30 });
+      const [allData, savedOrder] = await Promise.all([
+        getProducts({ sort: "popular", limit: 500 }),
+        getPopularMasksOrder(),
+      ]);
       if (allData && allData.length > 0) {
         setAllProducts(allData);
+      }
+      if (savedOrder && Array.isArray(savedOrder) && savedOrder.length > 0) {
+        setPopularMasksOrder(savedOrder);
       }
     } catch (err) {
       console.error("Failed to load products:", err);
@@ -124,23 +140,24 @@ export default function Home() {
     };
 
     if (activePopularFilter === "masks") {
-      const customMasksOrder = localStorage.getItem("MIXO_popular_masks_order");
-      if (customMasksOrder) {
+      const customOrder = popularMasksOrder || (() => {
         try {
-          const orderedIds = JSON.parse(customMasksOrder);
-          if (Array.isArray(orderedIds) && orderedIds.length > 0) {
-            const productMap = new Map(allProducts.map((p) => [String(p.id), p]));
-            const customList = [];
-            orderedIds.forEach((id) => {
-              const prod = productMap.get(String(id));
-              if (prod) customList.push(prod);
-            });
-            if (customList.length > 0) {
-              return customList.slice(0, 8);
-            }
-          }
+          const saved = localStorage.getItem("MIXO_popular_masks_order");
+          return saved ? JSON.parse(saved) : null;
         } catch (e) {
-          console.error("Error parsing custom popular masks order:", e);
+          return null;
+        }
+      })();
+
+      if (customOrder && Array.isArray(customOrder) && customOrder.length > 0) {
+        const productMap = new Map(allProducts.map((p) => [String(p.id), p]));
+        const customList = [];
+        customOrder.forEach((id) => {
+          const prod = productMap.get(String(id));
+          if (prod) customList.push(prod);
+        });
+        if (customList.length > 0) {
+          return customList.slice(0, 8);
         }
       }
 
@@ -183,11 +200,17 @@ export default function Home() {
     }
 
     return allProducts.slice(0, 8);
-  }, [allProducts, activePopularFilter]);
+  }, [allProducts, activePopularFilter, popularMasksOrder]);
 
   useEffect(() => {
     loadData();
-    const handleStorageChange = () => loadData();
+    const handleStorageChange = () => {
+      try {
+        const saved = localStorage.getItem("MIXO_popular_masks_order");
+        if (saved) setPopularMasksOrder(JSON.parse(saved));
+      } catch (e) {}
+      loadData();
+    };
     window.addEventListener("storage", handleStorageChange);
     window.addEventListener("mixo_products_updated", handleStorageChange);
     return () => {
