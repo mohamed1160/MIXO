@@ -318,7 +318,7 @@ export default function CustomDesignModal({ isOpen, onClose }) {
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <label className="block text-xs font-bold uppercase tracking-wider text-gray-800 dark:text-[#F5F7FA]">
-                {isRTL ? "اوصف التصميم *" : "Describe Your Design *"}
+                {isRTL ? "اوصف التصميم (اختياري)" : "Describe Your Design (Optional)"}
               </label>
               <span className="text-[10px] text-gray-400 dark:text-[#7F8A96]">
                 {description.length} / 1000

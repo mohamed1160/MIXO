@@ -101,7 +101,7 @@ export default function DimensionInputs({
   return (
     <div className="space-y-2">
       <label className="block text-xs font-bold uppercase tracking-wider text-gray-800 dark:text-[#F5F7FA]">
-        {isRTL ? "الأبعاد بالسم (Dimensions in cm) *" : "Dimensions (Length × Width in cm) *"}
+        {isRTL ? "الأبعاد بالسم (اختياري)" : "Dimensions in cm (Optional)"}
       </label>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

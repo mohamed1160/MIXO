@@ -76,12 +76,9 @@ export function useCustomOrderForm(isRTL = false) {
         : "Please enter a valid phone number for price quotes & contact.";
     }
 
-    if (!description || description.trim().length < 10) {
-      errs.description = isRTL
-        ? "يرجى كتابة تفاصيل لا تقل عن 10 أحرف حول تصميمك."
-        : "Please provide at least 10 characters describing your design.";
-    }
+    // Description is NOT required (optional for all categories)
 
+    // Dimensions: Required ONLY when category is a mask
     if (isMask) {
       const h = Number(maskHeight);
       if (!maskHeight || isNaN(h) || h <= 0 || h > 200) {
@@ -97,24 +94,29 @@ export function useCustomOrderForm(isRTL = false) {
           : "Circular face width/contour must be between 0.1 cm and 200 cm.";
       }
     } else {
-      const numLength = Number(length);
-      if (!length || isNaN(numLength) || numLength <= 0 || numLength > 200) {
-        errs.length = isRTL
-          ? "يجب أن يكون الطول بين 0.1 سم و 200 سم."
-          : "Length must be between 0.1 cm and 200 cm.";
+      // Non-mask categories: length & width are OPTIONAL
+      if (length && length.trim() !== "") {
+        const numLength = Number(length);
+        if (isNaN(numLength) || numLength <= 0 || numLength > 200) {
+          errs.length = isRTL
+            ? "يجب أن يكون الطول بين 0.1 سم و 200 سم."
+            : "Length must be between 0.1 cm and 200 cm.";
+        }
       }
 
-      const numWidth = Number(width);
-      if (!width || isNaN(numWidth) || numWidth <= 0 || numWidth > 200) {
-        errs.width = isRTL
-          ? "يجب أن يكون العرض بين 0.1 سم و 200 سم."
-          : "Width must be between 0.1 cm and 200 cm.";
+      if (width && width.trim() !== "") {
+        const numWidth = Number(width);
+        if (isNaN(numWidth) || numWidth <= 0 || numWidth > 200) {
+          errs.width = isRTL
+            ? "يجب أن يكون العرض بين 0.1 سم و 200 سم."
+            : "Width must be between 0.1 cm and 200 cm.";
+        }
       }
     }
 
     setErrors(errs);
     return Object.keys(errs).length === 0;
-  }, [files, phoneNumber, description, isMask, maskHeight, circularWidth, length, width, isRTL]);
+  }, [files, phoneNumber, isMask, maskHeight, circularWidth, length, width, isRTL]);
 
   const resetForm = useCallback(() => {
     setFiles([]);
