@@ -16,7 +16,9 @@ export default function VideoLoader({ onComplete }) {
       video.playsInline = true;
       video.setAttribute("muted", "");
       video.setAttribute("playsinline", "");
-      video.setAttribute("webkit-playsinline", "");
+      video.setAttribute("webkit-playsinline", "true");
+      video.setAttribute("x5-playsinline", "true");
+      video.setAttribute("autoplay", "true");
 
       const startPlay = () => {
         if (!video) return;
@@ -24,32 +26,34 @@ export default function VideoLoader({ onComplete }) {
         const playPromise = video.play();
         if (playPromise !== undefined) {
           playPromise.catch((err) => {
-            console.warn("Mobile WebKit video autoplay prevented:", err);
+            console.warn("Mobile WebKit video autoplay fallback:", err);
+            video.muted = true;
+            video.play().catch(() => {});
           });
         }
       };
 
       startPlay();
 
-      video.addEventListener("loadedmetadata", startPlay);
-      video.addEventListener("canplay", startPlay);
-      video.addEventListener("canplaythrough", startPlay);
+      const events = ["loadedmetadata", "loadeddata", "canplay", "canplaythrough", "playing"];
+      events.forEach((evt) => video.addEventListener(evt, startPlay));
 
       const handleUserTouch = () => {
         startPlay();
         window.removeEventListener("touchstart", handleUserTouch);
         window.removeEventListener("click", handleUserTouch);
+        window.removeEventListener("pointerdown", handleUserTouch);
       };
 
-      window.addEventListener("touchstart", handleUserTouch);
-      window.addEventListener("click", handleUserTouch);
+      window.addEventListener("touchstart", handleUserTouch, { passive: true });
+      window.addEventListener("click", handleUserTouch, { passive: true });
+      window.addEventListener("pointerdown", handleUserTouch, { passive: true });
 
       return () => {
-        video.removeEventListener("loadedmetadata", startPlay);
-        video.removeEventListener("canplay", startPlay);
-        video.removeEventListener("canplaythrough", startPlay);
+        events.forEach((evt) => video.removeEventListener(evt, startPlay));
         window.removeEventListener("touchstart", handleUserTouch);
         window.removeEventListener("click", handleUserTouch);
+        window.removeEventListener("pointerdown", handleUserTouch);
       };
     }
   }, []);
@@ -101,17 +105,20 @@ export default function VideoLoader({ onComplete }) {
           <div className="relative w-64 sm:w-80 aspect-square rounded-3xl overflow-hidden bg-black mb-8 z-10 flex items-center justify-center group">
             <video
               ref={videoRef}
-              src={loaderVideo || "/mixo_loader.mp4"}
               autoPlay
               loop
               muted
+              defaultMuted
               playsInline
               preload="auto"
-              webkit-playsinline="true"
-              x5-playsinline="true"
+              disablePictureInPicture
+              controlsList="nodownload nofullscreen noremoteplayback"
               aria-hidden="true"
               className="w-full h-full object-cover object-center transform scale-105 pointer-events-none"
-            />
+            >
+              <source src={loaderVideo} type="video/mp4" />
+              <source src="/mixo_loader.mp4" type="video/mp4" />
+            </video>
           </div>
 
           {/* Progress Bar & Counter Container */}
