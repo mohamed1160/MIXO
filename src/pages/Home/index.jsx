@@ -424,9 +424,15 @@ export default function Home() {
 
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
-      gsap.ticker.remove(updateLenis);
-      lenis.destroy();
-      ScrollTrigger.getAll().forEach((t) => t.kill());
+      if (updateLenis) {
+        try { gsap.ticker.remove(updateLenis); } catch(e){}
+      }
+      if (lenis) {
+        try { lenis.destroy(); } catch(e){}
+      }
+      try {
+        ScrollTrigger.getAll().forEach((t) => t.kill());
+      } catch(e){}
     };
   }, []);
 

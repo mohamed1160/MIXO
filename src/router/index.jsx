@@ -78,6 +78,10 @@ export default function AppRouter() {
   const isAdminRoute = location.pathname.startsWith('/admin');
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
+  useEffect(() => {
     let unsubscribe;
     setupForegroundNotifications(navigate).then((unsub) => {
       unsubscribe = unsub;
@@ -102,9 +106,8 @@ export default function AppRouter() {
         />
       </AnimatePresence>
 
-      <AnimatePresence mode="wait">
-        <Suspense fallback={<RouteFallback />}>
-          <Routes location={location} key={location.pathname}>
+      <Suspense fallback={<RouteFallback />}>
+        <Routes>
             {/* ── Main Pages ── */}
             <Route path="/"                   element={<PageTransition><Home /></PageTransition>} />
             <Route path="/shop"               element={<PageTransition><Shop /></PageTransition>} />
@@ -184,7 +187,6 @@ export default function AppRouter() {
             </Route>
           </Routes>
         </Suspense>
-      </AnimatePresence>
 
       {!isAdminRoute && <PromoPopup />}
       {!isAdminRoute && <WhatsAppButton />}
