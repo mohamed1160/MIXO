@@ -124,8 +124,18 @@ export default function ProductDetails() {
   }, [id]);
 
   const loadProductDetails = async () => {
-    const all = await getProducts({ limit: 100 });
-    const found = all.find((p) => String(p.id) === String(id));
+    let all = await getProducts({ limit: 1000 });
+    let found = all.find((p) => String(p.id) === String(id) || String(p._id) === String(id));
+
+    if (!found) {
+      try {
+        const supa = await getSupabaseProducts();
+        if (supa && supa.length > 0) {
+          all = supa;
+          found = supa.find((p) => String(p.id) === String(id));
+        }
+      } catch (e) {}
+    }
     
     if (found) {
       setProduct(found);
@@ -139,11 +149,6 @@ export default function ProductDetails() {
       // Fetch customer reviews from API / Supabase
       const productReviews = await getSupabaseReviews(found.id);
       setReviews(productReviews);
-    } else {
-      // Fallback to first mock product
-      const fallback = MOCK_3D_PRODUCTS[0];
-      setProduct(fallback);
-      setSelectedImage(fallback.image);
     }
   };
 

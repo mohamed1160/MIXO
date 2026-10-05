@@ -38,7 +38,10 @@ export default function ProductCard({ product }) {
 
   const isInCart = cart?.some((item) => item.id === id);
 
-  const handleCardClick = () => {
+  const handleCardClick = (e) => {
+    if (e && e.target && typeof e.target.closest === "function" && e.target.closest("button")) {
+      return;
+    }
     navigate(`/product/${id}`);
   };
 
