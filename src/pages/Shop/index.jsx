@@ -78,7 +78,7 @@ export default function Shop() {
         filters,
         sort,
         page,
-        limit: 12,
+        limit: 1000,
       });
 
       if (isMounted) {
@@ -114,7 +114,7 @@ export default function Shop() {
       <ProductToolbar
         totalProducts={totalProducts}
         currentPage={page}
-        limit={12}
+        limit={1000}
         onOpenCustomModal={() => setIsCustomModalOpen(true)}
       />
 

@@ -55,6 +55,7 @@ const Customers = lazy(() => import('../pages/admin/components/Customers'))
 const Payments = lazy(() => import('../pages/admin/components/Payments'))
 const Products = lazy(() => import('../pages/admin/components/Products'))
 const PromoCodes = lazy(() => import('../pages/admin/components/PromoCodes'))
+const PopularMasks = lazy(() => import('../pages/admin/components/PopularMasks'))
 const Categories = lazy(() => import('../pages/admin/components/Categories'))
 const Reports = lazy(() => import('../pages/admin/components/Reports'))
 const AdminReviews = lazy(() => import('../pages/admin/components/Reviews'))
@@ -169,6 +170,7 @@ export default function AppRouter() {
               <Route path="customers"     element={<Customers />} />
               <Route path="payments"      element={<Payments />} />
               <Route path="products"      element={<Products />} />
+              <Route path="popular-masks" element={<PopularMasks />} />
               <Route path="promo-codes"   element={<PromoCodes />} />
               <Route path="promo-popup"   element={<PromoPopupSettings />} />
               <Route path="categories"    element={<Categories />} />

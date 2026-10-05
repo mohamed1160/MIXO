@@ -124,6 +124,26 @@ export default function Home() {
     };
 
     if (activePopularFilter === "masks") {
+      const customMasksOrder = localStorage.getItem("MIXO_popular_masks_order");
+      if (customMasksOrder) {
+        try {
+          const orderedIds = JSON.parse(customMasksOrder);
+          if (Array.isArray(orderedIds) && orderedIds.length > 0) {
+            const productMap = new Map(allProducts.map((p) => [String(p.id), p]));
+            const customList = [];
+            orderedIds.forEach((id) => {
+              const prod = productMap.get(String(id));
+              if (prod) customList.push(prod);
+            });
+            if (customList.length > 0) {
+              return customList.slice(0, 8);
+            }
+          }
+        } catch (e) {
+          console.error("Error parsing custom popular masks order:", e);
+        }
+      }
+
       const filtered = allProducts.filter((p) => {
         const catId = getCatId(p);
         const catRaw = String(p.category || "").toLowerCase();
@@ -178,20 +198,26 @@ export default function Home() {
 
   // ── Lenis & GSAP ScrollTrigger Integration ──
   useEffect(() => {
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      smoothWheel: true,
-      touchMultiplier: 1.5,
-    });
+    const isMobile = window.innerWidth < 768;
+    let lenis = null;
+    let updateLenis = null;
 
-    const updateLenis = (time) => {
-      lenis.raf(time * 1000);
-    };
+    if (!isMobile) {
+      lenis = new Lenis({
+        duration: 1.2,
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        smoothWheel: true,
+        touchMultiplier: 1.5,
+      });
 
-    lenis.on("scroll", ScrollTrigger.update);
-    gsap.ticker.add(updateLenis);
-    gsap.ticker.lagSmoothing(0);
+      updateLenis = (time) => {
+        lenis.raf(time * 1000);
+      };
+
+      lenis.on("scroll", ScrollTrigger.update);
+      gsap.ticker.add(updateLenis);
+      gsap.ticker.lagSmoothing(0);
+    }
 
     // Custom Cursor Motion
     const dot = cursorDotRef.current;
@@ -247,6 +273,7 @@ export default function Home() {
           y: 20,
           duration: 1,
           stagger: 0.1,
+          clearProps: "all",
         }, 1.0);
     }
 
@@ -362,8 +389,8 @@ export default function Home() {
       }
 
       if (deadpoolHeartImgRef.current) {
-        gsap.set(deadpoolHeartImgRef.current, { y: isMobile ? 80 : 150 });
-        theatersTL.to(deadpoolHeartImgRef.current, { y: isMobile ? -60 : -150, ease: "none", duration: 1 }, 0);
+        gsap.set(deadpoolHeartImgRef.current, { y: isMobile ? 150 : 260 });
+        theatersTL.to(deadpoolHeartImgRef.current, { y: isMobile ? -180 : -320, ease: "none", duration: 1 }, 0);
       }
 
       if (crosshairBgRef.current) {
@@ -455,7 +482,7 @@ export default function Home() {
       {/* ========================================================================== */}
       {/* SECTION 1 – HERO (MIXO BRANDING ONLY WITH SPIDER-MAN IMAGE)               */}
       {/* ========================================================================== */}
-      <section className="relative w-full h-screen bg-[#0a0a0a] overflow-hidden flex flex-col justify-between p-[6rem_4vw_3rem_4vw] z-10" ref={heroSectionRef} id="hero">
+      <section className="relative w-full h-screen bg-[#0a0a0a] overflow-hidden flex flex-col justify-between p-[6rem_4vw_3rem_4vw] z-30" ref={heroSectionRef} id="hero">
         
         {/* Top MIXO Marquee */}
         <div className="hero-marquee-wrap w-full overflow-hidden mt-4 relative z-20 [mask-image:linear-gradient(90deg,transparent,#000_15%,#000_85%,transparent)]">
@@ -501,6 +528,8 @@ export default function Home() {
             ref={deadpoolHeroImgRef}
             src={spidermanHero}
             alt="Spider-Man 3D Mask Edition"
+            fetchpriority="high"
+            decoding="async"
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[68vh] md:h-[82vh] max-h-[850px] z-4 pointer-events-none filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.8)] object-contain"
           />
 
@@ -516,34 +545,24 @@ export default function Home() {
         </div>
 
         {/* Hero Bottom Bar */}
-        <div className="hero-bottom-bar flex justify-between items-end w-full z-50 relative">
-          <div className="flex flex-col gap-3 sm:gap-4 relative z-50">
-            <div className="font-sans font-black text-xs sm:text-sm tracking-[0.3em] text-white flex items-center gap-2">
-              <span>MIXO</span>
-              <span className="w-10 h-[1px] bg-[#c8102e]" />
+        <div className="hero-bottom-bar flex justify-between items-end w-full z-[9999] relative">
+          <div className="flex flex-col gap-3 sm:gap-4 relative z-[9999]">
+            <div className="font-sans font-black text-xs sm:text-sm tracking-[0.3em] text-white flex items-center gap-2 drop-shadow-md">
+              <span className="text-white font-black">MIXO</span>
+              <span className="w-10 h-[1.5px] bg-[#c8102e]" />
             </div>
 
-            {/* Mobile Shop Now Button (White BG, Black Text, Navigates to /shop) */}
-            <div className="flex sm:hidden items-center gap-2 mt-1 relative z-50">
-              <Link to="/shop" className="relative z-50">
-                <button className="font-sans text-xs font-black tracking-[0.2em] uppercase px-6 py-3 bg-white text-black hover:bg-gray-100 border-none rounded-full cursor-pointer transition-all shadow-[0_8px_25px_rgba(255,255,255,0.35)] flex items-center gap-2 active:scale-95 relative z-50">
-                  <ShoppingBag className="w-4 h-4 text-black" />
+            {/* Mobile & Desktop Buttons */}
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-1 relative z-[9999]">
+              <Link to="/shop" className="relative z-[9999]">
+                <button className="font-sans text-[11px] sm:text-xs font-black tracking-[0.15em] sm:tracking-[0.25em] uppercase px-4 sm:px-7 py-2.5 sm:py-3.5 bg-white text-black hover:bg-gray-100 hover:-translate-y-0.5 border-none rounded-full cursor-pointer transition-all shadow-[0_8px_30px_rgba(255,255,255,0.4)] flex items-center gap-1.5 sm:gap-2 active:scale-95 relative z-[9999]">
+                  <ShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-black" />
                   <span>{isRTL ? "تسوق الآن" : "SHOP NOW"}</span>
                 </button>
               </Link>
-            </div>
-
-            {/* Desktop Buttons */}
-            <div className="hidden sm:flex items-center gap-3">
-              <Link to="/shop">
-                <button className="font-sans text-xs font-extrabold tracking-[0.25em] uppercase px-7 py-3.5 bg-[#c8102e] text-white border-none rounded-full cursor-pointer hover:bg-[#e61c38] hover:-translate-y-0.5 transition-all shadow-[0_8px_20px_rgba(200,16,46,0.4)] flex items-center gap-2">
-                  <ShoppingBag className="w-4 h-4" />
-                  <span>{isRTL ? "تسوق MIXO" : "SHOP MIXO"}</span>
-                </button>
-              </Link>
-              <Link to="/custom-order">
-                <button className="font-sans text-xs font-extrabold tracking-[0.25em] uppercase px-6 py-3.5 bg-white/10 hover:bg-white/20 text-white border border-white/30 rounded-full cursor-pointer transition-all flex items-center gap-2 backdrop-blur-sm">
-                  <PenTool className="w-4 h-4 text-[#c8102e]" />
+              <Link to="/custom-order" className="relative z-[9999]">
+                <button className="font-sans text-[11px] sm:text-xs font-black tracking-[0.15em] sm:tracking-[0.25em] uppercase px-4 sm:px-6 py-2.5 sm:py-3.5 bg-white/15 hover:bg-white/30 text-white border border-white/40 rounded-full cursor-pointer transition-all flex items-center gap-1.5 sm:gap-2 backdrop-blur-md shadow-lg active:scale-95 relative z-[9999]">
+                  <PenTool className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#c8102e]" />
                   <span>{isRTL ? "طلب تصميم خاص" : "CUSTOM PRINT"}</span>
                 </button>
               </Link>
@@ -741,7 +760,10 @@ export default function Home() {
 
           {/* Center Visual Assembly */}
           <div className="relative w-full max-w-[1200px] h-[65vh] flex items-end justify-center z-5 my-6">
-            <div ref={crosshairBgRef} className="absolute w-[min(520px,50vw)] h-[min(520px,50vw)] border border-black/15 dark:border-white/20 rounded-full bottom-[5%] flex items-center justify-center z-1 before:absolute before:w-full before:h-[1px] before:bg-black/10 dark:before:bg-white/10 after:absolute after:h-full after:w-[1px] after:bg-black/10 dark:after:bg-white/10" />
+            <div
+              ref={crosshairBgRef}
+              className="absolute w-[min(520px,82vw)] h-[min(520px,82vw)] sm:w-[min(520px,50vw)] sm:h-[min(520px,50vw)] border-2 border-dashed border-black/35 dark:border-white/40 rounded-full bottom-[10%] sm:bottom-[5%] flex items-center justify-center z-1 animate-[spin_20s_linear_infinite] pointer-events-none before:absolute before:w-full before:h-[1px] before:bg-black/20 dark:before:bg-white/20 after:absolute after:h-full after:w-[1px] after:bg-black/20 dark:after:bg-white/20"
+            />
             <img
               ref={deadpoolHeartImgRef}
               src={spidermanHanging}

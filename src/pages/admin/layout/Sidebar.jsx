@@ -27,6 +27,7 @@ const NAV_ITEMS = [
   { to: "/admin", label: "Overview", labelAr: "نظرة عامة", icon: LayoutDashboard, end: true },
   { to: "/admin/orders", label: "Orders & 3D Quotes", labelAr: "الطلبات والتسعير", icon: ShoppingBag },
   { to: "/admin/products", label: "3D Products Catalog", labelAr: "منتجات المتجر 3D", icon: Box },
+  { to: "/admin/popular-masks", label: "Hero Masks Order", labelAr: "ترتيب ماسكات الهيرو 🎭", icon: Sparkles },
   { to: "/admin/promo-codes", label: "Promo Codes & Coupons", labelAr: "أكواد الخصم والكوبونات", icon: Tag },
   { to: "/admin/promo-popup", label: "Promo Popup Settings", labelAr: "البوب أب الترويجي ⚡", icon: Sparkles },
   { to: "/admin/customers", label: "Registered Customers", labelAr: "العملاء المسجلين", icon: Users },

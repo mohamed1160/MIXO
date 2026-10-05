@@ -6,7 +6,7 @@ import { applyPagination } from "../utils/pagination";
 import { getSupabaseProducts } from './db.service';
 
 export const shopService = {
-  getProducts: async ({ filters, sort, page = 1, limit = 12 }) => {
+  getProducts: async ({ filters, sort, page = 1, limit = 1000 }) => {
     let allProducts = [];
 
     try {
@@ -29,38 +29,64 @@ export const shopService = {
       }
     }
 
-    const normalizedProducts = allProducts.map((item) => {
-      const primaryImg = item.image || (Array.isArray(item.images) && item.images[0]) || 'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=600&auto=format&fit=crop&q=80';
-      const imgList = Array.isArray(item.images) && item.images.length > 0 ? item.images : [primaryImg];
-
-      return {
-        id: item.id,
-        title: item.title || item.name,
-        name: item.name || item.title,
-        price: Number(item.price) || 0,
-        oldPrice: item.oldPrice || item.originalPrice || null,
-        originalPrice: item.originalPrice || item.oldPrice || null,
-        description: item.description || '',
-        category: item.category || 'Figures & Collectibles',
-        categoryId: item.categoryId || mapCategoryToId(item.category),
-        stock: item.stock ?? (item.inStock !== false ? 10 : 0),
-        inStock: item.inStock !== false,
-        ratings: item.rating || item.ratings || 0,
-        numReviews: item.reviewCount || item.numReviews || 0,
-        colors: item.colors || [],
-        sizes: item.sizes || [],
-        image: primaryImg,
-        images: imgList,
-        material: item.material || 'PLA Plus',
-        isNewArrival: item.isNewArrival ?? false,
-        isBestSeller: item.isBestSeller ?? false,
-      };
-    });
+    const normalizedProducts = allProducts.map((item) => ({
+      id: item.id,
+      title: item.title || item.name,
+      name: item.name || item.title,
+      price: Number(item.price) || 0,
+      oldPrice: item.oldPrice || item.originalPrice || null,
+      originalPrice: item.originalPrice || item.oldPrice || null,
+      description: item.description || '',
+      category: item.category || 'Figures & Collectibles',
+      categoryId: item.categoryId || mapCategoryToId(item.category),
+      stock: item.inStock !== false ? 10 : 0,
+      inStock: item.inStock !== false,
+      ratings: item.rating || item.ratings || 0,
+      numReviews: item.reviewCount || item.numReviews || 0,
+      colors: item.colors || [],
+      sizes: item.sizes || [],
+      image: item.image || item.images?.[0] || '',
+      images: item.images?.length ? item.images : [item.image || ''],
+      material: item.material || 'PLA Plus',
+      isNewArrival: item.isNewArrival ?? false,
+      isBestSeller: item.isBestSeller ?? false,
+      isMask: item.isMask || false,
+    }));
 
     // 1. Filter
     const filtered = applyFilters(normalizedProducts, filters);
     // 2. Sort
-    const sorted = applySort(filtered, sort);
+    let sorted = applySort(filtered, sort);
+
+    // If category is "All" / no specific category filter active, prioritize Masks at top
+    const selectedCategories =
+      Array.isArray(filters?.categories) && filters.categories.length > 0
+        ? filters.categories
+        : filters?.category && filters.category !== "All"
+        ? [filters.category]
+        : [];
+
+    const isCategoryAll = selectedCategories.length === 0;
+
+    if (isCategoryAll) {
+      const isMaskProduct = (p) => {
+        const catId = (p.categoryId || mapCategoryToId(p.category || "")).toLowerCase();
+        const catRaw = String(p.category || "").toLowerCase();
+        return (
+          p.isMask ||
+          catId === "masks" ||
+          catId === "mask" ||
+          catRaw.includes("mask") ||
+          catRaw.includes("ماسكات") ||
+          catRaw.includes("أقنعة")
+        );
+      };
+
+      const masks = sorted.filter(isMaskProduct);
+      const others = sorted.filter((p) => !isMaskProduct(p));
+      sorted = [...masks, ...others];
+    }
+
     // 3. Paginate
     const paginated = applyPagination(sorted, page, limit);
 

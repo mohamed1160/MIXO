@@ -319,16 +319,14 @@ export function subscribeToRealtimeOrders(onUpdate) {
   };
 }
 
-// Cache memory for fast duplicate requests
+// Cache memory & background sync for fast instant responses
 let productsCache = null;
 let productsCacheTime = 0;
-const CACHE_TTL_MS = 15000;
+let isFetchingProducts = false;
 
-export async function getSupabaseProducts(forceRefresh = false) {
-  const now = Date.now();
-  if (!forceRefresh && productsCache && (now - productsCacheTime < CACHE_TTL_MS)) {
-    return productsCache;
-  }
+async function fetchProductsFromSupabase() {
+  if (isFetchingProducts) return productsCache;
+  isFetchingProducts = true;
 
   try {
     const { data, error } = await supabase
@@ -336,49 +334,79 @@ export async function getSupabaseProducts(forceRefresh = false) {
       .select('id, name, title, category, price, original_price, image, images, rating, review_count, is_bestseller, description')
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
-    if (Array.isArray(data)) {
-      const formatted = data.map(p => {
-        const primaryImg = p.image || (Array.isArray(p.images) && p.images[0]) || 'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=600&auto=format&fit=crop&q=80';
-        const imgList = Array.isArray(p.images) && p.images.length > 0 ? p.images : [primaryImg];
+    if (!error && Array.isArray(data) && data.length > 0) {
+      const formatted = data.map(p => ({
+        id: p.id,
+        name: p.name,
+        title: p.title || p.name,
+        category: p.category,
+        price: Number(p.price),
+        originalPrice: p.original_price ? Number(p.original_price) : null,
+        image: p.image,
+        images: p.images || [p.image],
+        rating: p.rating || 0,
+        reviewCount: p.review_count || 0,
+        isBestSeller: p.is_bestseller || false,
+        description: p.description || '',
+        material: p.material || 'PLA Plus',
+        inStock: true
+      }));
 
-        return {
-          id: p.id,
-          name: p.name,
-          title: p.title || p.name,
-          category: p.category,
-          price: Number(p.price),
-          originalPrice: p.original_price ? Number(p.original_price) : null,
-          image: primaryImg,
-          images: imgList,
-          rating: p.rating || 0,
-          reviewCount: p.review_count || 0,
-          isBestSeller: p.is_bestseller || false,
-          description: p.description || '',
-          material: p.material || 'PLA Plus',
-          inStock: true,
-          stock: 10
-        };
-      });
+      const prevStr = JSON.stringify(productsCache || []);
+      const newStr = JSON.stringify(formatted);
+      const hasChanged = prevStr !== newStr;
 
       productsCache = formatted;
-      productsCacheTime = now;
+      productsCacheTime = Date.now();
+
       try {
         localStorage.setItem('MIXO_products', JSON.stringify(formatted));
       } catch (e) {
         console.warn('LocalStorage quota exceeded for products cache:', e);
       }
+
+      if (hasChanged) {
+        window.dispatchEvent(new Event('mixo_products_updated'));
+      }
       return formatted;
     }
   } catch (err) {
-    console.warn('Supabase products fetch fallback to LocalStorage:', err);
+    console.warn('Background Supabase products fetch error:', err);
+  } finally {
+    isFetchingProducts = false;
   }
 
+  return productsCache;
+}
+
+export async function getSupabaseProducts(forceRefresh = false) {
+  const now = Date.now();
+
+  // 1. Return memory cache immediately if available (0ms load time!)
+  if (productsCache && productsCache.length > 0) {
+    if (forceRefresh || now - productsCacheTime > 30000) {
+      fetchProductsFromSupabase();
+    }
+    return productsCache;
+  }
+
+  // 2. Return LocalStorage cache immediately if available (0ms load time!)
   const saved = localStorage.getItem('MIXO_products');
-  const parsed = saved ? JSON.parse(saved) : [];
-  productsCache = parsed;
-  productsCacheTime = now;
-  return parsed;
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        productsCache = parsed;
+        productsCacheTime = now;
+        fetchProductsFromSupabase();
+        return parsed;
+      }
+    } catch (e) {}
+  }
+
+  // 3. Fallback: First-time load without any cache - fetch directly
+  const fresh = await fetchProductsFromSupabase();
+  return fresh || (productsCache || []);
 }
 
 export async function saveSupabaseProduct(product) {

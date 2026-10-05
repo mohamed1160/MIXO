@@ -8,7 +8,7 @@ export default defineConfig({
   build: {
     target: 'esnext',
     cssCodeSplit: true,
-    modulePreload: false,
+    modulePreload: { polyfill: false },
     rollupOptions: {
       output: {
         manualChunks(id) {
@@ -18,6 +18,9 @@ export default defineConfig({
             }
             if (id.includes('@supabase') || id.includes('axios')) {
               return 'vendor-supabase';
+            }
+            if (id.includes('gsap')) {
+              return 'vendor-gsap';
             }
             if (id.includes('lucide-react')) {
               return 'vendor-icons';

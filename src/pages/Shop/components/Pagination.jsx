@@ -8,7 +8,9 @@ export default function Pagination({ totalPages }) {
   const currentPage = useShopStore((state) => state.page);
   const setPage = useShopStore((state) => state.setPage);
 
-  const effectiveTotalPages = totalPages || 21;
+  if (!totalPages || totalPages <= 1) return null;
+
+  const effectiveTotalPages = totalPages;
 
   const getPageNumbers = () => {
     const pages = [];
