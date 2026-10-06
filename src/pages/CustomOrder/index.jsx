@@ -111,7 +111,22 @@ export default function CustomOrderPage() {
             notes: description
           },
           items: [
-            { id: customItem.id, name: customItem.name, price: 0, quantity: Number(quantity) || 1, images: imageUrls || [] }
+            {
+              id: customItem.id,
+              name: customItem.name,
+              price: 0,
+              quantity: Number(quantity) || 1,
+              images: imageUrls || [],
+              image: primaryFileUrl,
+              makerworldUrl: makerworldUrl,
+              description: description,
+              category: category,
+              isMask: isMask,
+              maskHeight: maskHeight,
+              circularWidth: circularWidth,
+              length: length,
+              width: width
+            }
           ]
         };
 

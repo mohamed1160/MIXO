@@ -88,10 +88,14 @@ export default function Checkout() {
         address: `${data.shipping?.streetAddress || ''}, ${data.shipping?.city || ''}, ${data.shipping?.governorate || 'Cairo'}`.trim(),
       },
       items: cart.map(i => ({
+        id: i.id,
         name: i.name || i.title,
         quantity: i.quantity || 1,
         price: i.price || 0,
         image: i.image || i.images?.[0],
+        images: i.images || (i.image ? [i.image] : []),
+        makerworldUrl: i.makerworldUrl || i.url || i.link || null,
+        description: i.description || i.notes || null,
         category: i.category || '3D Print',
         material: i.material || 'High-Quality Eco PLA Filament',
         color: i.color || i.selectedColor || (Array.isArray(i.colors) ? i.colors.join(' + ') : null) || null,
@@ -99,9 +103,25 @@ export default function Checkout() {
         circularWidth: i.circularWidth || i.faceWidth || null,
         faceHeight: i.faceHeight || i.maskHeight || null,
         faceWidth: i.faceWidth || i.circularWidth || null,
+        length: i.length || null,
+        width: i.width || null,
         size: i.size || null,
         dimensions: i.dimensions || null,
       })),
+      customData: (() => {
+        const customItem = cart.find(i => i.makerworldUrl || i.url || (i.images && i.images.length > 0) || i.description);
+        if (customItem) {
+          return {
+            url: customItem.makerworldUrl || customItem.url || customItem.link || "",
+            uploadedFiles: customItem.images || (customItem.image ? [customItem.image] : []),
+            fileUrl: customItem.images?.[0] || customItem.image || null,
+            notes: customItem.description || "",
+            mask: customItem.isMask ? `${customItem.maskHeight || ''} x ${customItem.circularWidth || ''} cm` : `${customItem.length || ''} x ${customItem.width || ''} cm`,
+            filament: customItem.material || 'PLA Plus',
+          };
+        }
+        return null;
+      })()
     };
 
     try {

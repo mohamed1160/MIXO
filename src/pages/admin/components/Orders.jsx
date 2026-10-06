@@ -104,6 +104,110 @@ export default function Orders() {
     },
   };
 
+  const handleDownloadImage = async (imageUrl, filenameHint = 'mixo-design-image') => {
+    if (!imageUrl) return;
+    try {
+      const toastId = toast.loading(isRTL ? 'جاري تجهيز الصورة للتحميل...' : 'Preparing image download...');
+
+      if (imageUrl.startsWith('data:')) {
+        const a = document.createElement('a');
+        a.href = imageUrl;
+        a.download = `${filenameHint}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        toast.dismiss(toastId);
+        toast.success(isRTL ? 'تم تحميل الصورة بنجاح! 📥' : 'Image downloaded successfully! 📥');
+        return;
+      }
+
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      const cleanUrl = imageUrl.split('?')[0];
+      const ext = cleanUrl.split('.').pop() || 'png';
+      link.download = `${filenameHint}.${ext}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      toast.dismiss(toastId);
+      toast.success(isRTL ? 'تم تحميل الصورة بنجاح! 📥' : 'Image downloaded successfully! 📥');
+    } catch (err) {
+      console.warn('Direct download fallback:', err);
+      const a = document.createElement('a');
+      a.href = imageUrl;
+      a.target = '_blank';
+      a.download = filenameHint;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  };
+
+  const getOrderCustomImages = (order) => {
+    if (!order) return [];
+    const list = [];
+    const addImg = (img) => {
+      if (img && typeof img === 'string' && img.trim() !== '' && !list.includes(img)) {
+        list.push(img.trim());
+      }
+    };
+
+    if (order.customData?.uploadedFiles && Array.isArray(order.customData.uploadedFiles)) {
+      order.customData.uploadedFiles.forEach(addImg);
+    }
+    if (order.customData?.fileUrl) {
+      addImg(order.customData.fileUrl);
+    }
+
+    if (order.items && Array.isArray(order.items)) {
+      order.items.forEach(item => {
+        if (item.images && Array.isArray(item.images)) {
+          item.images.forEach(addImg);
+        }
+        if (item.image) addImg(item.image);
+        if (item.img) addImg(item.img);
+      });
+    }
+    return list;
+  };
+
+  const getOrderCustomLinks = (order) => {
+    if (!order) return [];
+    const list = [];
+
+    const addLink = (link) => {
+      if (link && typeof link === 'string' && link.trim() !== '') {
+        const clean = link.trim();
+        if ((clean.startsWith('http://') || clean.startsWith('https://')) && !list.includes(clean)) {
+          list.push(clean);
+        }
+      }
+    };
+
+    addLink(order.customData?.url);
+    addLink(order.customData?.makerworldUrl);
+    addLink(order.customData?.link);
+
+    if (order.items && Array.isArray(order.items)) {
+      order.items.forEach(item => {
+        addLink(item.makerworldUrl);
+        addLink(item.url);
+        addLink(item.link);
+      });
+    }
+
+    if (order.customer?.address && order.customer.address.includes('http')) {
+      const match = order.customer.address.match(/(https?:\/\/[^\s]+)/g);
+      if (match) match.forEach(addLink);
+    }
+
+    return list;
+  };
+
   const handleCloseModal = () => {
     setSelectedOrder(null);
     if (paramOrderId) {
@@ -919,41 +1023,148 @@ export default function Orders() {
               </div>
             </div>
 
-            {/* 3D Custom Quote Data */}
-            {selectedOrder.customData && (
-              <div className="bg-red-50/40 dark:bg-gradient-to-br dark:from-[#1A121F] dark:to-[#0F1622] border border-[#FF1F3D]/30 rounded-2xl p-5 space-y-4">
-                <div className="flex items-center justify-between">
+            {/* ── Custom Design Files, Images & Model Links Section ── */}
+            {selectedOrder && (
+              getOrderCustomImages(selectedOrder).length > 0 ||
+              getOrderCustomLinks(selectedOrder).length > 0 ||
+              selectedOrder.customData?.notes ||
+              selectedOrder.customData?.mask ||
+              selectedOrder.customData
+            ) && (
+              <div className="bg-gradient-to-br from-red-500/10 via-amber-500/5 to-purple-500/10 border-2 border-[#FF1F3D]/30 rounded-2xl p-5 space-y-4 shadow-sm">
+                
+                {/* Panel Header */}
+                <div className="flex items-center justify-between border-b border-[#FF1F3D]/20 pb-3">
                   <h3 className="text-sm font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
-                    <Printer className="w-5 h-5 text-[#FF1F3D]" />
-                    <span>{isRTL ? "تفاصيل طلب تسعير 3D المخصص" : "Custom 3D Quote Details"}</span>
+                    <Sparkles className="w-5 h-5 text-[#FF1F3D]" />
+                    <span>{isRTL ? "بيانات وتصاميم الطلب المخصص (Custom 3D Attachments)" : "Custom 3D Design Attachments"}</span>
                   </h3>
-                  {selectedOrder.customData?.url && (
-                    <a
-                      href={selectedOrder.customData.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="px-3 py-1.5 bg-[#FF1F3D] text-white rounded-xl text-xs font-bold flex items-center gap-1 hover:bg-[#D91832] transition-all shadow-md"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                      <span>{isRTL ? "فتح موديل MakerWorld" : "MakerWorld Model"}</span>
-                    </a>
-                  )}
+                  <span className="text-[11px] font-extrabold text-[#FF1F3D] bg-[#FF1F3D]/15 px-3 py-1 rounded-full border border-[#FF1F3D]/30">
+                    {isRTL ? "مرفقات ورابط الطلب" : "Order Uploads & Links"}
+                  </span>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                  <div className="bg-white dark:bg-[#0d121b] p-3 rounded-xl border border-gray-200 dark:border-white/10">
-                    <div className="text-gray-500 dark:text-gray-400 text-[11px]">{isRTL ? "أبعاد الموديل (Mask Dimensions):" : "Mask Dimensions:"}</div>
-                    <div className="text-gray-900 dark:text-white font-mono font-bold mt-1">
-                      {selectedOrder.customData?.mask || (isRTL ? 'تلقائي حسب الرابط' : 'Default / From URL')}
+                {/* Dimensions & Material if present */}
+                {(selectedOrder.customData?.mask || selectedOrder.customData?.filament) && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                    {selectedOrder.customData?.mask && (
+                      <div className="bg-white dark:bg-[#0d121b] p-3 rounded-xl border border-gray-200 dark:border-white/10">
+                        <div className="text-gray-500 dark:text-gray-400 text-[11px] font-bold">{isRTL ? "أبعاد الموديل (Dimensions):" : "Dimensions:"}</div>
+                        <div className="text-gray-900 dark:text-white font-mono font-black mt-1 text-sm">
+                          {selectedOrder.customData.mask}
+                        </div>
+                      </div>
+                    )}
+                    {selectedOrder.customData?.filament && (
+                      <div className="bg-white dark:bg-[#0d121b] p-3 rounded-xl border border-gray-200 dark:border-white/10">
+                        <div className="text-gray-500 dark:text-gray-400 text-[11px] font-bold">{isRTL ? "نوع الخامة (Filament Material):" : "Filament Material:"}</div>
+                        <div className="text-gray-900 dark:text-white font-extrabold mt-1 text-xs">
+                          {selectedOrder.customData.filament}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Description / Notes if provided */}
+                {selectedOrder.customData?.notes && (
+                  <div className="bg-white dark:bg-[#0d121b] p-3.5 rounded-xl border border-gray-200 dark:border-white/10 space-y-1">
+                    <div className="text-[11px] font-bold text-gray-500 dark:text-gray-400">
+                      {isRTL ? "وصف التصميم والملاحظات المرفقة:" : "Design Description & Customer Notes:"}
+                    </div>
+                    <p className="text-xs text-gray-900 dark:text-white font-semibold leading-relaxed whitespace-pre-wrap">
+                      {selectedOrder.customData.notes}
+                    </p>
+                  </div>
+                )}
+
+                {/* Model Links if provided */}
+                {getOrderCustomLinks(selectedOrder).length > 0 && (
+                  <div className="space-y-2 pt-1">
+                    <div className="text-xs font-extrabold text-gray-900 dark:text-white flex items-center gap-1.5">
+                      <ExternalLink className="w-4 h-4 text-[#FF1F3D]" />
+                      <span>{isRTL ? "روابط الموديل المرفقة (MakerWorld / Model Link):" : "Attached Model Links:"}</span>
+                    </div>
+                    <div className="space-y-2">
+                      {getOrderCustomLinks(selectedOrder).map((linkUrl, idx) => (
+                        <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-white dark:bg-[#0d121b] border border-gray-200 dark:border-white/10 rounded-xl shadow-xs">
+                          <span className="text-xs font-mono font-bold text-[#FF1F3D] truncate max-w-md select-all">
+                            {linkUrl}
+                          </span>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                navigator.clipboard.writeText(linkUrl);
+                                toast.success(isRTL ? 'تم نسخ الرابط! 📋' : 'Link copied! 📋');
+                              }}
+                              className="px-2.5 py-1.5 bg-gray-100 dark:bg-[#161d28] hover:bg-gray-200 dark:hover:bg-[#202b3c] text-gray-700 dark:text-gray-300 rounded-lg text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer"
+                            >
+                              <Copy size={13} />
+                              <span>{isRTL ? 'نسخ' : 'Copy'}</span>
+                            </button>
+                            <a
+                              href={linkUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="px-3 py-1.5 bg-[#FF1F3D] hover:bg-[#D91832] text-white rounded-lg text-xs font-bold transition-colors flex items-center gap-1 shadow-xs"
+                            >
+                              <ExternalLink size={13} />
+                              <span>{isRTL ? 'فتح الرابط 🔗' : 'Open Link 🔗'}</span>
+                            </a>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                  <div className="bg-white dark:bg-[#0d121b] p-3 rounded-xl border border-gray-200 dark:border-white/10">
-                    <div className="text-gray-500 dark:text-gray-400 text-[11px]">{isRTL ? "نوع الخامة (Filament):" : "Filament Material:"}</div>
-                    <div className="text-gray-900 dark:text-white font-bold mt-1">
-                      {selectedOrder.customData?.filament || 'PLA Plus High Toughness'}
+                )}
+
+                {/* Custom Images if provided */}
+                {getOrderCustomImages(selectedOrder).length > 0 && (
+                  <div className="space-y-2 pt-1">
+                    <div className="text-xs font-extrabold text-gray-900 dark:text-white flex items-center gap-1.5">
+                      <Upload className="w-4 h-4 text-[#FF1F3D]" />
+                      <span>{isRTL ? "صور التصميم المرفقة من العميل (مع التحميل المباشر 📥):" : "Customer Uploaded Design Images (Direct Download 📥):"}</span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {getOrderCustomImages(selectedOrder).map((imgUrl, idx) => (
+                        <div key={idx} className="flex items-center gap-3 p-3 bg-white dark:bg-[#0d121b] border border-gray-200 dark:border-white/10 rounded-xl shadow-xs">
+                          <img
+                            src={imgUrl}
+                            alt={`Design ${idx + 1}`}
+                            className="w-16 h-16 object-cover rounded-xl border border-gray-200 dark:border-white/10 bg-black/20 shrink-0 cursor-pointer hover:scale-105 transition-transform"
+                            onClick={() => window.open(imgUrl, '_blank')}
+                          />
+                          <div className="flex-1 min-w-0 space-y-1.5">
+                            <div className="text-xs font-black text-gray-900 dark:text-white truncate">
+                              {isRTL ? `صورة تصميم #${idx + 1}` : `Design Image #${idx + 1}`}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <a
+                                href={imgUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="px-2 py-1 bg-gray-100 dark:bg-[#161d28] hover:bg-gray-200 dark:hover:bg-[#202b3c] text-gray-700 dark:text-gray-300 rounded-lg text-[11px] font-bold transition-colors flex items-center gap-1"
+                              >
+                                <Eye size={12} />
+                                <span>{isRTL ? 'معاينة' : 'Preview'}</span>
+                              </a>
+                              <button
+                                type="button"
+                                onClick={() => handleDownloadImage(imgUrl, `order-${selectedOrder.id}-design-${idx + 1}`)}
+                                className="px-3 py-1 bg-[#FF1F3D] hover:bg-[#D91832] text-white rounded-lg text-[11px] font-extrabold transition-all flex items-center gap-1 shadow-xs cursor-pointer"
+                              >
+                                <Download size={12} />
+                                <span>{isRTL ? 'تحميل الصورة 📥' : 'Download 📥'}</span>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                </div>
+                )}
+
               </div>
             )}
 
