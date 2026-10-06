@@ -1067,9 +1067,25 @@ export async function saveSupabaseNotification(userIdentifier, notificationObj) 
 }
 
 // ==========================================
+export function fileToBase64(file) {
+  return new Promise((resolve) => {
+    try {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => resolve(null);
+    } catch (e) {
+      resolve(null);
+    }
+  });
+}
+
+// ==========================================
 // 10. STORAGE SERVICE (3D Files & Images Bucket)
 // ==========================================
 export async function upload3DFileToSupabase(file) {
+  if (!file) return null;
+
   const fileExt = (file.name || 'jpg').split('.').pop();
   const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
   const filePath = `product-uploads/${fileName}`;
@@ -1094,6 +1110,8 @@ export async function upload3DFileToSupabase(file) {
       console.warn(`Supabase Storage upload to bucket "${bucket}" failed:`, e);
     }
   }
-  return null;
+
+  // Fallback: Return persistent Base64 Data URL so image works on ALL devices
+  return await fileToBase64(file);
 }
 

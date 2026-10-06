@@ -1,4 +1,4 @@
-import { upload3DFileToSupabase } from './db.service';
+import { upload3DFileToSupabase, fileToBase64 } from './db.service';
 
 export const customOrderService = {
   validateFiles(files) {
@@ -39,11 +39,17 @@ export const customOrderService = {
     
     const imageUrls = [];
     for (const file of Array.from(files)) {
-      const supaUrl = await upload3DFileToSupabase(file);
-      if (supaUrl) {
-        imageUrls.push(supaUrl);
-      } else {
-        imageUrls.push(URL.createObjectURL(file));
+      try {
+        const supaUrl = await upload3DFileToSupabase(file);
+        if (supaUrl) {
+          imageUrls.push(supaUrl);
+        } else {
+          const base64 = await fileToBase64(file);
+          if (base64) imageUrls.push(base64);
+        }
+      } catch (e) {
+        const base64 = await fileToBase64(file);
+        if (base64) imageUrls.push(base64);
       }
     }
     return imageUrls;
